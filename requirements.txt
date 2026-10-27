@@ -1,0 +1,7 @@
+mujoco==3.3.7
+numpy>=1.26,<3
+scipy>=1.11,<2
+imageio>=2.34,<3
+imageio-ffmpeg>=0.5,<0.7
+Pillow>=10,<14
+trimesh==4.9.0

@@ -1,0 +1,6 @@
+# Scene edits always reset the complete simulation to the new starts.
+place red 0.38 -0.14
+add green cube 0.50 0.00 0.04
+objects
+stack green blue
+check green blue

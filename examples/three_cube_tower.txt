@@ -1,0 +1,7 @@
+# Run with --config scenes/three_cubes.json
+reset
+objects
+stack red blue
+stack green red
+check green red
+check red blue

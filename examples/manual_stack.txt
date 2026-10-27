@@ -1,0 +1,16 @@
+# Low-level program: metres and seconds. The cube is held only by finger contact.
+reset
+open
+status
+move 0.4 -0.12 0.24
+move 0.4 -0.12 0.02
+close
+move 0.4 -0.12 0.24
+wait 5
+move 0.4 0.12 0.24
+move 0.4 0.12 0.061
+open
+move 0.4 0.12 0.24
+wait 3
+check red blue
+status

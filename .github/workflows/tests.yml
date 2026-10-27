@@ -1,0 +1,31 @@
+name: Python compatibility
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  tests:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python: ['3.12', '3.13']
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+      - name: Install, diagnose and test the local environment
+        run: python bootstrap.py --test
+      - name: Contact-physics scenarios
+        if: matrix.os == 'ubuntu-latest' && matrix.python == '3.13'
+        env:
+          OPENBLAS_NUM_THREADS: '1'
+        run: |
+          .venv/bin/python validate.py
+          .venv/bin/python validate_objects.py
+          .venv/bin/python validate_controls.py

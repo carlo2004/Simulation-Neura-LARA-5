@@ -1,0 +1,8 @@
+# Run in project folder: python console.py --commands examples/push_playground.txt
+axes on
+push red 0.06 0.00
+wait 2
+# Add resets all objects to their starts. Then push a newly added ball.
+add ball sphere 0.50 0.00 0.04
+push ball 0.05 0.00
+wait 3

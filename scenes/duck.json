@@ -1,0 +1,58 @@
+{
+  "seed": 42,
+  "cube_size_m": 0.04,
+  "red_xy_m": [
+    0.4,
+    -0.12
+  ],
+  "blue_xy_m": [
+    0.4,
+    0.12
+  ],
+  "hover_z_m": 0.24,
+  "speed_mm_s": 80,
+  "fps": 30,
+  "random_jitter_m": 0,
+  "objects": [
+    {
+      "name": "red",
+      "shape": "cube",
+      "xy_m": [
+        0.4,
+        -0.12
+      ],
+      "size_m": 0.04,
+      "mass_kg": 0.06,
+      "color": null,
+      "mesh_file": null
+    },
+    {
+      "name": "blue",
+      "shape": "cube",
+      "xy_m": [
+        0.4,
+        0.12
+      ],
+      "size_m": 0.04,
+      "mass_kg": 0.06,
+      "color": null,
+      "mesh_file": null
+    },
+    {
+      "name": "duck",
+      "shape": "mesh",
+      "xy_m": [
+        0.5,
+        0
+      ],
+      "size_m": [
+        0.08,
+        0.05571888258811775,
+        0.0744704469910328
+      ],
+      "mass_kg": 0.06,
+      "color": null,
+      "mesh_file": "models/objects/a285065e4291d192208c.obj"
+    }
+  ]
+}

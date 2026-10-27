@@ -1,0 +1,21 @@
+{
+  "python": "3.13.16",
+  "virtualenv": true,
+  "packages": {
+    "mujoco": "3.3.7",
+    "numpy": "2.5.4",
+    "scipy": "1.18.1",
+    "imageio": "2.38.1",
+    "imageio-ffmpeg": "0.6.0",
+    "Pillow": "13.0.0",
+    "trimesh": "4.9.0"
+  },
+  "errors": [],
+  "success": true,
+  "unit_tests_passed": 35,
+  "stacking_scenarios_passed": 22,
+  "push_scenarios_passed": 5,
+  "manual_logic_scenario_passed": true,
+  "fresh_checkout_bootstrap_passed": true,
+  "reproduced_meshes_identical": 10
+}

@@ -1,0 +1,10 @@
+{
+  "seed": 42,
+  "hover_z_m": 0.24,
+  "random_jitter_m": 0,
+  "objects": [
+    {"name": "red", "shape": "cube", "xy_m": [0.40, -0.12], "size_m": 0.04},
+    {"name": "blue", "shape": "cube", "xy_m": [0.40, 0.12], "size_m": 0.04},
+    {"name": "green", "shape": "cube", "xy_m": [0.50, 0.0], "size_m": 0.04}
+  ]
+}

@@ -1,0 +1,6 @@
+# Run in project folder: python console.py --commands examples/import_duck.txt
+add-mesh duck source/duck/Duck.glb 0.50 0.00 0.08
+axes on
+objects
+push duck 0.05 0.00
+wait 5

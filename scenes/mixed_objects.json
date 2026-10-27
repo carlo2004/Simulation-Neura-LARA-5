@@ -1,0 +1,12 @@
+{
+  "seed": 42,
+  "hover_z_m": 0.24,
+  "objects": [
+    {"name": "red", "shape": "cube", "xy_m": [0.35, -0.12], "size_m": 0.04},
+    {"name": "blue", "shape": "cube", "xy_m": [0.35, 0.12], "size_m": 0.04},
+    {"name": "green", "shape": "cube", "xy_m": [0.50, 0.0], "size_m": 0.04},
+    {"name": "yellow", "shape": "box", "xy_m": [0.52, -0.19], "size_m": [0.06, 0.045, 0.05]},
+    {"name": "ball", "shape": "sphere", "xy_m": [0.52, 0.19], "size_m": 0.045, "color": [0.70, 0.22, 0.80, 1]},
+    {"name": "can", "shape": "cylinder", "xy_m": [0.28, 0.0], "size_m": [0.04, 0.06]}
+  ]
+}

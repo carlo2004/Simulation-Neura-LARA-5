@@ -1,0 +1,13 @@
+# Run: python console.py --commands examples/visual_checks.txt
+axes on
+stackviz red blue
+status
+move 0.40 -0.12 0.24
+jog z 0.03
+wait 2
+stack red blue
+check red blue
+wait 5
+stackviz off
+axes off
+wait 2

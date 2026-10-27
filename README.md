@@ -1,9 +1,11 @@
-# Stack Lab — NEURA LARA 5, Version 2.4
+# Stack Lab — NEURA LARA 5, Version 2.4.1
 
 Ein Python-Teststand für euer Praktikum: den LARA 5 sichtbar bewegen, benannte Objekte
 platzieren und Würfel/Quader durch physisches Greifen aufeinander stapeln. Szene, Maße, Seed
 und Geschwindigkeit lassen sich anpassen. Das Projekt läuft eigenständig mit
 MuJoCo; für den Betrieb ist keine RoboDK-Installation nötig.
+Die erste Einrichtung lädt die festgelegten Modellquellen, prüft ihre SHA-256-Werte
+und erzeugt die Geometrie lokal. Modelldefinition und Prüfsummen sind versioniert.
 
 **Modellstatus:** Die Geometrie, Kinematiktabelle und Gelenkgrenzen stammen aus
 dem öffentlich herunterladbaren RoboDK-Modell des LARA 5. Massenverteilung,
@@ -15,42 +17,49 @@ dynamischer Zwilling des realen Roboters.
 
 ## 1. Voraussetzungen
 
-- Empfohlen: Python 3.12. Das Projekt verwendet Python, MuJoCo, NumPy und SciPy;
+- Python **3.12 oder 3.13**. Eine zusätzliche Installation von 3.12 ist bei
+  vorhandenem 3.13 nicht nötig. Das Projekt verwendet Python, MuJoCo, NumPy und SciPy;
   für den Mesh-Import zusätzlich trimesh. Alles wird über requirements.txt installiert.
 - Windows, Linux oder macOS mit Desktop und OpenGL für das interaktive Fenster.
-- Internet nur zur Installation der Python-Pakete. Modelldaten sind enthalten.
+- Internet zur ersten Installation der Pakete und Modelldaten. Anschließend lokal nutzbar.
 - Kein ROS, keine RoboDK-Lizenzdatei und kein LLM-API-Key für diese Simulation nötig.
 
-Die mitgelieferte Ausführung wurde unter Linux/Python 3.12 geprüft, einschließlich
-Kontaktphysik und EGL-Videoexport. Das native Desktopfenster konnte hier nicht
+Die Referenzläufe wurden unter Linux/Python 3.12 und 3.13 geprüft, einschließlich
+Kontaktphysik. EGL-Videoexport wurde unter 3.12 geprüft. Das native Desktopfenster konnte hier nicht
 manuell bedient werden. Die Windows-/macOS-Befehle sind Startanleitungen;
 es wurden hier keine Tests auf diesen Plattformen ausgeführt.
 
 ## 2. Schnellstart
 
-ZIP entpacken. Im Ordner `lara5_lab` ein Terminal öffnen.
+Repository klonen oder ZIP entpacken. Im Ordner mit `bootstrap.py` ein Terminal öffnen.
+Das GitHub-Repository enthält das Projekt direkt im Wurzelordner; das frühere ZIP
+verwendet den Unterordner `lara5_lab`.
+
+Der Einrichtungsbefehl erstellt eine lokale `.venv`, installiert alle Pakete
+einschließlich **trimesh** darin und zeigt den tatsächlich verwendeten Interpreter.
+Eine vorhandene gültige Umgebung wird weiterverwendet. Globale Pakete werden
+dabei nicht verändert. Fehlende LARA-/Enten-Geometrie wird aus den geprüften
+Quellen aufgebaut. Die Python-Version, mit der du `bootstrap.py` startest,
+wird für eine neu erstellte Umgebung verwendet.
 
 Windows, PowerShell:
 
 ```powershell
-py -3.12 -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+py bootstrap.py
 .\.venv\Scripts\python.exe run.py --gui
 ```
 
 Linux:
 
 ```bash
-python3 -m venv .venv
-.venv/bin/python -m pip install -r requirements.txt
+python3 bootstrap.py
 .venv/bin/python run.py --gui
 ```
 
 macOS:
 
 ```bash
-python3 -m venv .venv
-.venv/bin/python -m pip install -r requirements.txt
+python3 bootstrap.py
 .venv/bin/mjpython run.py --gui
 ```
 
@@ -62,6 +71,46 @@ Je nach Rechner kann die Ansicht langsamer als Echtzeit laufen.
 
 In den folgenden Befehlen bedeutet `python` den Interpreter der eingerichteten
 virtuellen Umgebung. Alternativ den vollständigen `.venv`-Pfad wie oben verwenden.
+
+Wenn mehrere Python-Versionen vorhanden sind, lässt sich unter Windows mit
+`py -3.13 bootstrap.py` gezielt 3.13 auswählen. `py -0p` zeigt die installierten
+Interpreter. `py bootstrap.py --test` richtet die Umgebung ein und führt die
+Unittests mit **demselben** `.venv`-Interpreter aus. Unter Linux/macOS entsprechend
+`python3 bootstrap.py --test`.
+
+Nur eine vorhandene Umgebung prüfen, ohne Installation:
+
+```text
+python bootstrap.py --check
+```
+
+Bei manueller Installation gilt weiterhin: `python -m venv .venv` und danach
+`.venv`-Python `-m pip install -r requirements.txt`. Installation, Start und Tests
+müssen denselben Interpreter verwenden. Ein globales `python` mit fehlendem
+`trimesh` sagt nichts über die korrekt eingerichtete lokale Umgebung aus.
+
+Windows-Tests und Diagnose ohne Aktivierung der Umgebung:
+
+```powershell
+.\.venv\Scripts\python.exe check_env.py
+.\.venv\Scripts\python.exe -m unittest discover -s tests -v
+.\.venv\Scripts\python.exe console.py --axes
+```
+
+Unter Linux sind das `.venv/bin/python check_env.py` und
+`.venv/bin/python -m unittest discover -s tests -v`.
+
+## Versionsverwaltung
+
+GitHub: https://github.com/carlo2004/Simulation-Neura-LARA-5 (privates Repository).
+Quellcode, Szenen, Tests, Modelldefinition, Download-Prüfsummen und Herkunftshinweise
+werden mit Git versioniert. Große Quelldateien und daraus erzeugte Meshes werden
+beim Setup bereitgestellt; `fetch_assets.py` legt die genauen Quellen fest.
+`.venv`, Zugangsdaten und erzeugte Ausgaben bleiben ausgeschlossen.
+Für spätere Änderungen zunächst `git pull --ff-only`, dann die Änderungen prüfen
+und mit einer aussagekräftigen Commit-Nachricht speichern. Die GitHub-Actions-Datei
+prüft Python 3.12/3.13 auf Linux und Windows; der jeweilige Actions-Status zeigt
+die Ergebnisse dieser externen Läufe.
 
 ## Einstellungsleisten einklappen
 
@@ -235,8 +284,9 @@ python console.py --commands examples/visual_checks.txt
 Die Beispieldatei zeigt Bewegung, relativen Hub, Stapeln, Prüfung und Ausschalten.
 Im Dateimodus endet die Simulation nach der letzten Zeile. Für eine frei steuerbare
 Vorführung einfach `python console.py` starten und die Befehle einzeln eingeben.
-Das enthaltene Referenzvideo aus Version 2.3 mit eingeblendeten Hilfen liegt unter
-`output/annotated_demo/demo.mp4`, das Schlussbild daneben in `final.png`.
+Frühere ZIP-Ausgaben enthalten das Referenzvideo aus Version 2.3 unter
+`output/annotated_demo/demo.mp4`. Erzeugte Videos und Bilder sind nicht Teil des
+Git-Repositories. Mit dem obigen `--video`-Befehl kannst du sie selbst aufnehmen.
 
 ## 2c. Tastatursteuerung und Mausziele — optional
 
@@ -466,7 +516,8 @@ Hilfskräfte an Objekte angelegt. Das ist eine einfache Tischstrategie, kein
 allgemeiner Schiebeplaner; hohe Turmebenen werden nicht automatisch geschoben.
 Zum freien Experimentieren den Tastaturmodus oder die MuJoCo-Mauskräfte nutzen.
 
-Die **Gummiente** ist bereits samt Quelldatei und Lizenz enthalten:
+Die **Gummiente** ist vorbereitet; die Einrichtung lädt ihre Quelldatei und
+erzeugt die Geometrie. Lizenz und Herkunftshinweise sind enthalten:
 
 ```bash
 python console.py --config scenes/duck.json --axes

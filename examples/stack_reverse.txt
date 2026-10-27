@@ -1,0 +1,4 @@
+# High-level reference policy in the other direction, followed by another check.
+reset
+stack blue red
+check blue red
