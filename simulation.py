@@ -213,6 +213,9 @@ class Simulation:
 
     def step(self, seconds):
         for _ in range(round(seconds/self.model.opt.timestep)):
+            interrupt = getattr(self, 'command_interrupt', None)
+            if interrupt is not None:
+                interrupt()
             # Ideal model-based gravity/Coriolis feedforward for arm and fingers.
             # The free objects receive no external support or scripted motion.
             self.data.qfrc_applied[:8] = self.data.qfrc_bias[:8]

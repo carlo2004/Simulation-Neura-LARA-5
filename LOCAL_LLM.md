@@ -1,182 +1,268 @@
-# Erstes lokales Modell im LARA-Teststand
+# Lokale Modelle, Live-Prompts und Ausführungsfeedback — Version 2.6
 
-Der Test verbindet eine Sprachaufgabe mit einem tatsächlich vom lokalen Modell
-erzeugten Python-Programm und der vorhandenen MuJoCo-Kontaktphysik. Es wird kein
-Cloud-Inferenzdienst verwendet. `stack()` und die handgeschriebene Stapelstrategie
-sind für das Modell nicht erreichbar. Ein erfolgreicher Installations- oder
-Unittest bedeutet noch keinen erfolgreichen LLM-Stapelversuch.
+Der LARA-Teststand übersetzt freie Sprache mit einem lokalen Modell in Python,
+führt den begrenzten Code in MuJoCo aus und meldet tatsächliche Positionen,
+Kontakte und Fehler zurück. Ein Modell kann mehrere Blöcke für eine Aufgabe
+verwenden. Das ist der Versuchsaufbau für euren späteren Finetuning-Vergleich;
+ein erfolgreicher Softwaretest allein beweist keine erfolgreiche Modellstrategie.
 
-## Modell und Auswahl
+## 1. Modellwahl und Größe
 
-Ausgewählt ist **Qwen/Qwen3.5-4B**, Stand 28.10.2026. Mit „Artificial Intelligent“
-wurde hier **Artificial Analysis** als Vergleichsplattform angenommen. Die dort
-verglichenen kleinen Modelle machten Qwen3.5-4B zu einem passenden Kandidaten;
-allgemeine Ranglisten sind kein Nachweis für Roboterprogrammierung.
+Die frühere strikte 7B-Grenze wurde auf deinen Wunsch erweitert. Die neue
+Obergrenze beträgt 10 Milliarden **Gesamtparameter**, sodass alle drei ausdrücklich
+gewünschten Modelle hineinpassen. Der vollständige Originalcheckpoint wird gezählt,
+auch wenn wir für diese Textaufgaben nur den Sprachmodellteil benutzen.
 
-Die offizielle Hugging-Face-Metadatenabfrage meldet **4.659.865.088 Parameter für
-das vollständige Originalmodell**, einschließlich der visuellen Komponenten.
-Damit liegt es unter der strikten Grenze von **7.000.000.000 Gesamtparametern**.
-Für diesen textbasierten Versuch wird nur das Sprachmodell geladen. Die Zahl
-„4B“ im Namen oder die Größe einer quantisierten Datei allein wäre kein
-ausreichender Nachweis für diese Grenze. Ein kleineres, geeignetes Modell ist
-hier sinnvoller als eine Überschreitung der Grenze für das nächstgrößere Modell.
+| Alias | Gewünschtes Modell | Originalparameter | GGUF-Download | Modus ab Werk |
+|---|---|---:|---:|---|
+| `qwen9b` | `Qwen/Qwen3.5-9B` | 9.653.104.368 | 5,68 GB | Thinking |
+| `ministral8b` | `mistralai/Ministral-3-8B-Reasoning-2512` | 8.918.026.240 | 5,20 GB | Reasoning, kein Abschalten |
+| `nemotron8b` | `nvidia/NVIDIA-Nemotron-3.5-Bolt-E4B-4GB` | 7.996.156.490 | 6,18 GB | Non-Thinking |
+| `qwen4b` | `Qwen/Qwen3.5-4B` | 4.659.865.088 | 2,74 GB | Non-Thinking, bisherige Referenz |
 
-Das Setup lädt eine **Q4_K_M-GGUF-Quantisierung von Unsloth**, exakt 2.740.937.888
-Bytes. Es ist das unverändert verwendete, bereits nachtrainierte öffentliche
-Qwen-Modell, noch **kein für unser Praktikum finetuniertes Modell**. Revision,
-Dateigröße, SHA-256, Originalparameterzahl und die Plattform-Downloads der
-llama.cpp-Version **b11951** stehen in `local_model.lock.json`. Modell und
-Runtime werden beim Setup mit Größe und SHA-256 geprüft. Gewichte bleiben lokal
-und werden nicht auf GitHub hochgeladen.
+„E4B“ bei Bolt bezeichnet die effektive Größe; das Modell hat insgesamt rund 8B
+Parameter. „4GB“ im Modellnamen ist keine Angabe der Downloadgröße: die konkrete
+GGUF-Datei hat 6.180.446.208 Bytes. Die Zahlen stammen aus den öffentlichen
+Hugging-Face-Metadaten der Originalmodelle; bei Bolt aus dem BF16-Gegenstück.
 
-Quellen für die Auswahl und Einrichtung:
+Alle vier Einträge verwenden Q4_K_M. Für Ministral und Bolt wird die vom Hersteller
+veröffentlichte GGUF verwendet, für Qwen die festgelegte Unsloth-Konvertierung.
+`local_model.lock.json` enthält genaue Revisionen, Größen, SHA-256-Prüfsummen,
+Samplingprofile, Trainingsquellen, Lizenzen und die llama.cpp-Laufzeit b11951.
+Qwen/Ministral verwenden Apache-2.0, Bolt OpenMDW-1.1. Die Herstellerquellen:
 
-- Offizielles Modell und Sampling-Empfehlungen: https://huggingface.co/Qwen/Qwen3.5-4B
-- Originalmetadaten: https://huggingface.co/api/models/Qwen/Qwen3.5-4B
-- Quantisierung: https://huggingface.co/unsloth/Qwen3.5-4B-GGUF
-- Laufzeit: https://github.com/ggml-org/llama.cpp/releases/tag/b11951
-- Vergleich: https://artificialanalysis.ai/models/qwen3-5-4b
+- https://huggingface.co/Qwen/Qwen3.5-9B
+- https://huggingface.co/mistralai/Ministral-3-8B-Reasoning-2512
+- https://huggingface.co/mistralai/Ministral-3-8B-Reasoning-2512-GGUF
+- https://huggingface.co/nvidia/NVIDIA-Nemotron-3.5-Bolt-E4B-4GB
+- https://huggingface.co/nvidia/NVIDIA-Nemotron-3.5-Bolt-E4B-BF16
 
-Quantisierung, kurze Ausgabebudgets und deaktiviertes Thinking können die Qualität
-beeinflussen. Diese Pilotkonfiguration entspricht keinem vollständigen
-Leaderboard-Benchmark. Alle Einstellungen werden pro Versuch gespeichert.
+Größe und allgemeine Leaderboards garantieren keinen Erfolg beim Stapeln.
+Die tatsächlichen Messungen dieses Arbeitsstands stehen in `TEST_REPORT.md` und
+`test_results/models_8b/`. Der unveränderte frühere 4B-Pilot bleibt unter
+`test_results/local_llm/` erhalten.
 
-## Voraussetzungen und Einrichtung
+## 2. Voraussetzungen und Einrichtung
 
-- Das aktuelle Repository, Python 3.12 oder 3.13 und Internet für die Einrichtung.
-- Ein 64-Bit-System: Windows/Linux x86_64 oder macOS Apple Silicon/Intel.
-  Der tatsächliche CPU-Inferenzlauf wurde hier unter Linux x86_64 geprüft;
-  die übrigen Laufzeitarchive sind festgelegt, aber hier nicht ausgeführt worden.
-- Empfohlen: 12 GB RAM und mindestens 5 GB freier Speicher. Hier liefen die
-  Versuche mit ungefähr 10,4 GB System-RAM, acht CPU-Threads und ohne GPU.
-- Für `--gui` zusätzlich ein lokaler Desktop mit OpenGL. Ohne `--gui` läuft die
-  physikalische Prüfung ohne Fenster. Kein API-Key und kein Ollama nötig.
+Python 3.12 oder 3.13, ein 64-Bit-System und Internet für die erste Einrichtung.
+Unterstützte Downloadziele: Windows/Linux x86_64 sowie macOS Intel/Apple Silicon.
+Die echte Modellinferenz wurde hier unter Linux x86_64 auf der CPU geprüft.
+Windows/Linux-Softwaretests laufen zusätzlich über GitHub Actions; das ist kein
+Windows-Modelltest. Der native Desktopviewer wurde hier nicht manuell bedient.
+
+Empfohlen: 16 GB RAM. Die Modelle liefen hier einzeln mit rund 10,45 GB System-RAM.
+Nur ein Modell wird gleichzeitig geladen. Alle vier Gewichte belegen zusammen
+rund 19,8 GB; plane mindestens 25 GB freien Speicher für Einrichtung und Projekt.
+Die mitgelieferte Laufzeit verwendet die CPU. Ein API-Key oder Ollama ist nicht nötig.
+Für die 3D-Ansicht benötigst du einen Desktop mit OpenGL.
 
 Im Repository-Ordner unter Windows/PowerShell:
 
 ```powershell
 git pull --ff-only
 py bootstrap.py
-.\.venv\Scripts\python.exe llm_test.py setup
-.\.venv\Scripts\python.exe llm_test.py test --case red-on-blue --gui --axes --stackviz
+.\.venv\Scripts\python.exe llm_test.py models
+.\.venv\Scripts\python.exe llm_test.py setup --model qwen9b
+.\.venv\Scripts\python.exe llm_chat.py --model qwen9b --no-thinking --axes --stackviz red blue
 ```
 
-Unter Linux/macOS:
+Linux/macOS entsprechend `.venv/bin/python` verwenden:
 
 ```bash
-git pull --ff-only
 python3 bootstrap.py
-.venv/bin/python llm_test.py setup
-.venv/bin/python llm_test.py test --case red-on-blue --gui --axes --stackviz
+.venv/bin/python llm_test.py setup --model qwen9b
+.venv/bin/python llm_chat.py --model qwen9b --no-thinking --axes --stackviz red blue
 ```
 
-Für das macOS-Fenster wählt der Test automatisch `mjpython` aus derselben `.venv`.
-Der erste Modell-Download umfasst etwa **2,74 GB**. Abgebrochene Downloads werden
-nach Möglichkeit fortgesetzt und anschließend vollständig geprüft. Scheitert
-eine Prüfsumme, wird die betreffende Datei abgelehnt. Nach erfolgreichem Setup
-benötigt die Inferenz keine Internetverbindung. Ein erneutes `setup` prüft den Cache.
+Unter macOS wählt der Live-Einstieg für die GUI automatisch `mjpython` aus derselben
+Umgebung, wenn vorhanden. Alternativ direkt `.venv/bin/mjpython llm_chat.py ...`.
+Alle Pakete und Tests müssen denselben `.venv`-Interpreter benutzen.
 
-Es läuft vorübergehend ein llama.cpp-Prozess, ausschließlich an `127.0.0.1` mit
-einem freien lokalen Port. Nach der Antwort oder einem Fehler wird er beendet.
-Der Client umgeht HTTP-Proxys für diese lokale Verbindung. Es wird kein dauerhaft
-laufender Dienst eingerichtet. Der erste CPU-Versuch kann ungefähr eine Minute
-oder länger dauern; Thinking benötigt entsprechend mehr Zeit.
-
-## Was das Modell darf
-
-Die vollständige minimale Beschreibung steht in **`LLM_API.md`** und wird dem
-Modell tatsächlich als Systemnachricht übergeben. Es gibt vier Methoden:
-
-| Methode | Bedeutung |
-|---|---|
-| `robot.position("red")` | Aktuellen Objektmittelpunkt in Weltmetern abfragen |
-| `robot.move_to([x, y, z])` | TCP bei senkrechtem Greifer an ein Ziel bewegen |
-| `robot.gripper(closed=True)` / `False` | Finger schließen / öffnen |
-| `robot.step(0.5)` | Physik für eine begrenzte Zeit weiterlaufen lassen |
-
-Das Modell erhält die Aufgabe sowie Namen, Formen und Abmessungen der vorhandenen
-Objekte. Positionen muss es über die API abfragen. Das sind exakte Zustandsdaten
-des Simulators; Bilderkennung ist nicht Teil dieses ersten Versuchs. IK,
-Interpolation und Gelenkregelung erledigt der Teststand. Das Modell programmiert
-die Abfolge von Abfragen, Bewegungen und Greiferaktionen.
-
-Die Antwort ist ein JSON-Objekt mit einem Python-Programm im Feld `code`.
-Die JSON-Struktur wird nach der Generierung geprüft; es wird keine zusätzliche
-Decoding-Grammatik erzwungen. Es wird kein fertiger Stapelcode als Beispiel
-mitgegeben und generierter Code wird nicht von Hand repariert.
-
-Ein kleiner AST-Interpreter führt ausschließlich die dokumentierte Python-Teilmenge
-aus: lokale Variablen, kurze Listen/Tupel, Indexlesen und einfache Zahlenrechnung.
-Keine Imports, Schleifen, beliebiger Python-Code oder Dateizugriffe; kein `exec()`.
-Arbeitsraum, Anzahl der Anweisungen/API-Aufrufe, Wartezeit und Prozesslaufzeit sind
-begrenzt. Das ist eine begrenzte Ausführungsoberfläche, keine Betriebssystem-VM.
-
-Die getrennte Auswertung prüft 20-mal über zwei Simulationssekunden: Zentrierung,
-Höhe, Ruhe, tatsächlichen Kontakt und die Stützkette zum Tisch. Zusätzlich darf
-der Greifer den oberen Würfel nicht berühren und muss mindestens 7,5 cm vom
-Objektmittelpunkt entfernt sein. Der generierte Code kann diese Auswertung nicht
-aufrufen. Achsen und Prüfrahmen sind nur mit den entsprechenden Optionen sichtbar.
-
-## Eigene erste Versuche
-
-Die drei Entwicklungsszenarien umfassen Rot auf Blau, Blau auf Rot und Grün auf
-Blau. Die letzten beiden variieren die Positionen mit einem festgehaltenen Seed.
+Alle Modelle nacheinander herunterladen und prüfen:
 
 ```text
-python llm_test.py test --suite
-python llm_test.py test --case green-on-blue --seed 123 --gui
-python llm_test.py test --case red-on-blue --instruction "Stack the red cube on the blue cube."
-python llm_test.py test --case red-on-blue --thinking --max-tokens 2048
+python llm_test.py setup --all
 ```
 
-`python` meint immer den `.venv`-Interpreter. `--instruction` ändert nur die
-Formulierung, nicht das ausgewertete Zielpaar des gewählten Falls. Deshalb dort
-keinen anderen Zielstapel verlangen. Für `--suite` ist diese Option ausgeschlossen.
+`python` meint in diesen Beispielen immer den `.venv`-Interpreter. `--model` akzeptiert
+auch die oben genannten vollständigen Hugging-Face-IDs. Downloads sind fortsetzbar;
+Größe und SHA-256 werden vor Verwendung des fertigen Downloads geprüft. Nach dem
+Setup ist die Inferenz offline nutzbar. Gewichte und Runtime bleiben außerhalb von Git.
 
-Standard ist der schnelle **Non-Thinking-Modus** mit 768 Ausgabetokens und Qwens
-Instruct-Samplingprofil: Temperatur 0,7, top-p 0,8, top-k 20, min-p 0,
-Presence-Penalty 1,5 und Repeat-Penalty 1,0. `--thinking` nutzt das veröffentlichte
-Coding-Profil mit Temperatur 0,6, top-p 0,95 und Presence-Penalty 0; standardmäßig
-2048 Ausgabetokens. Das Kontextfenster ist bewusst auf 4096 Tokens begrenzt.
-Token- oder Zeitlimits werden als Fehlschlag protokolliert, nicht als fertige
-Antwort ausgeführt. Ein festgehaltener Seed verbessert Wiederholbarkeit, garantiert
-aber keine bitgleichen Ergebnisse über unterschiedliche CPUs/Runtime-Versionen.
+## 3. Live mit dem Roboter sprechen
 
-Weitere Optionen zeigt `python llm_test.py test --help`, unter anderem CPU-Threads,
-Zeitlimits und ein eigener neuer Ausgabeordner. Ein vorhandener nichtleerer
-Ausgabeordner wird nicht überschrieben. Im GUI-Lauf erfolgt zuerst die Generierung,
-dann öffnet sich das Fenster; nach der Auswertung bleibt das Ergebnis für weitere
-zehn Simulationssekunden sichtbar. `Tab`/`Umschalt+Tab` schalten die Seitenleisten um.
+Das Terminal zeigt `llm>`. Beispielsweise einzeln eingeben:
 
-## Ergebnisse aufbewahren und wissenschaftlich verwenden
+```text
+Bewege den Greifer 5 cm nach rechts.
+Bewege den Greifer 5 cm nach links.
+Staple den roten Würfel auf den blauen Würfel.
+Setze anschließend den grünen Würfel auf den roten.
+```
 
-Jeder Lauf erzeugt unter `output/llm_<Zeitstempel>/`:
+Die Beispiele sind Testaufgaben, keine garantierten Mustererfolge. Standardmäßig
+enthält die Live-Szene drei Würfel. `--config scenario.json` verwendet zwei.
+Der gleiche physische Zustand bleibt über mehrere Prompts erhalten.
+Für relative Verschiebungen gibt es zusätzlich `robot.jog(Achse, Strecke)`:
+das ist derselbe Bewegungsweg wie `jog` in der bisherigen Terminalkonsole.
+Die Zielkoordinate wird aus dem gemessenen TCP berechnet, die anderen Achsen
+bleiben konstant. Achse und Strecke wählt weiterhin das Modell.
 
-- `summary.json`: Erfolg/Fehlschlag und Konfiguration aller Fälle;
-- pro Fall die konkrete Szene, beide Prompttexte, Nachrichten und die Anfrage;
-- `raw_response.txt`, `response.json` und unverändert extrahiertes `generated.py`;
-- `generation.json`: Modellrevision/Hash, Sampling, Tokens und Laufzeiten;
-- `execution.json`: tatsächliche Aktionen, Objektpositionen und unabhängige Checks;
-- `result.json` sowie Inferenz-/Simulationslogs, auch bei Fehlern.
+Du siehst die Generierungsphase, den erzeugten Python-Code, jeden ausgeführten
+API-Aufruf und danach die Messwerte. `--stream` zeigt zusätzlich die rohe
+Antwort während ihrer Entstehung, `--show-thinking` gegebenenfalls das Reasoning.
+Unvollständige Antworten werden niemals stückweise als Befehle ausgeführt.
 
-Die installierten Paketversionen lassen sich zusätzlich mit `python -m pip freeze`
-festhalten. Erfolgreich ist ein Fall nur bei `success: true`, nicht schon dann,
-wenn Python syntaktisch gültig war. Der Prozess endet bei einem fehlgeschlagenen
-Fall mit Exitcode 1. Einrichtung und Softwareprüfungen:
+Richtungen sind bewusst in **Weltkoordinaten** festgelegt, unabhängig von der
+Kamera: rechts = +X, links = −X, vorne = +Y, hinten = −Y, hoch = +Z. Ohne
+Abstandsangabe sind relative Bewegungen 5 cm. Das optionale Achsensystem macht
+diesen Bezug sichtbar. Es startet nur mit `--axes` oder `/axes on`.
+
+Nützliche Steuerbefehle:
+
+```text
+/status
+/axes on
+/stackviz red blue
+/check red blue
+/stop
+/reset
+/models
+/model qwen9b
+/sim add yellow cube 0.50 -0.18 0.04
+/help
+/quit
+```
+
+`/stop` unterbricht die Generierung oder die laufende Bewegung. Die Regelung hält
+anschließend die gemessenen Gelenke; Objektpositionen werden nicht manipuliert.
+Nach einem Generierungsabbruch wird das Modell beim nächsten Prompt neu geladen.
+Während einer Aufgabe sind `/stop` und `/quit` unmittelbar verfügbar. Andere
+Eingaben werden währenddessen zurückgewiesen, damit sie keine Bewegung nachträglich
+ungewollt starten. `Strg+C` beendet das Programm.
+
+`/model` wechselt einen bereits heruntergeladenen Checkpoint. `/sim` verwendet
+bewusst die bestehende deterministische Konsole; ihre Szenenänderungen setzen
+wie bisher die Szene zurück. Solche Befehle sind Nutzereingaben, keine versteckten
+LLM-Fähigkeiten. Tastatursteuerung wird während der LLM-Aufgabe ausgesetzt.
+Tab/Umschalt+Tab schalten die MuJoCo-Seitenleisten um.
+
+## 4. Feedback und längere Aufgaben
+
+Das Modell gibt JSON mit `code`, `done` und einer kurzen `message` aus. Der Code
+verwendet die kleine, versionierte Schnittstelle in `LLM_API.md`: Objekt- oder
+TCP-Position abfragen, bewegen, Greifer öffnen/schließen und Physik warten lassen.
+IK und Gelenkregelung erledigt die Simulation. Es gibt kein fertiges `stack()` in
+der Modell-API und keinen mitgegebenen Lösungsplan für das Stapeln.
+
+Nach jedem Block erhält das Modell die aktuellen Objekt-/Werkzeugpositionen,
+Fingerkontakte, API-Ergebnisse, Fehler und die physikalischen Prüfergebnisse.
+Zahlen in Modellnachrichten werden auf sechs Nachkommastellen begrenzt;
+Physikzustände und Messprotokolle bleiben in voller Präzision erhalten.
+Lokale Python-Variablen gelten nur im jeweiligen Block. Die physische Welt bleibt
+erhalten; ein fehlgeschlagener Griff wird zwischen Korrekturen nicht zurückgesetzt.
+Im Live-Modus bestätigt das Modell den Abschluss nach Sichtung des Feedbacks mit
+einem leeren letzten Codeblock. Eine Fertigmeldung des Modells ist keine
+unabhängige Bewertung der Bedeutung deiner freien Sprachaufgabe.
+
+Ein Stapel wird physikalisch anhand von Zentrierung, Höhe, Ruhe, Kontakt und
+Stützkette zum Tisch geprüft: 20 Proben über zwei Simulationssekunden. Zusätzlich
+muss der Greifer den oberen Würfel freigeben und mindestens 7,5 cm von dessen
+Mittelpunkt entfernt sein. Auch nahe, unpräzise Stapelkandidaten werden im Feedback
+angezeigt. `/check SOURCE TARGET` gibt dir eine konkrete unabhängige Prüfung.
+
+Während der Modellinferenz **pausiert die Physik**, die Ansicht bleibt bedienbar.
+Das verhindert, dass die Rechenzeit eines Modells die physische Ausgangslage eines
+Versuchs verändert. Während Bewegungen und Prüfungen läuft die echte Kontaktphysik.
+Dieser Aufbau ist eine schrittweise Robotik-Simulation, kein Echtzeitcontroller.
+
+Standard: höchstens vier Blöcke pro Live-Aufgabe, maximal sechs mit `--max-rounds 6`.
+Pro Block: höchstens 64 Python-Anweisungen, 48 API-Aufrufe und 15 Sekunden explizite
+Wartezeit. Der AST-Interpreter erlaubt keine Imports, Dateizugriffe oder `exec()`.
+Arbeitsraum und Prozesslaufzeiten sind begrenzt. Das ist eine begrenzte API,
+keine Betriebssystem-VM. Im Modell-API-Kontext werden die letzten beiden
+Feedbackwechsel sowie die Aufgabe und aktueller Zustand gehalten.
+
+## 5. Modi vergleichen und automatisch testen
+
+Die vier Entwicklungsszenarien umfassen drei Stapelaufgaben mit zwei/drei Würfeln
+und eine unabhängig gemessene 5-cm-Bewegung. Ein Test endet nur bei Erfüllung des
+extern vorgegebenen Ziels erfolgreich; `done=true` kann das nicht überschreiben.
+
+```text
+python llm_test.py test --model qwen9b --case move-right --no-thinking
+python llm_test.py test --model nemotron8b --case red-on-blue --feedback-rounds 4 --gui --stackviz
+python llm_test.py test --model ministral8b --suite --feedback-rounds 4
+python llm_test.py test --model qwen4b --suite
+```
+
+Ohne `--feedback-rounds` erhält das Modell genau einen Programmblock. Mit der Option
+bekommt es bis zu dieser Zahl an Blöcken und echte Rückmeldung zur Korrektur.
+Diese beiden Bedingungen verwenden ab Version 2.6 dieselben initialen Beobachtungen
+und dieselbe Code-Schnittstelle. Mehr Feedback erlaubt mehr Aufrufe/Tokens und ist
+als separate Versuchsbedingung auszuweisen. Gegenüber dem ursprünglichen
+2.5-Pilot haben sich Prompt, Beobachtungen und Protokoll geändert; dessen 0/3 dürfen
+nicht direkt als kontrollierter Modellvergleich mit 2.6 interpretiert werden.
+
+Ein einzelner Live-Prompt ohne interaktive Eingabe:
+
+```text
+python llm_chat.py --model nemotron8b --prompt "Bewege den Greifer 5 cm nach rechts." --headless
+python llm_chat.py --model qwen9b --prompt "Staple Rot auf Blau." --goal-stack red blue --max-rounds 4 --axes
+```
+
+`--prompt` darf mehrfach vorkommen, um Aufgaben nacheinander in derselben Szene
+abzuarbeiten. `--goal-stack` gibt ein unabhängig vorgegebenes Prüfziel an und ist
+nur mit genau einem Prompt zulässig. Bei beliebigen freien Live-Aufgaben bleibt
+`success` im Protokoll `null`; die tatsächlichen Stapelmessungen bleiben separat sichtbar.
+
+Thinking ist bei Qwen optional; Ministral Reasoning kann es nicht abschalten.
+Bolt unterstützt beide Modi. `--thinking` / `--no-thinking` überschreibt den Modus.
+Die modellabhängigen Samplingprofile sind im Lockfile festgelegt: Qwen nutzt die
+veröffentlichten Coding-/Instruct-Profile, Ministral Temperatur 0,7, Bolt Temperatur
+1,0 und top-p 0,95. Sonstige festgelegte Samplingwerte sind mitprotokolliert.
+Ministrals unveränderter Hersteller-Systemprompt wird vor die API-Beschreibung gesetzt.
+
+Die neuen 8B-/9B-Einträge nutzen 8192 Kontexttokens. Standardmäßig stehen für
+Thinking höchstens 768 Tokens zur Verfügung, damit im 2048-Token-Budget Platz für
+Code bleibt. Bei Non-Thinking ist das Standard-Testbudget 768, im Live-Modus 2048.
+Mehr Raum für schwierige Aufgaben, beispielsweise:
+
+```text
+python llm_chat.py --model qwen9b --thinking --thinking-budget 2048 --max-tokens 4096 --generation-timeout 900
+```
+
+`--thinking-budget -1` entfernt nur die separate Denkgrenze; `--max-tokens` bleibt
+die harte Gesamtgrenze. Antworten, die am Tokenlimit abbrechen, zählen als Fehler.
+Auf der CPU sind je nach Modell und Modus erhebliche Wartezeiten möglich; Streaming
+und das warm gehaltene Modell machen den Ablauf sichtbar. Es läuft ausschließlich
+ein privater llama.cpp-Prozess an `127.0.0.1`, ohne Cloud-Inferenz.
+
+## 6. Nachweise für das Seminar
+
+Jede Aufgabe schreibt eine eigene Ausgabe unter `output/`: Szenenkonfiguration,
+initialen/finalen Physikzustand, tatsächlich gesendete Prompts/Anfragen, gestreamte
+Antworten, extrahierten Code, Aktionen, Feedback und Ergebnis. `stream.jsonl`
+enthält die originalen SSE-Ereignisse; `response.json` setzt deren Text-/Reasoning-
+Felder zusammen. Ein `trajectory.jsonl` verbindet Modellantworten und Ausführungsfeedback.
+Fehlversuche werden erhalten; Code wird nicht von Hand zu einer Lösung korrigiert.
+
+Das sind zunächst **rohe Versuchsdaten**. Fehlgeschlagene oder unbestätigte Antworten
+dürfen nicht automatisch als positive SFT-Beispiele verwendet werden. Finetuning
+wurde hier noch nicht ausgeführt. Dafür verwendet ihr später den jeweiligen
+Originalcheckpoint aus `training_model_id`/`training_revision`, nicht die GGUF-Datei.
+Die vollständigen Nachrichten und Zustands-/Fehlerinformationen sind dafür gespeichert.
+
+Für eine wissenschaftliche Evaluation jetzt neue zurückgehaltene Aufgaben und
+Seeds festlegen. Originalmodell und finetuniertes Modell müssen dieselbe API,
+Beobachtung, Quantisierung, Modus, Kontext-, Token-, Zeit- und Feedbackbudgets bekommen.
+Gültiger Code, API-Erfolg, Zielerfolg, Fehler, Korrekturrunden und Laufzeit getrennt
+berichten. Ein fester Seed garantiert keine bitgleichen Resultate über verschiedene
+CPUs und Runtime-Versionen. Der LARA-Modellstatus aus der Haupt-README gilt weiterhin.
+
+Softwareprüfungen:
 
 ```text
 python bootstrap.py --check
 python -m unittest discover -s tests -v
 ```
-
-Die Ergebnisse dieses Arbeitsstands stehen in `TEST_REPORT.md` und die ausgewählten
-unveränderten Pilotdateien unter `test_results/local_llm/`. Vorversuche an der
-Anbindung werden getrennt von den eigentlichen Modellversuchen dokumentiert.
-
-Für das Seminar ist dies ein **Entwicklungspilot**, kein unabhängiges Testset.
-Vor dem Vergleich Originalmodell gegen Finetuning müssen neue, zurückgehaltene
-Aufgaben/Seeds, Prompt, Quantisierung, Sampling und Zeit-/Tokenbudgets festgelegt
-werden. Derselbe Prompt und dieselben APIs müssen für beide Modelle gelten.
-Syntaxfehler, API-Fehler, Timeouts und physikalische Fehlschläge getrennt zählen.
-Eine spätere Promptoptimierung oder ein Beispiel im Prompt ist eine eigene
-Versuchsbedingung. Es wurde hier noch kein Modell trainiert.

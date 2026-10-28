@@ -85,3 +85,16 @@ Die bisherigen Tests zeigen, dass die implementierten Aufgaben unter diesen
 Annahmen funktionieren. Sie ersetzen keine Kalibrierung oder Validierung eines
 realen LARA 5. Für den Praktikumsbericht sollten diese Quellen und Annahmen
 als Teil des Versuchsaufbaus angegeben werden.
+# Ergänzung 2.6: lokale Modelle und Agentensteuerung
+
+Die Parameter in `local_model.lock.json` sind keine NEURA-Einstellungen. Modell-IDs,
+Revisionen, Dateigrößen und Prüfsummen stammen aus den veröffentlichten Modellquellen.
+Qwen-Samplingprofile, Bolt-Temperatur/top-p und Ministrals Temperatur 0,7 folgen
+den Modellkarten; die übrigen festgelegten Werte sind im Lockfile dokumentiert.
+Ministrals Systemprompt unter `model_prompts/` stammt unverändert vom Hersteller.
+
+Kontextlänge 8192, Denkbudget 768, Ausgabebudgets, maximal vier Live-Blöcke,
+Zeitlimits und die Weltachsen-Konvention für „rechts“ sind eigene Entscheidungen
+für diesen Teststand. Die 4-mm-Zentrierung und sonstigen Stapelkriterien bleiben
+eigene Prüfkriterien. Die Physik pausiert während der Inferenz, während die Ansicht
+bedienbar bleibt. Details und Überschreibungsoptionen: `LOCAL_LLM.md`.

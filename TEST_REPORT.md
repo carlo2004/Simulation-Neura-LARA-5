@@ -1,3 +1,86 @@
+# Ergänzung — Version 2.6: 8B-/9B-Modelle und Live-Feedback
+
+Ausgeführt am 28.10.2026 unter Linux x86_64/Python 3.12.14, MuJoCo 3.3.7,
+acht Inferenzthreads, ohne GPU und ohne gehostete Modell-API.
+
+## Einrichtung und Software
+
+- Qwen3.5-9B (9.653.104.368 Originalparameter), Ministral 3 8B Reasoning
+  (8.918.026.240) und Nemotron 3.5 Bolt (7.996.156.490) vollständig heruntergeladen,
+  jeweils Q4_K_M. Die 4B-Referenz bleibt verfügbar. Alle liegen unter der auf deinen
+  Wunsch erweiterten 10B-Grenze. Revisionen und Prüfsummen sind festgelegt.
+- Der abschließende reale Aufruf `llm_test.py setup --all` prüft alle vier
+  Gewichtedateien per SHA-256 und beendet sich erfolgreich.
+- **65/65 Softwaretests bestanden.** Sie prüfen auch echte Kontaktphysik,
+  Einzelbefehle über denselben Interpreter, Feedbackkorrekturen, Jog-Invarianten,
+  Pausieren der Physik während der Inferenz, SSE, Modellauswahl und Abbrüche.
+- Ein bekanntes Kontrollprogramm stapelt weiterhin mit 20/20 stabilen Proben.
+  Es wurde den echten Modellen nicht als Beispiel mitgegeben. No-op wird abgelehnt.
+- Die Live-Konsole hält die Szene und das Modell über mehrere Prompts offen.
+  Sichtbar sind generierter Code, Aktionen und tatsächliches Ausführungsfeedback.
+  `/stop` wurde zusätzlich im echten interaktiven Terminal während der Generierung
+  geprüft: abgebrochene Episode und unveränderte TCP-Position.
+- Ein beim abschließenden Setup gefundener Alias-/Dateipfadfehler ist korrigiert
+  und durch einen Regressionstest sowie den erfolgreichen Gesamtlauf abgesichert.
+
+## Tatsächliche Modellversuche
+
+Die vorgegebene 5-cm-Rechtsbewegung wird von **allen drei neuen Modellen** erreicht.
+Das Ziel stammt aus dem Testfall, nicht aus einer Selbsteinschätzung des Modells.
+
+In der finalen Live-Probe werden zwei Prompts in derselben Szene nacheinander
+gegeben: 5 cm rechts, dann 5 cm links. Gemessen werden die tatsächlichen TCP-
+Verschiebungen einschließlich der unveränderten beiden anderen Achsen:
+
+| Modell | Modus | Korrekte Bewegungen | Abschluss |
+|---|---|---:|---|
+| Qwen3.5-9B | Non-Thinking | 2/2 | beide Aufgaben beendet |
+| Ministral 3 8B Reasoning | Thinking | 2/2 | beide Aufgaben beendet |
+| Nemotron 3.5 Bolt | Non-Thinking | 1/2 | zweite Aufgabe am Blocklimit; etwa 10 cm statt 5 cm |
+
+Die beiden Qwen-Aufgaben benötigen zusammen rund 80 Sekunden, die beiden
+Ministral-Aufgaben rund 638 Sekunden auf dieser CPU und mit den protokollierten
+Modi. Das ist eine kleine Entwicklungsprobe, kein allgemeiner Modell- oder
+Geschwindigkeitsbenchmark. Für den ersten Live-Test ist Qwen9B/Non-Thinking
+hier der sinnvollste Ausgangspunkt; Thinking und die anderen Modelle sind wählbar.
+
+**Stapelversuche bleiben erfolglos.** Zwei-Block-Versuche aller drei Modelle,
+ein Vier-Block-Versuch von Bolt, ein Qwen-Versuch mit höherem Denk-/Ausgabebudget
+und ein abschließender Qwen-Vier-Block-Versuch mit Jog-API bestehen die Kriterien
+nicht. Der letzte Qwen-Lauf endet mit 0/20. Das Feedback bewirkt bislang keine
+zuverlässige vollständige Greif-/Ablagestrategie. Ein früher Bolt-Versuch erreicht
+Kontakt und passende Stapelhöhe, verfehlt aber mit ca. 5,7 mm XY-Fehler die
+unveränderte 4-mm-Grenze. Er wird ausdrücklich nicht als Erfolg gezählt.
+
+Die Rohantworten und Zustände sind erhalten. Code wird nicht repariert oder durch
+handgeschriebene Stapelprogramme ersetzt. Diese Fehlversuche sind ein Ausgangspunkt
+für euer Finetuning, kein fertiger autonomer Stapelagent.
+
+## Grenzen und Reproduzierbarkeit
+
+Während der Entwicklung wurden API, Feedbackprotokoll und Zahlenformatierung
+verbessert; die verschiedenen Versuchsbedingungen sind getrennt archiviert und
+werden nicht zu einer gemeinsamen Erfolgsquote addiert. Gegenüber dem alten
+4B-Pilot sind unter anderem Beobachtungen und API verändert. Ein direkter
+4B-/9B-Leistungsvergleich lässt sich daraus nicht ableiten.
+
+Die finale Schnittstelle besitzt Position, absolute Bewegung, relatives Joggen,
+Greifer und begrenztes Warten. Für freie Sprache bleibt semantischer Erfolg ohne
+extern vorgegebenes Ziel unbestätigt; tatsächliche Stapelprüfungen sind separat
+sichtbar. Die Modellinferenz pausiert die Physik, die Ansicht bleibt bedienbar.
+Die Simulation bleibt Kontaktphysik ohne Objekt-Teleportation oder Attach-Constraints.
+
+Noch kein Training und kein unabhängiges Testset. Für den Seminarvergleich müssen
+API, Prompts, Szenen/Seeds und Budgets vorab eingefroren werden. Originalmodell
+und finetuniertes Modell bekommen dieselben Bedingungen. Kein manueller Test des
+nativen Desktopfensters und kein Modell-Inferenztest auf Windows/macOS; die
+GitHub-Softwarematrix prüft diese Plattformaspekte nur soweit dort konfiguriert.
+
+Anleitung: `LOCAL_LLM.md`. Messdaten, Setupnachweis und vollständige Erklärungen:
+`test_results/models_8b/`. Die unveränderten bisherigen Berichte folgen darunter.
+
+---
+
 # Ergänzung — Version 2.5, lokales Sprachmodell
 
 Ausgeführt am 28.10.2026 unter Linux x86_64, Python 3.12.14 und MuJoCo 3.3.7.

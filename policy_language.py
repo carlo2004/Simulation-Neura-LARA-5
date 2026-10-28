@@ -3,11 +3,15 @@ import ast
 import math
 import operator
 
-METHODS = {'position', 'move_to', 'gripper', 'step'}
+METHODS = {'position', 'move_to', 'jog', 'gripper', 'step'}
 OPS = {ast.Add: operator.add, ast.Sub: operator.sub, ast.Mult: operator.mul, ast.Div: operator.truediv}
 
 
 class PolicyError(ValueError):
+    pass
+
+
+class PolicyCancelled(PolicyError):
     pass
 
 
@@ -37,10 +41,10 @@ def validate(code):
                 number(node.value)
         if isinstance(node, ast.Attribute):
             if not isinstance(node.value, ast.Name) or node.value.id != 'robot' or node.attr not in METHODS:
-                raise PolicyError('Only the four documented robot methods are accessible')
+                raise PolicyError('Only the five documented robot methods are accessible')
         if isinstance(node, ast.Call):
             if not isinstance(node.func, ast.Attribute) or node.func.attr not in METHODS:
-                raise PolicyError('Only calls to robot.position/move_to/gripper/step are allowed')
+                raise PolicyError('Only calls to robot.position/move_to/jog/gripper/step are allowed')
             if any(k.arg is None for k in node.keywords):
                 raise PolicyError('Argument unpacking is not allowed')
         if isinstance(node, ast.Assign):
@@ -63,11 +67,13 @@ def number(value):
 
 
 class Interpreter:
-    def __init__(self, robot):
+    def __init__(self, robot, on_action=None, should_stop=None):
         self.robot = robot
         self.variables = {}
         self.actions = []
         self.wait_total = 0.
+        self.on_action = on_action
+        self.should_stop = should_stop
 
     def expression(self, node):
         if isinstance(node, ast.Constant):
@@ -103,13 +109,33 @@ class Interpreter:
         raise PolicyError('Unsupported expression')
 
     def call(self, method, args, kwargs):
+        if self.should_stop and self.should_stop():
+            raise PolicyCancelled('Execution cancelled')
         if len(self.actions) >= 48:
             raise PolicyError('At most 48 robot API calls are allowed')
         action = dict(method=method, args=args, kwargs=kwargs, time_s=float(self.robot.data.time))
         self.actions.append(action)
+        if self.on_action:
+            self.on_action('start', action)
+        try:
+            result = self.dispatch(method, args, kwargs, action)
+            action['status'] = 'ok'
+            return result
+        except Exception as error:
+            action.update(status='error', error=type(error).__name__+': '+str(error))
+            raise
+        finally:
+            if self.on_action:
+                self.on_action('end', action)
+
+    def dispatch(self, method, args, kwargs, action):
         if method == 'position':
             if kwargs or len(args) != 1 or not isinstance(args[0], str):
                 raise PolicyError('position expects one object name')
+            if args[0] == 'tcp':
+                result = self.robot.data.site_xpos[self.robot.sid].tolist()
+                action['result'] = result
+                return result
             if args[0] not in self.robot.object_names:
                 raise PolicyError('Unknown object: '+args[0])
             result = self.robot.position(args[0]).tolist()
@@ -119,6 +145,17 @@ class Interpreter:
             if kwargs or len(args) != 1 or not isinstance(args[0], list) or len(args[0]) != 3:
                 raise PolicyError('move_to expects one three-number position list')
             xyz = [number(v) for v in args[0]]
+            try:
+                self.robot.validate_tcp(xyz)
+            except ValueError as error:
+                raise PolicyError(str(error)) from None
+            self.robot.move_to(xyz)
+        elif method == 'jog':
+            if kwargs or len(args) != 2 or args[0] not in ('x', 'y', 'z'):
+                raise PolicyError('jog expects an axis (x/y/z) and a distance in metres')
+            delta = number(args[1])
+            xyz = self.robot.data.site_xpos[self.robot.sid].copy()
+            xyz['xyz'.index(args[0])] += delta
             try:
                 self.robot.validate_tcp(xyz)
             except ValueError as error:
@@ -147,6 +184,8 @@ class Interpreter:
     def run(self, code):
         tree = validate(code)
         for statement in tree.body:
+            if self.should_stop and self.should_stop():
+                raise PolicyCancelled('Execution cancelled')
             if isinstance(statement, ast.Expr):
                 self.expression(statement.value)
             else:
