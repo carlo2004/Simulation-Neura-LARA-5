@@ -1,3 +1,0 @@
-```json
-{"code": "red_pos = robot.position(\"red\")\nblue_pos = robot.position(\"blue\")\nred_center = [red_pos[0], red_pos[1], 0.24]\nblue_center = [blue_pos[0], blue_pos[1], 0.24]\nrobot.move_to(red_center)\nrobot.gripper(closed=True)\nrobot.move_to(blue_center)\nrobot.gripper(closed=False)\nrobot.step(1)\nrobot.move_to([0.5, 0, 0.4])"}
-```

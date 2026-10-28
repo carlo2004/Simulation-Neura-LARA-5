@@ -9,13 +9,13 @@ import time
 import unittest
 from unittest.mock import patch
 import numpy as np
-from core import Config
-from simulation import Simulation
-from llm_agent import Agent, parse_reply, system_prompt, model_json
-from llm_evaluation import observe
-from llm_runtime import ROOT, lock, model_keys, download
-from llm_session import GenerationCancelled, LocalModel
-from policy_language import Interpreter, PolicyCancelled
+from stacklab.config import Config
+from stacklab.sim.robot import Simulation
+from stacklab.llm.agent import Agent, parse_reply, system_prompt, model_json
+from stacklab.evaluation import observe
+from stacklab.llm.catalog import ROOT, lock, model_keys, download
+from stacklab.llm.runtime import GenerationCancelled, LocalModel
+from stacklab.policy import Interpreter, PolicyCancelled
 
 MOVE = 'p = robot.position("tcp")\nrobot.move_to([p[0] + 0.05, p[1], p[2]])'
 STACK = '''a = robot.position("red")
@@ -83,7 +83,7 @@ class FeedbackTests(unittest.TestCase):
         self.assertIs(formatted['valid'], True)
 
     def test_tcp_read_and_action_trace_match_measured_position(self):
-        with closing(Simulation(Config.load(ROOT/'scenario.json'))) as robot:
+        with closing(Simulation(Config.load(ROOT/'scenes/default.json'))) as robot:
             events = []
             runner = Interpreter(robot, on_action=lambda phase, data: events.append((phase, data['method'])))
             runner.run('p = robot.position("tcp")')
@@ -91,7 +91,7 @@ class FeedbackTests(unittest.TestCase):
             self.assertEqual(events, [('start', 'position'), ('end', 'position')])
 
     def test_jog_is_relative_and_preserves_the_other_axes(self):
-        with closing(Simulation(Config.load(ROOT/'scenario.json'))) as robot:
+        with closing(Simulation(Config.load(ROOT/'scenes/default.json'))) as robot:
             initial = robot.data.site_xpos[robot.sid].copy()
             runner = Interpreter(robot)
             runner.run('robot.jog("x", 0.05)')
@@ -100,8 +100,8 @@ class FeedbackTests(unittest.TestCase):
             np.testing.assert_allclose(robot.data.site_xpos[robot.sid], initial, atol=.001)
 
     def test_invalid_jog_does_not_change_the_controller_target(self):
-        from policy_language import PolicyError
-        with closing(Simulation(Config.load(ROOT/'scenario.json'))) as robot:
+        from stacklab.policy import PolicyError
+        with closing(Simulation(Config.load(ROOT/'scenes/default.json'))) as robot:
             before = robot.command.copy()
             for code in ['robot.jog("bad", .05)', 'robot.jog("x", 9)', 'robot.jog("x", True)']:
                 with self.assertRaises(PolicyError):
@@ -110,7 +110,7 @@ class FeedbackTests(unittest.TestCase):
 
     def test_feedback_contains_real_error_and_repairs_movement(self):
         replies = [dict(code='robot.move_to([9, 0, .2])', done=True), dict(code=MOVE, done=True)]
-        with tempfile.TemporaryDirectory() as temp, closing(Simulation(Config.load(ROOT/'scenario.json'))) as robot:
+        with tempfile.TemporaryDirectory() as temp, closing(Simulation(Config.load(ROOT/'scenes/default.json'))) as robot:
             target = robot.data.site_xpos[robot.sid]+[.05, 0, 0]
             client = FakeModel(replies)
             agent = Agent(robot, client, max_rounds=2)
@@ -125,7 +125,7 @@ class FeedbackTests(unittest.TestCase):
             self.assertEqual(report['rounds'][0]['actions'][0]['status'], 'error')
 
     def test_model_done_cannot_override_failed_stack_check(self):
-        with tempfile.TemporaryDirectory() as temp, closing(Simulation(Config.load(ROOT/'scenario.json'))) as robot:
+        with tempfile.TemporaryDirectory() as temp, closing(Simulation(Config.load(ROOT/'scenes/default.json'))) as robot:
             client = FakeModel([dict(code='robot.step(.1)', done=True), dict(code=STACK, done=True)])
             report = Agent(robot, client, max_rounds=2).run_task(
                 'Rot auf Blau', Path(temp)/'episode', goal=dict(type='stack', source='red', target='blue'))
@@ -135,7 +135,7 @@ class FeedbackTests(unittest.TestCase):
             self.assertTrue(report['evaluation']['stack_checks'][0]['tool_clear'])
 
     def test_free_form_live_task_never_claims_independent_semantic_success(self):
-        with tempfile.TemporaryDirectory() as temp, closing(Simulation(Config.load(ROOT/'scenario.json'))) as robot:
+        with tempfile.TemporaryDirectory() as temp, closing(Simulation(Config.load(ROOT/'scenes/default.json'))) as robot:
             before = observe(robot)['tcp_m']
             report = Agent(robot, FakeModel([dict(code=MOVE, done=True), dict(code='', done=True)])).run_task('rechts', Path(temp)/'episode')
             self.assertIsNone(report['success'])
@@ -143,7 +143,7 @@ class FeedbackTests(unittest.TestCase):
             self.assertAlmostEqual(report['final_observation']['tcp_m'][0]-before[0], .05, delta=.004)
 
     def test_motion_can_be_interrupted_inside_a_move(self):
-        with closing(Simulation(Config.load(ROOT/'scenario.json'))) as robot:
+        with closing(Simulation(Config.load(ROOT/'scenes/default.json'))) as robot:
             before = robot.data.site_xpos[robot.sid].copy()
             count = 0
             def stop():
@@ -166,7 +166,7 @@ class FeedbackTests(unittest.TestCase):
                         raise GenerationCancelled('fixture cancelled')
                     time.sleep(.01)
                 raise AssertionError('Cancellation failed')
-        with tempfile.TemporaryDirectory() as temp, closing(Simulation(Config.load(ROOT/'scenario.json'))) as robot:
+        with tempfile.TemporaryDirectory() as temp, closing(Simulation(Config.load(ROOT/'scenes/default.json'))) as robot:
             agent = Agent(robot, SlowModel([]))
             agent.tick = agent.stop
             report = agent.run_task('rechts', Path(temp)/'episode')
@@ -177,7 +177,7 @@ class FeedbackTests(unittest.TestCase):
         class InterruptedModel(FakeModel):
             def complete(self, *args, **kwargs):
                 raise KeyboardInterrupt()
-        with tempfile.TemporaryDirectory() as temp, closing(Simulation(Config.load(ROOT/'scenario.json'))) as robot:
+        with tempfile.TemporaryDirectory() as temp, closing(Simulation(Config.load(ROOT/'scenes/default.json'))) as robot:
             directory = Path(temp)/'episode'
             with self.assertRaises(KeyboardInterrupt):
                 Agent(robot, InterruptedModel([])).run_task('rechts', directory)
@@ -186,7 +186,7 @@ class FeedbackTests(unittest.TestCase):
             self.assertIsNone(robot.command_interrupt)
 
     def test_live_cli_repeated_prompts_keep_the_same_world(self):
-        import llm_chat
+        from stacklab.cli import chat as llm_chat
         with tempfile.TemporaryDirectory() as temp, redirect_stdout(io.StringIO()) as stdout:
             client = FakeModel([dict(code=MOVE, done=True), dict(code='', done=True),
                                 dict(code=MOVE, done=True), dict(code='', done=True)])
@@ -201,7 +201,7 @@ class FeedbackTests(unittest.TestCase):
             self.assertIn('robot.position', stdout.getvalue())
 
     def test_cancelled_live_task_is_not_presented_as_model_completion(self):
-        import llm_chat
+        from stacklab.cli import chat as llm_chat
         class CancelledModel(FakeModel):
             def complete(self, *args, **kwargs):
                 raise GenerationCancelled('fixture cancelled')
@@ -217,7 +217,7 @@ class FeedbackTests(unittest.TestCase):
             def complete(self, *args, **kwargs):
                 time.sleep(.08)
                 return super().complete(*args, **kwargs)
-        with tempfile.TemporaryDirectory() as temp, closing(Simulation(Config.load(ROOT/'scenario.json'))) as robot:
+        with tempfile.TemporaryDirectory() as temp, closing(Simulation(Config.load(ROOT/'scenes/default.json'))) as robot:
             started = float(robot.data.time)
             measured = []
             agent = Agent(robot, DelayedModel([dict(code='', done=True)]),
@@ -230,7 +230,7 @@ class FeedbackTests(unittest.TestCase):
 class StreamTests(unittest.TestCase):
     def test_insufficient_storage_stops_before_network_or_partial_file(self):
         import hashlib
-        import llm_runtime
+        import stacklab.llm.catalog as llm_runtime
         from types import SimpleNamespace
         with tempfile.TemporaryDirectory() as temp:
             path = Path(temp)/'model.gguf'
@@ -243,7 +243,7 @@ class StreamTests(unittest.TestCase):
 
     def test_storage_drop_during_download_preserves_the_reserve(self):
         import hashlib
-        import llm_runtime
+        import stacklab.llm.catalog as llm_runtime
         from types import SimpleNamespace
         with tempfile.TemporaryDirectory() as temp:
             path = Path(temp)/'model.gguf'
@@ -259,7 +259,7 @@ class StreamTests(unittest.TestCase):
             self.assertEqual(path.with_name(path.name+'.part').stat().st_size, 0)
 
     def test_setup_keeps_the_model_alias_after_resolving_weight_path(self):
-        import llm_runtime
+        import stacklab.llm.catalog as llm_runtime
         with tempfile.TemporaryDirectory() as temp, redirect_stdout(io.StringIO()):
             cache = Path(temp)
             config = lock('qwen9b')

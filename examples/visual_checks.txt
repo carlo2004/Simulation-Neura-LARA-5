@@ -1,4 +1,4 @@
-# Run: python console.py --commands examples/visual_checks.txt
+# Run: python -m stacklab console --commands examples/visual_checks.txt
 axes on
 stackviz red blue
 status

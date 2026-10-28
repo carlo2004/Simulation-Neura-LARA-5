@@ -4,8 +4,8 @@ from pathlib import Path
 import tempfile
 import unittest
 import numpy as np
-from console import Controller, CommandError, run_batch
-from simulation import Simulation
+from stacklab.cli.console import Controller, CommandError, run_batch
+from stacklab.sim.robot import Simulation
 
 class ConsoleTests(unittest.TestCase):
     @classmethod

@@ -1,4 +1,4 @@
-# Run in project folder: python console.py --commands examples/push_playground.txt
+# Run in project folder: python -m stacklab console --commands examples/push_playground.txt
 axes on
 push red 0.06 0.00
 wait 2

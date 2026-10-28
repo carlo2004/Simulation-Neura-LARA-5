@@ -1,1 +1,0 @@
-{"code": "robot.move_to([0.45, -0.12, 0.26])", "done": false, "message": "Move TCP to the target position 0.45 m in X, maintaining Z and Y"}

@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lara-stack-lab"
+dynamic = ["version", "dependencies"]
+description = "Contact-physics LARA 5 simulation and local Python-policy experiments"
+requires-python = ">=3.12"
+
+[project.scripts]
+stacklab = "stacklab.__main__:main"
+
+[tool.setuptools.packages.find]
+include = ["stacklab*"]
+
+[tool.setuptools.dynamic]
+version = {attr = "stacklab.__version__"}
+dependencies = {file = ["requirements.txt"]}

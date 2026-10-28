@@ -6,16 +6,24 @@ __pycache__/
 .ruff_cache/
 .DS_Store
 Thumbs.db
+runs/
 output/
 *.log
-SHA256SUMS.json
 .env
 .env.*
 !.env.example
 *.zip
 *.bundle
+*.egg-info/
+build/
+dist/
+.local_llm/
+assets/robots/lara5/assets/
+assets/objects/
+assets/sources/Neura-LARA-5.robot
+assets/sources/duck/Duck.glb
+# Old working checkouts may still contain these generated caches.
 models/lara5/assets/
 models/objects/
 source/Neura-LARA-5.robot
 source/duck/Duck.glb
-.local_llm/

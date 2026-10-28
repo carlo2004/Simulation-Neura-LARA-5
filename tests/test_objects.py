@@ -3,9 +3,9 @@ from dataclasses import replace
 from pathlib import Path
 import mujoco
 import numpy as np
-from core import Config, ObjectSpec
-from console import Controller
-from simulation import ROOT, Simulation
+from stacklab.config import Config, ObjectSpec
+from stacklab.cli.console import Controller
+from stacklab.sim.robot import ROOT, Simulation
 
 class ObjectDescriptionTests(unittest.TestCase):
     def test_dimensions_and_colors(self):

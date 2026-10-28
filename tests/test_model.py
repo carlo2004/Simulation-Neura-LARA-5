@@ -1,13 +1,13 @@
 import json, unittest
 import numpy as np
 import mujoco
-from simulation import ROOT, scene_xml
-from core import Config
+from stacklab.sim.robot import ROOT, scene_xml
+from stacklab.config import Config
 
 class LaraModelTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.params = json.loads((ROOT/'models/lara5/parameters.json').read_text())
+        cls.params = json.loads((ROOT/'assets/robots/lara5/parameters.json').read_text())
         cls.m = mujoco.MjModel.from_xml_string(scene_xml(Config()))
         cls.d = mujoco.MjData(cls.m)
 

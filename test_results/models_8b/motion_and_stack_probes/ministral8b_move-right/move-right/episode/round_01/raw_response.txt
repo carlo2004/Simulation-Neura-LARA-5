@@ -1,7 +1,0 @@
-```json
-{
-  "code": "pos = robot.position(\"tcp\")\nnew_pos = [pos[0] + 0.05, pos[1], pos[2]]\nrobot.move_to(new_pos)",
-  "done": false,
-  "message": "Moving the TCP 5 cm to the right while maintaining the current height."
-}
-```

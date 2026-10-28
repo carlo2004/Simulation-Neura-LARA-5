@@ -1,1 +1,0 @@
-{"code": "", "done": true, "message": "Task complete: gripper moved 5cm right."}

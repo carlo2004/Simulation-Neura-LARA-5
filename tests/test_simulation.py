@@ -1,8 +1,8 @@
 import unittest
 import numpy as np
 import mujoco
-from core import Config
-from simulation import Simulation
+from stacklab.config import Config
+from stacklab.sim.robot import Simulation
 
 class ConfigurationTests(unittest.TestCase):
     def test_repeatable_scene(self):

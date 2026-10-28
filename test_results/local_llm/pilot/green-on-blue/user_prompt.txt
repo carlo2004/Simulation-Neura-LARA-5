@@ -1,1 +1,0 @@
-{"instruction": "Staple den grünen Würfel auf den blauen Würfel.", "objects": [{"name": "red", "shape": "cube", "full_size_m": [0.04, 0.04, 0.04]}, {"name": "blue", "shape": "cube", "full_size_m": [0.04, 0.04, 0.04]}, {"name": "green", "shape": "cube", "full_size_m": [0.04, 0.04, 0.04]}], "units": "metres", "table_z": 0, "suggested_transport_z": 0.24}

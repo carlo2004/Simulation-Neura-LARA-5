@@ -4,9 +4,9 @@ import unittest
 from unittest.mock import patch
 import mujoco
 import numpy as np
-from console import Controller, CommandError
-from manual_control import SPACE, ESCAPE, INSERT, DELETE
-from simulation import Simulation
+from stacklab.cli.console import Controller, CommandError
+from stacklab.sim.manual import SPACE, ESCAPE, INSERT, DELETE
+from stacklab.sim.robot import Simulation
 
 
 class ManualTests(unittest.TestCase):

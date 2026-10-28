@@ -1,7 +1,0 @@
-```json
-{
-  "code": "",
-  "done": true,
-  "message": "Task complete: TCP moved 5 cm to the left."
-}
-```

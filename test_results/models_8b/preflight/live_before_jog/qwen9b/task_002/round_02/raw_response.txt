@@ -1,1 +1,0 @@
-{"code": "", "done": true, "message": "Task completed: Greifer moved 5cm left."}

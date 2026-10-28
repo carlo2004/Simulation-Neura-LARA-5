@@ -1,1 +1,0 @@
-{"code": "robot.gripper(closed=False)", "done": false, "message": "Ensure gripper is open (already open based on observation, but safe to call to confirm state or prepare for next step if necessary)"}

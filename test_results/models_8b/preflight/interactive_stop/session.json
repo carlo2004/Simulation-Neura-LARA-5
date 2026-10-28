@@ -1,9 +1,0 @@
-{
-  "tasks": [
-    {
-      "instruction": "Bewege den Greifer 5 cm nach rechts.",
-      "status": "cancelled",
-      "verified_success": null
-    }
-  ]
-}

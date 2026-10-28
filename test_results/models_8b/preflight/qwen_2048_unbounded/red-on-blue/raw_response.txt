@@ -1,1 +1,0 @@
-{"code": "red_pos = robot.position(\"red\")\nblue_pos = robot.position(\"blue\")\ngrasp_x = red_pos[0]\ngrasp_y = red_pos[1]\ngrasp_z = red_pos[2]\nrobot.move_to([grasp_x, grasp_y, grasp_z])\nrobot.gripper(closed=True)\nlift_z = 0.24\nrobot.move_to([grasp_x, grasp_y, lift_z])\nstack_x = blue_pos[0]\nstack_y

@@ -1,3 +1,4 @@
+from stacklab.paths import ROOT
 import json
 from pathlib import Path
 import subprocess
@@ -7,8 +8,8 @@ from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 import numpy as np
-import llm_runtime
-from policy_language import Interpreter, PolicyError, validate
+import stacklab.llm.catalog as llm_runtime
+from stacklab.policy import Interpreter, PolicyError, validate
 
 
 class FakeRobot:
@@ -96,9 +97,9 @@ class LocalRuntimeTests(unittest.TestCase):
     def test_parameter_limit_uses_total_not_quantized_file_size(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
-            (root/'local_model.lock.json').write_text(json.dumps(dict(total_parameters=8_000_000_000,
+            (root/'models.lock.json').write_text(json.dumps(dict(total_parameters=8_000_000_000,
                                                                     max_total_parameters=7_000_000_000)))
-            with patch.object(llm_runtime, 'ROOT', root), self.assertRaises(ValueError):
+            with patch.object(llm_runtime, 'REGISTRY_PATH', root/'models.lock.json'), self.assertRaises(ValueError):
                 llm_runtime.lock()
 
     def test_cached_download_is_verified_without_network(self):
@@ -119,8 +120,8 @@ class LocalRuntimeTests(unittest.TestCase):
             code = root/'program.py'
             result = root/'result.json'
             code.write_text('robot.step(0.1)\n')
-            process = subprocess.run([sys.executable, str(llm_runtime.ROOT/'llm_worker.py'),
-                                      '--config', str(llm_runtime.ROOT/'scenario.json'), '--code', str(code),
+            process = subprocess.run([sys.executable, '-m', 'stacklab.cli.worker',
+                                      '--config', str(llm_runtime.ROOT/'scenes/default.json'), '--code', str(code),
                                       '--result', str(result), '--source', 'red', '--target', 'blue'],
                                      capture_output=True, timeout=30)
             report = json.loads(result.read_text())
@@ -147,8 +148,8 @@ robot.move_to([b[0], b[1], 0.24])
             root = Path(temp)
             code, result = root/'program.py', root/'result.json'
             code.write_text(program)
-            process = subprocess.run([sys.executable, str(llm_runtime.ROOT/'llm_worker.py'),
-                                      '--config', str(llm_runtime.ROOT/'scenario.json'), '--code', str(code),
+            process = subprocess.run([sys.executable, '-m', 'stacklab.cli.worker',
+                                      '--config', str(llm_runtime.ROOT/'scenes/default.json'), '--code', str(code),
                                       '--result', str(result), '--source', 'red', '--target', 'blue',
                                       '--axes', '--stackviz'], capture_output=True, timeout=45)
             report = json.loads(result.read_text())

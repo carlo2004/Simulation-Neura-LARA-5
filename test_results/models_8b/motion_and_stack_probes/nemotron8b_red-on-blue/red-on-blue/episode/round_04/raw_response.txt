@@ -1,1 +1,0 @@
-{"code": "robot.move_to([0.4030325462235626, 0.0550419538590129, 0.24])\nrobot.gripper(True)\nrobot.move_to([0.4030325462235626, 0.0550419538590129, 0.02])\nrobot.gripper(False)", "done": true, "message": "Move to blue cube, grasp, lift, move to blue cube, release red on blue"}

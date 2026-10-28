@@ -26,6 +26,6 @@ jobs:
         env:
           OPENBLAS_NUM_THREADS: '1'
         run: |
-          .venv/bin/python validate.py
-          .venv/bin/python validate_objects.py
-          .venv/bin/python validate_controls.py
+          .venv/bin/python tools/validate.py
+          .venv/bin/python tools/validate_objects.py
+          .venv/bin/python tools/validate_controls.py

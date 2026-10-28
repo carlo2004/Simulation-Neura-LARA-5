@@ -1,3 +1,4 @@
+from stacklab.paths import ROOT
 from pathlib import Path
 import tempfile
 import unittest
@@ -5,11 +6,11 @@ from unittest.mock import patch
 import mujoco
 import numpy as np
 import trimesh
-import core
-import mesh_import
-from core import Config, ObjectSpec, write_json
-from console import Controller
-from simulation import Simulation
+import stacklab.config as core
+import stacklab.sim.meshes as mesh_import
+from stacklab.config import Config, ObjectSpec, write_json
+from stacklab.cli.console import Controller
+from stacklab.sim.robot import Simulation
 
 
 class MeshTests(unittest.TestCase):

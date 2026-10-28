@@ -1,1 +1,0 @@
-robot.move_to([0.3, -0.15, 0.24]); robot.gripper(closed=True); robot.step(1.0); robot.gripper(closed=False); robot.move_to([0.45, -0.15, 0.24]); robot.gripper(closed=True); robot.step(1.0); robot.gripper(closed=False); robot.move_to([0.6, -0.15, 0.35]); robot.step(0.5)

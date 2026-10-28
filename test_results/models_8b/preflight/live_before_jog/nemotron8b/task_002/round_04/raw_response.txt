@@ -1,1 +1,0 @@
-{"code": "robot.gripper(closed=True)", "done": false, "message": "Close gripper to grasp the red cube"}

@@ -4,8 +4,8 @@ import io
 import unittest
 import mujoco
 import numpy as np
-from console import Controller, CommandError
-from simulation import Simulation
+from stacklab.cli.console import Controller, CommandError
+from stacklab.sim.robot import Simulation
 
 
 class OverlayTests(unittest.TestCase):
