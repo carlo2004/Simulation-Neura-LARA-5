@@ -237,7 +237,7 @@ class StreamTests(unittest.TestCase):
             with patch.object(llm_runtime.shutil, 'disk_usage', return_value=SimpleNamespace(free=1)), \
                  patch('urllib.request.urlopen', side_effect=AssertionError('Network must not be used')):
                 with self.assertRaisesRegex(OSError, 'Not enough free disk space'):
-                    download('unused', path, hashlib.sha256(b'fixture').hexdigest(), 7)
+                    download('https://example.invalid/model.gguf', path, hashlib.sha256(b'fixture').hexdigest(), 7)
             self.assertFalse(path.exists())
             self.assertFalse(path.with_name(path.name+'.part').exists())
 
@@ -254,7 +254,7 @@ class StreamTests(unittest.TestCase):
             with patch.object(llm_runtime.shutil, 'disk_usage', side_effect=capacity), \
                  patch('urllib.request.urlopen', return_value=response):
                 with self.assertRaisesRegex(OSError, 'Not enough free disk space'):
-                    download('unused', path, hashlib.sha256(b'fixture').hexdigest(), 7)
+                    download('https://example.invalid/model.gguf', path, hashlib.sha256(b'fixture').hexdigest(), 7)
             self.assertFalse(path.exists())
             self.assertEqual(path.with_name(path.name+'.part').stat().st_size, 0)
 
