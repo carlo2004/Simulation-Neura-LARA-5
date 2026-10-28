@@ -57,6 +57,6 @@ Die Geometrie und Kinematik stammen aus einer RoboDK-Quelldatei. Dynamik, Greife
 | `docs/` | Bedienung, Architektur, Versuchsablauf, Entscheidungsgeschichte |
 | `runs/` | Neue Ergebnisse; nicht versioniert |
 
-[Bedienung und Einrichtung](docs/start.md) · [Modelle und Live-Chat](docs/models.md) · [Einstellungen](docs/settings.md) · [Architektur erweitern](docs/architecture.md) · [Prüfen und wissenschaftlich auswerten](docs/validation.md)
+[Bedienung und Einrichtung](docs/start.md) · [Modelle und Live-Chat](docs/models.md) · [Einstellungen](docs/settings.md) · [Architektur erweitern](docs/architecture.md) · [Prüfen und wissenschaftlich auswerten](docs/validation.md) · [Ergebnisarchitektur und Vergleichsplan](docs/results.md)
 
 Modellgewichte liegen standardmäßig im lokalen Cache. Mit `STACKLAB_CACHE_DIR` kann ein anderer Datenträger gewählt werden; `STACKLAB_RUN_DIR` steuert den Ergebnisordner. Das Projekt wird aus diesem Checkout mit editierbarer Installation betrieben.

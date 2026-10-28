@@ -1,5 +1,7 @@
 # Versuchsindex
 
+Der [Vorschlag für Ergebnisarchitektur und Vergleichsdesign](../docs/results.md) beschreibt den nächsten Ausbau. Er ist von den hier tatsächlich gemessenen Ergebnissen getrennt.
+
 Hier liegen ausgewählte **tatsächlich ausgeführte** Entwicklungsversuche vom 28.10.2026. Modellcode wurde nicht nachträglich repariert. Test-Fixtures der Software sind getrennt unter `tests/`.
 
 ## Ergebnisse
