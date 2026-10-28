@@ -1,0 +1,58 @@
+{
+  "model": {
+    "model_id": "Qwen/Qwen3.5-4B",
+    "original_revision": "851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a",
+    "total_parameters": 4659865088,
+    "max_total_parameters": 7000000000,
+    "quantization": "Q4_K_M",
+    "gguf_repository": "unsloth/Qwen3.5-4B-GGUF",
+    "gguf_revision": "e87f176479d0855a907a41277aca2f8ee7a09523",
+    "model_filename": "Qwen3.5-4B-Q4_K_M.gguf",
+    "model_bytes": 2740937888,
+    "model_sha256": "00fe7986ff5f6b463e62455821146049db6f9313603938a70800d1fb69ef11a4",
+    "model_url": "https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/e87f176479d0855a907a41277aca2f8ee7a09523/Qwen3.5-4B-Q4_K_M.gguf?download=true",
+    "runtime": "llama.cpp",
+    "runtime_version": "b11951",
+    "runtime_assets": {
+      "linux-x86_64": {
+        "filename": "llama-b11951-bin-ubuntu-x64.tar.gz",
+        "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11951/llama-b11951-bin-ubuntu-x64.tar.gz",
+        "sha256": "2897031960458f9422cd7c7bd37bdc7098da41893cf735ecce4b951ef5e2c658",
+        "bytes": 22646994
+      },
+      "windows-x86_64": {
+        "filename": "llama-b11951-bin-win-cpu-x64.zip",
+        "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11951/llama-b11951-bin-win-cpu-x64.zip",
+        "sha256": "ac5edf9c936132fb16c9ff863db8b627c2a67621ff2e796ffd184585aea567ea",
+        "bytes": 24378362
+      },
+      "darwin-arm64": {
+        "filename": "llama-b11951-bin-macos-arm64.tar.gz",
+        "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11951/llama-b11951-bin-macos-arm64.tar.gz",
+        "sha256": "e75da9f2e4696d2bf54f53b75c3cf5a2b6984bfc846904db1349834f867fa447",
+        "bytes": 16440283
+      },
+      "darwin-x86_64": {
+        "filename": "llama-b11951-bin-macos-x64.tar.gz",
+        "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11951/llama-b11951-bin-macos-x64.tar.gz",
+        "sha256": "bd4555e5ff1e4393b3326859688b663dc788fe5e070186de0b2b0b1aadc715bf",
+        "bytes": 12177301
+      }
+    }
+  },
+  "passed": 0,
+  "total": 1,
+  "results": [
+    {
+      "case": "red-on-blue",
+      "instruction": "Staple den roten W\u00fcrfel auf den blauen W\u00fcrfel.",
+      "source": "red",
+      "target": "blue",
+      "success": false,
+      "stage": "generation",
+      "seed": 42,
+      "error": "RuntimeError: Local inference failed; see /workspace/scratch/18d9569da47e/lara5_lab/output/llm_native_template/red-on-blue/inference.log"
+    }
+  ],
+  "note": "Development pilot; not a held-out scientific evaluation"
+}

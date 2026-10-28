@@ -18,3 +18,4 @@ models/lara5/assets/
 models/objects/
 source/Neura-LARA-5.robot
 source/duck/Duck.glb
+.local_llm/

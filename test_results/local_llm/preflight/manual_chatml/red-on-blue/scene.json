@@ -1,0 +1,17 @@
+{
+  "seed": 42,
+  "cube_size_m": 0.04,
+  "red_xy_m": [
+    0.4,
+    -0.12
+  ],
+  "blue_xy_m": [
+    0.4,
+    0.12
+  ],
+  "hover_z_m": 0.24,
+  "speed_mm_s": 80,
+  "fps": 30,
+  "random_jitter_m": 0,
+  "objects": null
+}

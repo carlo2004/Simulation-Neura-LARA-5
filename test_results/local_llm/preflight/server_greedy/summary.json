@@ -1,0 +1,279 @@
+{
+  "model": {
+    "model_id": "Qwen/Qwen3.5-4B",
+    "original_revision": "851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a",
+    "total_parameters": 4659865088,
+    "max_total_parameters": 7000000000,
+    "quantization": "Q4_K_M",
+    "gguf_repository": "unsloth/Qwen3.5-4B-GGUF",
+    "gguf_revision": "e87f176479d0855a907a41277aca2f8ee7a09523",
+    "model_filename": "Qwen3.5-4B-Q4_K_M.gguf",
+    "model_bytes": 2740937888,
+    "model_sha256": "00fe7986ff5f6b463e62455821146049db6f9313603938a70800d1fb69ef11a4",
+    "model_url": "https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/e87f176479d0855a907a41277aca2f8ee7a09523/Qwen3.5-4B-Q4_K_M.gguf?download=true",
+    "runtime": "llama.cpp",
+    "runtime_version": "b11951",
+    "runtime_assets": {
+      "linux-x86_64": {
+        "filename": "llama-b11951-bin-ubuntu-x64.tar.gz",
+        "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11951/llama-b11951-bin-ubuntu-x64.tar.gz",
+        "sha256": "2897031960458f9422cd7c7bd37bdc7098da41893cf735ecce4b951ef5e2c658",
+        "bytes": 22646994
+      },
+      "windows-x86_64": {
+        "filename": "llama-b11951-bin-win-cpu-x64.zip",
+        "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11951/llama-b11951-bin-win-cpu-x64.zip",
+        "sha256": "ac5edf9c936132fb16c9ff863db8b627c2a67621ff2e796ffd184585aea567ea",
+        "bytes": 24378362
+      },
+      "darwin-arm64": {
+        "filename": "llama-b11951-bin-macos-arm64.tar.gz",
+        "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11951/llama-b11951-bin-macos-arm64.tar.gz",
+        "sha256": "e75da9f2e4696d2bf54f53b75c3cf5a2b6984bfc846904db1349834f867fa447",
+        "bytes": 16440283
+      },
+      "darwin-x86_64": {
+        "filename": "llama-b11951-bin-macos-x64.tar.gz",
+        "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11951/llama-b11951-bin-macos-x64.tar.gz",
+        "sha256": "bd4555e5ff1e4393b3326859688b663dc788fe5e070186de0b2b0b1aadc715bf",
+        "bytes": 12177301
+      }
+    }
+  },
+  "passed": 0,
+  "total": 1,
+  "results": [
+    {
+      "case": "red-on-blue",
+      "instruction": "Staple den roten W\u00fcrfel auf den blauen W\u00fcrfel.",
+      "source": "red",
+      "target": "blue",
+      "success": false,
+      "stage": "evaluated",
+      "seed": 42,
+      "generation": {
+        "model_id": "Qwen/Qwen3.5-4B",
+        "original_revision": "851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a",
+        "total_parameters": 4659865088,
+        "model_sha256": "00fe7986ff5f6b463e62455821146049db6f9313603938a70800d1fb69ef11a4",
+        "quantization": "Q4_K_M",
+        "runtime": "llama.cpp",
+        "runtime_version": "b11951",
+        "thinking": false,
+        "temperature": 0,
+        "seed": 42,
+        "threads": 8,
+        "context_tokens": 4096,
+        "max_output_tokens": 768,
+        "prompt_sha256": "6c2a9f2cc6012ef34aea860965ac8d041ff2c9bbb133af32bccf4cdc6ea20555",
+        "device": "CPU",
+        "inference": "Local llama.cpp subprocess; temporary loopback HTTP; no hosted API",
+        "prompt_format": "GGUF chat template / Jinja",
+        "usage": {
+          "completion_tokens": 142,
+          "prompt_tokens": 631,
+          "total_tokens": 773,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        "timings": {
+          "cache_n": 0,
+          "prompt_n": 631,
+          "prompt_ms": 8445.502,
+          "prompt_per_token_ms": 13.38431378763867,
+          "prompt_per_second": 74.71432722412474,
+          "predicted_n": 142,
+          "predicted_ms": 10696.946,
+          "predicted_per_token_ms": 75.86486524822695,
+          "predicted_per_second": 13.181332316719184
+        },
+        "finish_reason": "stop",
+        "generation_seconds": 26.793208995999976,
+        "runtime_returncode": 0
+      },
+      "execution": {
+        "success": false,
+        "stage": "evaluated",
+        "actions": [
+          {
+            "method": "move_to",
+            "args": [
+              [
+                0.42,
+                0.0,
+                0.24
+              ]
+            ],
+            "kwargs": {},
+            "time_s": 0.5000000000000003
+          },
+          {
+            "method": "gripper",
+            "args": [],
+            "kwargs": {
+              "closed": true
+            },
+            "time_s": 3.119999999999878
+          },
+          {
+            "method": "step",
+            "args": [
+              1.0
+            ],
+            "kwargs": {},
+            "time_s": 3.819999999999801
+          },
+          {
+            "method": "gripper",
+            "args": [],
+            "kwargs": {
+              "closed": false
+            },
+            "time_s": 4.819999999999691
+          },
+          {
+            "method": "move_to",
+            "args": [
+              [
+                0.42,
+                0.0,
+                0.01
+              ]
+            ],
+            "kwargs": {},
+            "time_s": 5.519999999999614
+          },
+          {
+            "method": "step",
+            "args": [
+              1.0
+            ],
+            "kwargs": {},
+            "time_s": 10.140000000000056
+          },
+          {
+            "method": "move_to",
+            "args": [
+              [
+                0.42,
+                0.0,
+                0.24
+              ]
+            ],
+            "kwargs": {},
+            "time_s": 11.14000000000039
+          },
+          {
+            "method": "gripper",
+            "args": [],
+            "kwargs": {
+              "closed": true
+            },
+            "time_s": 15.640000000001892
+          },
+          {
+            "method": "step",
+            "args": [
+              1.0
+            ],
+            "kwargs": {},
+            "time_s": 16.340000000001822
+          },
+          {
+            "method": "gripper",
+            "args": [],
+            "kwargs": {
+              "closed": false
+            },
+            "time_s": 17.340000000001268
+          },
+          {
+            "method": "move_to",
+            "args": [
+              [
+                0.42,
+                0.0,
+                0.45
+              ]
+            ],
+            "kwargs": {},
+            "time_s": 18.04000000000088
+          },
+          {
+            "method": "step",
+            "args": [
+              1.0
+            ],
+            "kwargs": {},
+            "time_s": 22.27999999999853
+          }
+        ],
+        "initial_positions": {
+          "red": [
+            0.4,
+            -0.11999999999990067,
+            0.019957398275961748
+          ],
+          "blue": [
+            0.4,
+            0.1199999999999015,
+            0.019957398275961748
+          ]
+        },
+        "stable_checks": 0,
+        "checks": 20,
+        "check_samples": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ],
+        "tool_clear": true,
+        "diagnostics": {
+          "xy_error_m": 0.23999999999980218,
+          "height_error_m": 0.04,
+          "shapes_ok": true,
+          "centered": false,
+          "height_ok": false,
+          "stationary": true,
+          "touching": false,
+          "supported": true,
+          "valid": false
+        },
+        "final_positions": {
+          "red": [
+            0.4,
+            -0.11999999999990067,
+            0.019957398275963014
+          ],
+          "blue": [
+            0.4,
+            0.1199999999999015,
+            0.019957398275963014
+          ]
+        },
+        "simulation_seconds": 26.279999999996313,
+        "wall_seconds": 4.58824977400036
+      },
+      "worker_returncode": 1
+    }
+  ],
+  "note": "Development pilot; not a held-out scientific evaluation"
+}

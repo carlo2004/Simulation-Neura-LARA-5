@@ -1,0 +1,110 @@
+{
+  "case": "red-on-blue",
+  "instruction": "Staple den roten W\u00fcrfel auf den blauen W\u00fcrfel.",
+  "source": "red",
+  "target": "blue",
+  "success": false,
+  "stage": "api_rejected",
+  "seed": 42,
+  "generation": {
+    "model_id": "Qwen/Qwen3.5-4B",
+    "original_revision": "851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a",
+    "total_parameters": 4659865088,
+    "model_sha256": "00fe7986ff5f6b463e62455821146049db6f9313603938a70800d1fb69ef11a4",
+    "quantization": "Q4_K_M",
+    "runtime": "llama.cpp",
+    "runtime_version": "b11951",
+    "thinking": true,
+    "temperature": 0.6,
+    "top_p": 0.95,
+    "top_k": 20,
+    "min_p": 0.0,
+    "presence_penalty": 0.0,
+    "repeat_penalty": 1.0,
+    "seed": 42,
+    "threads": 8,
+    "context_tokens": 4096,
+    "max_output_tokens": 2048,
+    "prompt_sha256": "6c2a9f2cc6012ef34aea860965ac8d041ff2c9bbb133af32bccf4cdc6ea20555",
+    "device": "CPU",
+    "inference": "Local llama.cpp subprocess; temporary loopback HTTP; no hosted API",
+    "prompt_format": "GGUF chat template / Jinja",
+    "usage": {
+      "completion_tokens": 682,
+      "prompt_tokens": 629,
+      "total_tokens": 1311,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    "timings": {
+      "cache_n": 0,
+      "prompt_n": 629,
+      "prompt_ms": 7787.273,
+      "prompt_per_token_ms": 12.380402225755168,
+      "prompt_per_second": 80.77281995892528,
+      "predicted_n": 682,
+      "predicted_ms": 51799.555,
+      "predicted_per_token_ms": 76.06395741556534,
+      "predicted_per_second": 13.146831087641583
+    },
+    "finish_reason": "stop",
+    "generation_seconds": 65.28184531499983,
+    "runtime_returncode": 0
+  },
+  "execution": {
+    "success": false,
+    "stage": "api_rejected",
+    "actions": [
+      {
+        "method": "position",
+        "args": [
+          "red"
+        ],
+        "kwargs": {},
+        "time_s": 0.5000000000000003,
+        "result": [
+          0.4,
+          -0.11999999999990067,
+          0.019957398275961748
+        ]
+      },
+      {
+        "method": "position",
+        "args": [
+          "blue"
+        ],
+        "kwargs": {},
+        "time_s": 0.5000000000000003,
+        "result": [
+          0.4,
+          0.1199999999999015,
+          0.019957398275961748
+        ]
+      },
+      {
+        "method": "gripper",
+        "args": [],
+        "kwargs": {
+          "closed": true
+        },
+        "time_s": 0.5000000000000003
+      }
+    ],
+    "initial_positions": {
+      "red": [
+        0.4,
+        -0.11999999999990067,
+        0.019957398275961748
+      ],
+      "blue": [
+        0.4,
+        0.1199999999999015,
+        0.019957398275961748
+      ]
+    },
+    "error": "Undefined variable: red",
+    "wall_seconds": 1.5069494599997597
+  },
+  "worker_returncode": 1
+}

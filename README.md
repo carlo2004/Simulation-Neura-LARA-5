@@ -1,4 +1,4 @@
-# Stack Lab — NEURA LARA 5, Version 2.4.1
+# Stack Lab — NEURA LARA 5, Version 2.5
 
 Ein Python-Teststand für euer Praktikum: den LARA 5 sichtbar bewegen, benannte Objekte
 platzieren und Würfel/Quader durch physisches Greifen aufeinander stapeln. Szene, Maße, Seed
@@ -6,6 +6,12 @@ und Geschwindigkeit lassen sich anpassen. Das Projekt läuft eigenständig mit
 MuJoCo; für den Betrieb ist keine RoboDK-Installation nötig.
 Die erste Einrichtung lädt die festgelegten Modellquellen, prüft ihre SHA-256-Werte
 und erzeugt die Geometrie lokal. Modelldefinition und Prüfsummen sind versioniert.
+
+**Neu: lokales Sprachmodell.** Qwen3.5-4B lässt sich herunterladen und direkt
+mit der Simulation testen: Sprachaufgabe → generierter Python-Code → unabhängige
+Physikprüfung. Installation, Befehlsbeschreibung und Grenzen stehen in
+[LOCAL_LLM.md](LOCAL_LLM.md). Die handgeschriebene Referenzstrategie bleibt eine
+separate Funktion; ein laufender Teststand ist noch kein erfolgreicher LLM-Test.
 
 **Modellstatus:** Die Geometrie, Kinematiktabelle und Gelenkgrenzen stammen aus
 dem öffentlich herunterladbaren RoboDK-Modell des LARA 5. Massenverteilung,

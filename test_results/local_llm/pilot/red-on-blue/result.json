@@ -1,0 +1,181 @@
+{
+  "case": "red-on-blue",
+  "instruction": "Staple den roten W\u00fcrfel auf den blauen W\u00fcrfel.",
+  "source": "red",
+  "target": "blue",
+  "success": false,
+  "stage": "evaluated",
+  "seed": 42,
+  "generation": {
+    "model_id": "Qwen/Qwen3.5-4B",
+    "original_revision": "851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a",
+    "total_parameters": 4659865088,
+    "model_sha256": "00fe7986ff5f6b463e62455821146049db6f9313603938a70800d1fb69ef11a4",
+    "quantization": "Q4_K_M",
+    "runtime": "llama.cpp",
+    "runtime_version": "b11951",
+    "thinking": false,
+    "temperature": 0.7,
+    "top_p": 0.8,
+    "top_k": 20,
+    "min_p": 0.0,
+    "presence_penalty": 1.5,
+    "repeat_penalty": 1.0,
+    "seed": 42,
+    "threads": 8,
+    "context_tokens": 4096,
+    "max_output_tokens": 768,
+    "prompt_sha256": "2a4f954ba01f4017674d3f822d4b9c82e53f8a6d142b6c2bff83a72226dd096b",
+    "device": "CPU",
+    "inference": "Local llama.cpp subprocess; temporary loopback HTTP; no hosted API",
+    "prompt_format": "GGUF chat template / Jinja",
+    "constrained_decoding": false,
+    "usage": {
+      "completion_tokens": 78,
+      "prompt_tokens": 644,
+      "total_tokens": 722,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    "timings": {
+      "cache_n": 0,
+      "prompt_n": 644,
+      "prompt_ms": 8483.154,
+      "prompt_per_token_ms": 13.172599378881989,
+      "prompt_per_second": 75.91516079986287,
+      "predicted_n": 78,
+      "predicted_ms": 5748.661,
+      "predicted_per_token_ms": 74.65793506493506,
+      "predicted_per_second": 13.394423501403196
+    },
+    "finish_reason": "stop",
+    "generation_seconds": 19.93796413600012,
+    "runtime_returncode": 0
+  },
+  "execution": {
+    "success": false,
+    "stage": "evaluated",
+    "actions": [
+      {
+        "method": "move_to",
+        "args": [
+          [
+            0.3,
+            -0.15,
+            0.24
+          ]
+        ],
+        "kwargs": {},
+        "time_s": 0.5000000000000003
+      },
+      {
+        "method": "gripper",
+        "args": [],
+        "kwargs": {
+          "closed": true
+        },
+        "time_s": 2.7999999999999132
+      },
+      {
+        "method": "step",
+        "args": [
+          1.0
+        ],
+        "kwargs": {},
+        "time_s": 3.499999999999836
+      },
+      {
+        "method": "move_to",
+        "args": [
+          [
+            0.3,
+            -0.15,
+            0.15
+          ]
+        ],
+        "kwargs": {},
+        "time_s": 4.499999999999726
+      },
+      {
+        "method": "gripper",
+        "args": [],
+        "kwargs": {
+          "closed": false
+        },
+        "time_s": 6.499999999999506
+      },
+      {
+        "method": "step",
+        "args": [
+          1.0
+        ],
+        "kwargs": {},
+        "time_s": 7.199999999999429
+      }
+    ],
+    "initial_positions": {
+      "red": [
+        0.4,
+        -0.11999999999990067,
+        0.019957398275961748
+      ],
+      "blue": [
+        0.4,
+        0.1199999999999015,
+        0.019957398275961748
+      ]
+    },
+    "stable_checks": 0,
+    "checks": 20,
+    "check_samples": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "tool_clear": true,
+    "diagnostics": {
+      "xy_error_m": 0.23999999999980218,
+      "height_error_m": 0.04,
+      "shapes_ok": true,
+      "centered": false,
+      "height_ok": false,
+      "stationary": true,
+      "touching": false,
+      "supported": true,
+      "valid": false
+    },
+    "final_positions": {
+      "red": [
+        0.4,
+        -0.11999999999990067,
+        0.019957398275963014
+      ],
+      "blue": [
+        0.4,
+        0.1199999999999015,
+        0.019957398275963014
+      ]
+    },
+    "simulation_seconds": 11.20000000000041,
+    "wall_seconds": 2.6448881470000742
+  },
+  "worker_returncode": 1
+}

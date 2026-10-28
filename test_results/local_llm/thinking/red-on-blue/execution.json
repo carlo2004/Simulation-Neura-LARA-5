@@ -1,0 +1,154 @@
+{
+  "success": false,
+  "stage": "evaluated",
+  "actions": [
+    {
+      "method": "position",
+      "args": [
+        "red"
+      ],
+      "kwargs": {},
+      "time_s": 0.5000000000000003,
+      "result": [
+        0.4,
+        -0.11999999999990067,
+        0.019957398275961748
+      ]
+    },
+    {
+      "method": "position",
+      "args": [
+        "blue"
+      ],
+      "kwargs": {},
+      "time_s": 0.5000000000000003,
+      "result": [
+        0.4,
+        0.1199999999999015,
+        0.019957398275961748
+      ]
+    },
+    {
+      "method": "move_to",
+      "args": [
+        [
+          0.4,
+          -0.11999999999990067,
+          0.24
+        ]
+      ],
+      "kwargs": {},
+      "time_s": 0.5000000000000003
+    },
+    {
+      "method": "gripper",
+      "args": [],
+      "kwargs": {
+        "closed": true
+      },
+      "time_s": 1.6000000000000012
+    },
+    {
+      "method": "move_to",
+      "args": [
+        [
+          0.4,
+          0.1199999999999015,
+          0.24
+        ]
+      ],
+      "kwargs": {},
+      "time_s": 2.2999999999999683
+    },
+    {
+      "method": "gripper",
+      "args": [],
+      "kwargs": {
+        "closed": false
+      },
+      "time_s": 7.09999999999944
+    },
+    {
+      "method": "step",
+      "args": [
+        1
+      ],
+      "kwargs": {},
+      "time_s": 7.799999999999363
+    },
+    {
+      "method": "move_to",
+      "args": [
+        [
+          0.5,
+          0,
+          0.4
+        ]
+      ],
+      "kwargs": {},
+      "time_s": 8.799999999999608
+    }
+  ],
+  "initial_positions": {
+    "red": [
+      0.4,
+      -0.11999999999990067,
+      0.019957398275961748
+    ],
+    "blue": [
+      0.4,
+      0.1199999999999015,
+      0.019957398275961748
+    ]
+  },
+  "stable_checks": 0,
+  "checks": 20,
+  "check_samples": [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+  ],
+  "tool_clear": true,
+  "diagnostics": {
+    "xy_error_m": 0.23999999999980218,
+    "height_error_m": 0.04,
+    "shapes_ok": true,
+    "centered": false,
+    "height_ok": false,
+    "stationary": true,
+    "touching": false,
+    "supported": true,
+    "valid": false
+  },
+  "final_positions": {
+    "red": [
+      0.4,
+      -0.11999999999990067,
+      0.019957398275963014
+    ],
+    "blue": [
+      0.4,
+      0.1199999999999015,
+      0.019957398275963014
+    ]
+  },
+  "simulation_seconds": 16.300000000001845,
+  "wall_seconds": 3.2692807449998327
+}

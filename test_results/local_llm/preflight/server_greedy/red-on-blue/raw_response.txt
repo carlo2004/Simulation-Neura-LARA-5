@@ -1,0 +1,1 @@
+{"code": "robot.move_to([0.42, 0.0, 0.24]); robot.gripper(closed=True); robot.step(1.0); robot.gripper(closed=False); robot.move_to([0.42, 0.0, 0.01]); robot.step(1.0); robot.move_to([0.42, 0.0, 0.24]); robot.gripper(closed=True); robot.step(1.0); robot.gripper(closed=False); robot.move_to([0.42, 0.0, 0.45]); robot.step(1.0)"}

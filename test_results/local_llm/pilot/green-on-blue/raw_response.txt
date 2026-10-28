@@ -1,0 +1,3 @@
+{
+  "code": "robot.gripper(closed=False)\nrobot.move_to([0.30, -0.15, 0.24])\nrobot.gripper(closed=True)\nrobot.step(0.5)\nrobot.move_to([0.30, -0.15, 0.02])\nrobot.gripper(closed=False)\nrobot.step(0.5)"
+}

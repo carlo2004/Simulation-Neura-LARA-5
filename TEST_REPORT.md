@@ -1,3 +1,53 @@
+# Ergänzung — Version 2.5, lokales Sprachmodell
+
+Ausgeführt am 28.10.2026 unter Linux x86_64, Python 3.12.14 und MuJoCo 3.3.7.
+Qwen/Qwen3.5-4B (Original: 4.659.865.088 Gesamtparameter) wurde als Q4_K_M
+vollständig heruntergeladen und SHA-256-geprüft. llama.cpp b11951 läuft lokal
+auf der CPU; acht Inferenzthreads, kein Cloud-Modell und keine GPU.
+
+- **47/47 Softwaretests bestanden.** Darunter sind die 35 bisherigen Tests,
+  die Begrenzung der generierten Programme und unabhängige Physikkontrollen.
+- Das bekannte Kontrollprogramm besteht durch denselben AST-Interpreter und
+  Physikauswerter mit **20/20**, ohne `stack()` aufzurufen. Ein No-op scheitert
+  erwartungsgemäß mit 0/20. Das Kontrollprogramm war nicht Teil des Modellprompts.
+- Der finale Non-Thinking-Entwicklungspilot erzeugt und führt drei Programme
+  tatsächlich aus: **0/3 erfolgreiche Stapel**, jeweils 0/20 Stabilitätsproben.
+  Gültiges Python und ein laufender Arm allein werden nicht als Erfolg gewertet.
+- Die Programme verwenden feste Koordinaten und führen die notwendige
+  Abfrage-/Greif-/Ablagefolge nicht korrekt aus. Die unabhängige Prüfung erkennt
+  fehlende Zentrierung, Höhe und Kontakt korrekt als Fehlschlag.
+- Generierung inklusive Modellstart: rund **20–22 Sekunden pro Fall**;
+  reine Ausgabe ungefähr **12–13 Tokens/s** auf dieser CPU.
+- Modell, Runtime, API-Prompt, Szenen, Seed, Sampling, Ausgabetokens und Rohantworten
+  sind dokumentiert. Das finale Instruct-Profil verwendet Temperatur 0,7/top-p 0,8,
+  768 Ausgabetokens, 4096 Kontexttokens und keine zusätzliche Decoding-Grammatik.
+- Ein zusätzlicher Thinking-Versuch mit 2048 Tokens scheitert ebenfalls: **0/1**,
+  0/20 Stabilitätsproben. Das Modell fragt Positionen ab, schließt den Greifer
+  aber auf 24 cm Höhe und greift den Würfel nicht. Generierung inklusive Start:
+  75,3 Sekunden / 842 Ausgabetokens einschließlich Thinking. Separater Nachweis:
+  `test_results/local_llm/thinking/summary.json`.
+- Vorversuche mit rohem ChatML, dem hier abstürzenden nativen Completion-CLI,
+  anderem Sampling und JSON-Grammatik sind getrennt archiviert. Im finalen Pfad
+  startet und beendet Python selbst einen nur an Loopback gebundenen llama-server.
+
+**Ergebnis:** Download, lokale Inferenz, begrenzte Programmausführung und
+physikalische Bewertung funktionieren. Die geprüfte Modellkonfiguration löst
+unsere Stapelaufgaben bislang nicht. Das ist ein erster Ausgangsbefund für den
+späteren Finetuning-Vergleich, kein Nachweis allgemeiner Untauglichkeit eines
+4B-/7B-Modells. Quantisierung, kurzer Kontext, begrenzte Ausgabelänge und
+Non-Thinking sind eigene Versuchsbedingungen; keine Gleichsetzung mit den
+vollständigen Benchmark-Ergebnissen des Herstellers.
+
+Anleitung: `LOCAL_LLM.md`; tatsächlich übergebene Befehlsbeschreibung: `LLM_API.md`.
+Messdaten und Entwicklungsprotokoll: `test_results/local_llm/`. Gewichte sind
+absichtlich nicht auf GitHub; `llm_test.py setup` lädt die festgelegte Datei.
+Der native Desktopviewer wurde hier nicht manuell bedient. Python 3.13 und
+Windows werden zusätzlich über GitHub Actions geprüft; das ist kein lokaler
+Modell-Inferenztest auf Windows. Modell-/Dynamikgrenzen aus dem bisherigen
+Bericht gelten unverändert.
+
+---
+
 # Ergänzung — Version 2.4.1, Python-Umgebung und Git
 
 Ausgeführt am 27.10.2026. Frisch eingerichtete lokale Umgebung mit Python 3.13.16

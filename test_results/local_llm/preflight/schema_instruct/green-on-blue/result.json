@@ -1,0 +1,262 @@
+{
+  "case": "green-on-blue",
+  "instruction": "Staple den gr\u00fcnen W\u00fcrfel auf den blauen W\u00fcrfel.",
+  "source": "green",
+  "target": "blue",
+  "success": false,
+  "stage": "evaluated",
+  "seed": 42,
+  "generation": {
+    "model_id": "Qwen/Qwen3.5-4B",
+    "original_revision": "851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a",
+    "total_parameters": 4659865088,
+    "model_sha256": "00fe7986ff5f6b463e62455821146049db6f9313603938a70800d1fb69ef11a4",
+    "quantization": "Q4_K_M",
+    "runtime": "llama.cpp",
+    "runtime_version": "b11951",
+    "thinking": false,
+    "temperature": 0.7,
+    "top_p": 0.8,
+    "top_k": 20,
+    "min_p": 0.0,
+    "presence_penalty": 1.5,
+    "repeat_penalty": 1.0,
+    "seed": 42,
+    "threads": 8,
+    "context_tokens": 4096,
+    "max_output_tokens": 768,
+    "prompt_sha256": "da56a7eacac95fe923ff7a53064844bc439bb24790a84fa8f0f36569ea5230e9",
+    "device": "CPU",
+    "inference": "Local llama.cpp subprocess; temporary loopback HTTP; no hosted API",
+    "prompt_format": "GGUF chat template / Jinja",
+    "usage": {
+      "completion_tokens": 148,
+      "prompt_tokens": 667,
+      "total_tokens": 815,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    "timings": {
+      "cache_n": 0,
+      "prompt_n": 667,
+      "prompt_ms": 7545.05,
+      "prompt_per_token_ms": 11.31191904047976,
+      "prompt_per_second": 88.40233000444,
+      "predicted_n": 148,
+      "predicted_ms": 11397.475,
+      "predicted_per_token_ms": 77.53384353741497,
+      "predicted_per_second": 12.897593545938902
+    },
+    "finish_reason": "stop",
+    "generation_seconds": 24.135047267000118,
+    "runtime_returncode": 0
+  },
+  "execution": {
+    "success": false,
+    "stage": "evaluated",
+    "actions": [
+      {
+        "method": "move_to",
+        "args": [
+          [
+            0.3,
+            -0.1,
+            0.24
+          ]
+        ],
+        "kwargs": {},
+        "time_s": 0.5000000000000003
+      },
+      {
+        "method": "gripper",
+        "args": [],
+        "kwargs": {
+          "closed": true
+        },
+        "time_s": 2.7599999999999176
+      },
+      {
+        "method": "step",
+        "args": [
+          1
+        ],
+        "kwargs": {},
+        "time_s": 3.4599999999998405
+      },
+      {
+        "method": "gripper",
+        "args": [],
+        "kwargs": {
+          "closed": false
+        },
+        "time_s": 4.459999999999731
+      },
+      {
+        "method": "move_to",
+        "args": [
+          [
+            0.5,
+            0.1,
+            0.24
+          ]
+        ],
+        "kwargs": {},
+        "time_s": 5.159999999999654
+      },
+      {
+        "method": "gripper",
+        "args": [],
+        "kwargs": {
+          "closed": true
+        },
+        "time_s": 10.78000000000027
+      },
+      {
+        "method": "step",
+        "args": [
+          1
+        ],
+        "kwargs": {},
+        "time_s": 11.480000000000503
+      },
+      {
+        "method": "move_to",
+        "args": [
+          [
+            0.3,
+            -0.1,
+            0.24
+          ]
+        ],
+        "kwargs": {},
+        "time_s": 12.480000000000837
+      },
+      {
+        "method": "gripper",
+        "args": [],
+        "kwargs": {
+          "closed": true
+        },
+        "time_s": 18.100000000000847
+      },
+      {
+        "method": "step",
+        "args": [
+          1
+        ],
+        "kwargs": {},
+        "time_s": 18.80000000000046
+      },
+      {
+        "method": "gripper",
+        "args": [],
+        "kwargs": {
+          "closed": false
+        },
+        "time_s": 19.799999999999905
+      },
+      {
+        "method": "move_to",
+        "args": [
+          [
+            0.5,
+            0.1,
+            0.24
+          ]
+        ],
+        "kwargs": {},
+        "time_s": 20.499999999999517
+      },
+      {
+        "method": "gripper",
+        "args": [],
+        "kwargs": {
+          "closed": true
+        },
+        "time_s": 26.119999999996402
+      },
+      {
+        "method": "step",
+        "args": [
+          1
+        ],
+        "kwargs": {},
+        "time_s": 26.819999999996014
+      }
+    ],
+    "initial_positions": {
+      "red": [
+        0.4041828039537365,
+        -0.13424967734322055,
+        0.019957398275961748
+      ],
+      "blue": [
+        0.39325087955107363,
+        0.11169632214436619,
+        0.019957398275961748
+      ],
+      "green": [
+        0.5070941364249204,
+        0.005300984622687337,
+        0.019957398275961748
+      ]
+    },
+    "stable_checks": 0,
+    "checks": 20,
+    "check_samples": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "tool_clear": true,
+    "diagnostics": {
+      "xy_error_m": 0.15582122763602083,
+      "height_error_m": 0.04,
+      "shapes_ok": true,
+      "centered": false,
+      "height_ok": false,
+      "stationary": true,
+      "touching": false,
+      "supported": true,
+      "valid": false
+    },
+    "final_positions": {
+      "red": [
+        0.4041828039537365,
+        -0.13424967734322055,
+        0.019957398275963014
+      ],
+      "blue": [
+        0.39325087955107363,
+        0.11169632214436619,
+        0.019957398275963014
+      ],
+      "green": [
+        0.5070941364249204,
+        0.005300984622687337,
+        0.019957398275963014
+      ]
+    },
+    "simulation_seconds": 30.819999999993797,
+    "wall_seconds": 5.664728487000048
+  },
+  "worker_returncode": 1
+}

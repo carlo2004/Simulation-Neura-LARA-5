@@ -1,0 +1,158 @@
+{
+  "model": {
+    "model_id": "Qwen/Qwen3.5-4B",
+    "original_revision": "851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a",
+    "total_parameters": 4659865088,
+    "max_total_parameters": 7000000000,
+    "quantization": "Q4_K_M",
+    "gguf_repository": "unsloth/Qwen3.5-4B-GGUF",
+    "gguf_revision": "e87f176479d0855a907a41277aca2f8ee7a09523",
+    "model_filename": "Qwen3.5-4B-Q4_K_M.gguf",
+    "model_bytes": 2740937888,
+    "model_sha256": "00fe7986ff5f6b463e62455821146049db6f9313603938a70800d1fb69ef11a4",
+    "model_url": "https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/e87f176479d0855a907a41277aca2f8ee7a09523/Qwen3.5-4B-Q4_K_M.gguf?download=true",
+    "runtime": "llama.cpp",
+    "runtime_version": "b11951",
+    "runtime_assets": {
+      "linux-x86_64": {
+        "filename": "llama-b11951-bin-ubuntu-x64.tar.gz",
+        "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11951/llama-b11951-bin-ubuntu-x64.tar.gz",
+        "sha256": "2897031960458f9422cd7c7bd37bdc7098da41893cf735ecce4b951ef5e2c658",
+        "bytes": 22646994
+      },
+      "windows-x86_64": {
+        "filename": "llama-b11951-bin-win-cpu-x64.zip",
+        "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11951/llama-b11951-bin-win-cpu-x64.zip",
+        "sha256": "ac5edf9c936132fb16c9ff863db8b627c2a67621ff2e796ffd184585aea567ea",
+        "bytes": 24378362
+      },
+      "darwin-arm64": {
+        "filename": "llama-b11951-bin-macos-arm64.tar.gz",
+        "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11951/llama-b11951-bin-macos-arm64.tar.gz",
+        "sha256": "e75da9f2e4696d2bf54f53b75c3cf5a2b6984bfc846904db1349834f867fa447",
+        "bytes": 16440283
+      },
+      "darwin-x86_64": {
+        "filename": "llama-b11951-bin-macos-x64.tar.gz",
+        "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11951/llama-b11951-bin-macos-x64.tar.gz",
+        "sha256": "bd4555e5ff1e4393b3326859688b663dc788fe5e070186de0b2b0b1aadc715bf",
+        "bytes": 12177301
+      }
+    }
+  },
+  "passed": 0,
+  "total": 1,
+  "results": [
+    {
+      "case": "red-on-blue",
+      "instruction": "Staple den roten W\u00fcrfel auf den blauen W\u00fcrfel.",
+      "source": "red",
+      "target": "blue",
+      "success": false,
+      "stage": "api_rejected",
+      "seed": 42,
+      "generation": {
+        "model_id": "Qwen/Qwen3.5-4B",
+        "original_revision": "851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a",
+        "total_parameters": 4659865088,
+        "model_sha256": "00fe7986ff5f6b463e62455821146049db6f9313603938a70800d1fb69ef11a4",
+        "quantization": "Q4_K_M",
+        "runtime": "llama.cpp",
+        "runtime_version": "b11951",
+        "thinking": true,
+        "temperature": 0.6,
+        "top_p": 0.95,
+        "top_k": 20,
+        "min_p": 0.0,
+        "presence_penalty": 0.0,
+        "repeat_penalty": 1.0,
+        "seed": 42,
+        "threads": 8,
+        "context_tokens": 4096,
+        "max_output_tokens": 2048,
+        "prompt_sha256": "6c2a9f2cc6012ef34aea860965ac8d041ff2c9bbb133af32bccf4cdc6ea20555",
+        "device": "CPU",
+        "inference": "Local llama.cpp subprocess; temporary loopback HTTP; no hosted API",
+        "prompt_format": "GGUF chat template / Jinja",
+        "usage": {
+          "completion_tokens": 682,
+          "prompt_tokens": 629,
+          "total_tokens": 1311,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        "timings": {
+          "cache_n": 0,
+          "prompt_n": 629,
+          "prompt_ms": 7787.273,
+          "prompt_per_token_ms": 12.380402225755168,
+          "prompt_per_second": 80.77281995892528,
+          "predicted_n": 682,
+          "predicted_ms": 51799.555,
+          "predicted_per_token_ms": 76.06395741556534,
+          "predicted_per_second": 13.146831087641583
+        },
+        "finish_reason": "stop",
+        "generation_seconds": 65.28184531499983,
+        "runtime_returncode": 0
+      },
+      "execution": {
+        "success": false,
+        "stage": "api_rejected",
+        "actions": [
+          {
+            "method": "position",
+            "args": [
+              "red"
+            ],
+            "kwargs": {},
+            "time_s": 0.5000000000000003,
+            "result": [
+              0.4,
+              -0.11999999999990067,
+              0.019957398275961748
+            ]
+          },
+          {
+            "method": "position",
+            "args": [
+              "blue"
+            ],
+            "kwargs": {},
+            "time_s": 0.5000000000000003,
+            "result": [
+              0.4,
+              0.1199999999999015,
+              0.019957398275961748
+            ]
+          },
+          {
+            "method": "gripper",
+            "args": [],
+            "kwargs": {
+              "closed": true
+            },
+            "time_s": 0.5000000000000003
+          }
+        ],
+        "initial_positions": {
+          "red": [
+            0.4,
+            -0.11999999999990067,
+            0.019957398275961748
+          ],
+          "blue": [
+            0.4,
+            0.1199999999999015,
+            0.019957398275961748
+          ]
+        },
+        "error": "Undefined variable: red",
+        "wall_seconds": 1.5069494599997597
+      },
+      "worker_returncode": 1
+    }
+  ],
+  "note": "Development pilot; not a held-out scientific evaluation"
+}
