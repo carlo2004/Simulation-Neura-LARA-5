@@ -4,12 +4,14 @@ import json
 import os
 from pathlib import Path
 import platform
+import shutil
 import tarfile
 import urllib.request
 import zipfile
 
 ROOT = Path(__file__).resolve().parent
 CACHE_ROOT = ROOT/'.local_llm'
+DOWNLOAD_RESERVE_BYTES = 512*1024*1024
 
 
 def lock(model=None):
@@ -42,6 +44,14 @@ def sha256(path):
     return result.hexdigest()
 
 
+def require_download_space(path, remaining_bytes):
+    free = shutil.disk_usage(Path(path).parent).free
+    needed = max(0, remaining_bytes)+DOWNLOAD_RESERVE_BYTES
+    if free < needed:
+        raise OSError(f'Not enough free disk space for {Path(path).name}: need {needed/1e9:.2f} GB '
+                      f'including reserve, available {free/1e9:.2f} GB. Free storage or choose another model.')
+
+
 def download(url, path, expected_sha, expected_bytes):
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -58,7 +68,8 @@ def download(url, path, expected_sha, expected_bytes):
         return path
     if offset > expected_bytes:
         raise ValueError('Partial file exceeds the expected size: '+str(partial))
-    headers = {'User-Agent': 'StackLab-local-LLM/2.5'}
+    require_download_space(path, expected_bytes-offset)
+    headers = {'User-Agent': 'StackLab-local-LLM/2.6.1'}
     if offset:
         headers['Range'] = f'bytes={offset}-'
     print('Download: '+path.name, flush=True)
@@ -68,6 +79,7 @@ def download(url, path, expected_sha, expected_bytes):
         last = done
         with partial.open('ab' if append else 'wb') as stream:
             for block in iter(lambda: response.read(8*1024*1024), b''):
+                require_download_space(path, len(block))
                 stream.write(block)
                 done += len(block)
                 if done > expected_bytes:

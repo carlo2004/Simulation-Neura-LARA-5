@@ -228,6 +228,36 @@ class FeedbackTests(unittest.TestCase):
 
 
 class StreamTests(unittest.TestCase):
+    def test_insufficient_storage_stops_before_network_or_partial_file(self):
+        import hashlib
+        import llm_runtime
+        from types import SimpleNamespace
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp)/'model.gguf'
+            with patch.object(llm_runtime.shutil, 'disk_usage', return_value=SimpleNamespace(free=1)), \
+                 patch('urllib.request.urlopen', side_effect=AssertionError('Network must not be used')):
+                with self.assertRaisesRegex(OSError, 'Not enough free disk space'):
+                    download('unused', path, hashlib.sha256(b'fixture').hexdigest(), 7)
+            self.assertFalse(path.exists())
+            self.assertFalse(path.with_name(path.name+'.part').exists())
+
+    def test_storage_drop_during_download_preserves_the_reserve(self):
+        import hashlib
+        import llm_runtime
+        from types import SimpleNamespace
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp)/'model.gguf'
+            response = io.BytesIO(b'fixture')
+            response.status = 200
+            reserve = llm_runtime.DOWNLOAD_RESERVE_BYTES
+            capacity = [SimpleNamespace(free=reserve+7), SimpleNamespace(free=reserve-1)]
+            with patch.object(llm_runtime.shutil, 'disk_usage', side_effect=capacity), \
+                 patch('urllib.request.urlopen', return_value=response):
+                with self.assertRaisesRegex(OSError, 'Not enough free disk space'):
+                    download('unused', path, hashlib.sha256(b'fixture').hexdigest(), 7)
+            self.assertFalse(path.exists())
+            self.assertEqual(path.with_name(path.name+'.part').stat().st_size, 0)
+
     def test_setup_keeps_the_model_alias_after_resolving_weight_path(self):
         import llm_runtime
         with tempfile.TemporaryDirectory() as temp, redirect_stdout(io.StringIO()):

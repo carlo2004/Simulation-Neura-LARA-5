@@ -1,3 +1,16 @@
+<!-- Installer-only patch; model experiments below retain their original configuration. -->
+# Ergänzung 2.6.1 — Speicherprüfung für Modelldownloads
+
+Der Downloader prüft vor neuen Downloads den Platz für die fehlenden Bytes plus
+512 MiB Reserve. Er prüft die Reserve auch während des Schreibens, um auf weiteren
+Speicherverbrauch reagieren zu können. Ein abgebrochener Download wird nicht als
+fertiges Modell freigegeben; Größen- und SHA-256-Prüfungen bleiben bestehen.
+Zwei zusätzliche Softwaretests prüfen Ablehnung vor dem Netzwerkzugriff und
+Abbruch bei fallendem freien Speicher. Die Modell-API und bisherigen Messungen
+werden durch diese Installationsänderung nicht verändert.
+
+---
+
 # Ergänzung — Version 2.6: 8B-/9B-Modelle und Live-Feedback
 
 Ausgeführt am 28.10.2026 unter Linux x86_64/Python 3.12.14, MuJoCo 3.3.7,

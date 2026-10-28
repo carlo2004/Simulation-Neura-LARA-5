@@ -86,7 +86,10 @@ python llm_test.py setup --all
 
 `python` meint in diesen Beispielen immer den `.venv`-Interpreter. `--model` akzeptiert
 auch die oben genannten vollständigen Hugging-Face-IDs. Downloads sind fortsetzbar;
-Größe und SHA-256 werden vor Verwendung des fertigen Downloads geprüft. Nach dem
+Größe und SHA-256 werden vor Verwendung des fertigen Downloads geprüft.
+Der Downloader prüft vor dem Start den Platz für die noch fehlenden Bytes und hält
+während des Transfers 512 MiB Reserve frei. Bei Platzmangel stoppt er mit einer
+klaren Fehlermeldung; bereits installierte Modelle werden nicht automatisch gelöscht. Nach dem
 Setup ist die Inferenz offline nutzbar. Gewichte und Runtime bleiben außerhalb von Git.
 
 ## 3. Live mit dem Roboter sprechen
