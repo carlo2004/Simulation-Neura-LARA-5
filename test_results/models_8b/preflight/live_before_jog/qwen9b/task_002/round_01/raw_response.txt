@@ -1,0 +1,1 @@
+{"code": "robot.move_to([0.4, -0.17, 0.26])", "done": false, "message": "Moving TCP 5cm left (to x=0.4) while maintaining transport height."}

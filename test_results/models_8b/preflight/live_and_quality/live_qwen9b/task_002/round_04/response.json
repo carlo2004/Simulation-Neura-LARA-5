@@ -1,0 +1,31 @@
+{
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "message": {
+        "role": "assistant",
+        "content": "{\"code\": \"robot.move_to([0.35, -0.12, 0.26])\\nrobot.step(0.5)\", \"done\": false, \"message\": \"Moving the grasped red cube 5cm left (to x=0.35) while holding it.\"}",
+        "reasoning_content": ""
+      }
+    }
+  ],
+  "usage": {
+    "completion_tokens": 68,
+    "prompt_tokens": 2260,
+    "total_tokens": 2328,
+    "prompt_tokens_details": {
+      "cached_tokens": 1102
+    }
+  },
+  "timings": {
+    "cache_n": 1102,
+    "prompt_n": 1158,
+    "prompt_ms": 22385.534,
+    "prompt_per_token_ms": 19.331203799654578,
+    "prompt_per_second": 51.72983588419199,
+    "predicted_n": 68,
+    "predicted_ms": 8008.929,
+    "predicted_per_token_ms": 119.53625373134328,
+    "predicted_per_second": 8.36566287452417
+  }
+}

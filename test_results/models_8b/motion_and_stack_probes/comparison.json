@@ -1,0 +1,42 @@
+[
+  {
+    "model": "nemotron8b",
+    "case": "move-right",
+    "round_budget": 2,
+    "thinking": false,
+    "exitcode": 0,
+    "passed": 1,
+    "total": 1,
+    "seconds": 50.76859776099991
+  },
+  {
+    "model": "qwen9b",
+    "case": "move-right",
+    "round_budget": 2,
+    "thinking": false,
+    "exitcode": 0,
+    "passed": 1,
+    "total": 1,
+    "seconds": 40.32212403900121
+  },
+  {
+    "model": "ministral8b",
+    "case": "move-right",
+    "round_budget": 2,
+    "thinking": true,
+    "exitcode": 0,
+    "passed": 1,
+    "total": 1,
+    "seconds": 142.77409747800084
+  },
+  {
+    "model": "nemotron8b",
+    "case": "red-on-blue",
+    "round_budget": 4,
+    "thinking": false,
+    "exitcode": 1,
+    "passed": 0,
+    "total": 1,
+    "seconds": 116.76027785800034
+  }
+]

@@ -1,0 +1,31 @@
+{
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "message": {
+        "role": "assistant",
+        "content": "{\"code\": \"robot.move_to([0.4, 0.12, 0.24])\\nrobot.gripper(False)\", \"done\": false, \"message\": \"Move above blue cube, release red cube\"}",
+        "reasoning_content": ""
+      }
+    }
+  ],
+  "usage": {
+    "completion_tokens": 53,
+    "prompt_tokens": 1764,
+    "total_tokens": 1817,
+    "prompt_tokens_details": {
+      "cached_tokens": 1124
+    }
+  },
+  "timings": {
+    "cache_n": 1124,
+    "prompt_n": 640,
+    "prompt_ms": 8375.828,
+    "prompt_per_token_ms": 13.087231249999999,
+    "prompt_per_second": 76.4103560865863,
+    "predicted_n": 53,
+    "predicted_ms": 4452.655,
+    "predicted_per_token_ms": 85.62798076923076,
+    "predicted_per_second": 11.678425568565272
+  }
+}

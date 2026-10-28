@@ -1,0 +1,137 @@
+{
+  "round": 2,
+  "stage": "evaluated",
+  "actions": [
+    {
+      "method": "move_to",
+      "args": [
+        [
+          0.45,
+          -0.12,
+          0.26
+        ]
+      ],
+      "kwargs": {},
+      "time_s": 0.7000000000000005,
+      "status": "ok"
+    }
+  ],
+  "generation": {
+    "model_id": "nvidia/NVIDIA-Nemotron-3.5-Bolt-E4B-4GB",
+    "original_revision": "1db54d5b12533ff1bcaa8e42cf4c667988a1f1be",
+    "total_parameters": 7996156490,
+    "model_sha256": "c8af2b8aea10a690a1d9491db744a9446660173cb38fc489612b556615a69612",
+    "quantization": "Q4_K_M",
+    "runtime": "llama.cpp",
+    "runtime_version": "b11951",
+    "training_model_id": "nvidia/NVIDIA-Nemotron-3.5-Bolt-E4B-BF16",
+    "training_revision": "49843eed8db1f1c616c47af75cfd36e07aec0667",
+    "model_key": "nemotron8b",
+    "thinking": false,
+    "temperature": 1.0,
+    "top_p": 0.95,
+    "top_k": 0,
+    "min_p": 0.0,
+    "presence_penalty": 0.0,
+    "repeat_penalty": 1.0,
+    "seed": 43,
+    "threads": 8,
+    "context_tokens": 8192,
+    "max_output_tokens": 2048,
+    "prompt_sha256": "fc7f8dd218a10231180809fa1668ef718d2aa5998e50e6400a77126254c13afc",
+    "device": "CPU",
+    "inference": "Local subprocess; temporary loopback HTTP; no hosted API",
+    "prompt_format": "GGUF native chat template / Jinja",
+    "constrained_decoding": false,
+    "reasoning_budget_tokens": -1,
+    "model_load_seconds": 0.0,
+    "finish_reason": "stop",
+    "usage": {
+      "completion_tokens": 50,
+      "prompt_tokens": 1341,
+      "total_tokens": 1391,
+      "prompt_tokens_details": {
+        "cached_tokens": 1025
+      }
+    },
+    "timings": {
+      "cache_n": 1025,
+      "prompt_n": 316,
+      "prompt_ms": 4178.226,
+      "prompt_per_token_ms": 13.222234177215189,
+      "prompt_per_second": 75.63018371911907,
+      "predicted_n": 50,
+      "predicted_ms": 4955.765,
+      "predicted_per_token_ms": 101.1380612244898,
+      "predicted_per_second": 9.887474486784583
+    },
+    "generation_seconds": 9.148425461000443
+  },
+  "feedback": {
+    "error": null,
+    "observation": {
+      "tcp_m": [
+        0.4499974300210512,
+        -0.12000003939231327,
+        0.2599981703580257
+      ],
+      "gripper_command": "open",
+      "finger_contact_objects": [],
+      "simulation_time_s": 2.139999999999986,
+      "objects": [
+        {
+          "name": "red",
+          "shape": "cube",
+          "size_m": [
+            0.04,
+            0.04,
+            0.04
+          ],
+          "centre_m": [
+            0.4,
+            -0.11999999999990067,
+            0.019957398275963014
+          ]
+        },
+        {
+          "name": "blue",
+          "shape": "cube",
+          "size_m": [
+            0.04,
+            0.04,
+            0.04
+          ],
+          "centre_m": [
+            0.4,
+            0.1199999999999015,
+            0.019957398275963014
+          ]
+        }
+      ]
+    },
+    "evaluation": {
+      "success": null,
+      "goal": null,
+      "stack_checks": []
+    },
+    "actions": [
+      {
+        "method": "move_to",
+        "args": [
+          [
+            0.45,
+            -0.12,
+            0.26
+          ]
+        ],
+        "kwargs": {},
+        "time_s": 0.7000000000000005,
+        "status": "ok"
+      }
+    ],
+    "local_variables_reset": true,
+    "remaining_blocks": 2,
+    "model_declared_done": false
+  },
+  "model_declared_done": false
+}

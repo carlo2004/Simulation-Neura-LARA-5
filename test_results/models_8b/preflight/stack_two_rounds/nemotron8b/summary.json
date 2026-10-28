@@ -1,0 +1,641 @@
+{
+  "model": {
+    "format_version": 2,
+    "max_total_parameters": 10000000000,
+    "runtime": "llama.cpp",
+    "runtime_version": "b11951",
+    "runtime_assets": {
+      "linux-x86_64": {
+        "filename": "llama-b11951-bin-ubuntu-x64.tar.gz",
+        "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11951/llama-b11951-bin-ubuntu-x64.tar.gz",
+        "sha256": "2897031960458f9422cd7c7bd37bdc7098da41893cf735ecce4b951ef5e2c658",
+        "bytes": 22646994
+      },
+      "windows-x86_64": {
+        "filename": "llama-b11951-bin-win-cpu-x64.zip",
+        "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11951/llama-b11951-bin-win-cpu-x64.zip",
+        "sha256": "ac5edf9c936132fb16c9ff863db8b627c2a67621ff2e796ffd184585aea567ea",
+        "bytes": 24378362
+      },
+      "darwin-arm64": {
+        "filename": "llama-b11951-bin-macos-arm64.tar.gz",
+        "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11951/llama-b11951-bin-macos-arm64.tar.gz",
+        "sha256": "e75da9f2e4696d2bf54f53b75c3cf5a2b6984bfc846904db1349834f867fa447",
+        "bytes": 16440283
+      },
+      "darwin-x86_64": {
+        "filename": "llama-b11951-bin-macos-x64.tar.gz",
+        "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11951/llama-b11951-bin-macos-x64.tar.gz",
+        "sha256": "bd4555e5ff1e4393b3326859688b663dc788fe5e070186de0b2b0b1aadc715bf",
+        "bytes": 12177301
+      }
+    },
+    "model_id": "nvidia/NVIDIA-Nemotron-3.5-Bolt-E4B-4GB",
+    "original_revision": "1db54d5b12533ff1bcaa8e42cf4c667988a1f1be",
+    "training_model_id": "nvidia/NVIDIA-Nemotron-3.5-Bolt-E4B-BF16",
+    "training_revision": "49843eed8db1f1c616c47af75cfd36e07aec0667",
+    "total_parameters": 7996156490,
+    "quantization": "Q4_K_M",
+    "gguf_repository": "nvidia/NVIDIA-Nemotron-3.5-Bolt-E4B-4GB",
+    "gguf_revision": "1db54d5b12533ff1bcaa8e42cf4c667988a1f1be",
+    "model_filename": "Nemotron-3.5-Bolt-E4B-Q4_K_M.gguf",
+    "model_bytes": 6180446208,
+    "model_sha256": "c8af2b8aea10a690a1d9491db744a9446660173cb38fc489612b556615a69612",
+    "model_url": "https://huggingface.co/nvidia/NVIDIA-Nemotron-3.5-Bolt-E4B-4GB/resolve/1db54d5b12533ff1bcaa8e42cf4c667988a1f1be/Nemotron-3.5-Bolt-E4B-Q4_K_M.gguf?download=true",
+    "license": "OpenMDW-1.1",
+    "default_thinking": false,
+    "supports_thinking_toggle": true,
+    "context_tokens": 8192,
+    "profiles": {
+      "thinking": {
+        "temperature": 1.0,
+        "top_p": 0.95,
+        "top_k": 0,
+        "min_p": 0.0,
+        "presence_penalty": 0.0,
+        "repeat_penalty": 1.0
+      },
+      "instruct": {
+        "temperature": 1.0,
+        "top_p": 0.95,
+        "top_k": 0,
+        "min_p": 0.0,
+        "presence_penalty": 0.0,
+        "repeat_penalty": 1.0
+      }
+    },
+    "chat_template_kwargs": {
+      "conversational_mode": false
+    },
+    "preserve_reasoning": false,
+    "thinking_budget_tokens": 768,
+    "model_key": "nemotron8b"
+  },
+  "passed": 0,
+  "total": 1,
+  "results": [
+    {
+      "case": "red-on-blue",
+      "instruction": "Staple den roten W\u00fcrfel auf den blauen W\u00fcrfel.",
+      "source": "red",
+      "target": "blue",
+      "success": false,
+      "stage": "feedback_evaluated",
+      "seed": 42,
+      "execution": {
+        "success": false,
+        "stage": "feedback_evaluated",
+        "actions": [],
+        "instruction": "Staple den roten W\u00fcrfel auf den blauen W\u00fcrfel.",
+        "goal": {
+          "type": "stack",
+          "source": "red",
+          "target": "blue"
+        },
+        "status": "budget_exhausted",
+        "mode": "closed_loop_feedback",
+        "max_rounds": 2,
+        "model": {
+          "format_version": 2,
+          "max_total_parameters": 10000000000,
+          "runtime": "llama.cpp",
+          "runtime_version": "b11951",
+          "runtime_assets": {
+            "linux-x86_64": {
+              "filename": "llama-b11951-bin-ubuntu-x64.tar.gz",
+              "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11951/llama-b11951-bin-ubuntu-x64.tar.gz",
+              "sha256": "2897031960458f9422cd7c7bd37bdc7098da41893cf735ecce4b951ef5e2c658",
+              "bytes": 22646994
+            },
+            "windows-x86_64": {
+              "filename": "llama-b11951-bin-win-cpu-x64.zip",
+              "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11951/llama-b11951-bin-win-cpu-x64.zip",
+              "sha256": "ac5edf9c936132fb16c9ff863db8b627c2a67621ff2e796ffd184585aea567ea",
+              "bytes": 24378362
+            },
+            "darwin-arm64": {
+              "filename": "llama-b11951-bin-macos-arm64.tar.gz",
+              "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11951/llama-b11951-bin-macos-arm64.tar.gz",
+              "sha256": "e75da9f2e4696d2bf54f53b75c3cf5a2b6984bfc846904db1349834f867fa447",
+              "bytes": 16440283
+            },
+            "darwin-x86_64": {
+              "filename": "llama-b11951-bin-macos-x64.tar.gz",
+              "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11951/llama-b11951-bin-macos-x64.tar.gz",
+              "sha256": "bd4555e5ff1e4393b3326859688b663dc788fe5e070186de0b2b0b1aadc715bf",
+              "bytes": 12177301
+            }
+          },
+          "model_id": "nvidia/NVIDIA-Nemotron-3.5-Bolt-E4B-4GB",
+          "original_revision": "1db54d5b12533ff1bcaa8e42cf4c667988a1f1be",
+          "training_model_id": "nvidia/NVIDIA-Nemotron-3.5-Bolt-E4B-BF16",
+          "training_revision": "49843eed8db1f1c616c47af75cfd36e07aec0667",
+          "total_parameters": 7996156490,
+          "quantization": "Q4_K_M",
+          "gguf_repository": "nvidia/NVIDIA-Nemotron-3.5-Bolt-E4B-4GB",
+          "gguf_revision": "1db54d5b12533ff1bcaa8e42cf4c667988a1f1be",
+          "model_filename": "Nemotron-3.5-Bolt-E4B-Q4_K_M.gguf",
+          "model_bytes": 6180446208,
+          "model_sha256": "c8af2b8aea10a690a1d9491db744a9446660173cb38fc489612b556615a69612",
+          "model_url": "https://huggingface.co/nvidia/NVIDIA-Nemotron-3.5-Bolt-E4B-4GB/resolve/1db54d5b12533ff1bcaa8e42cf4c667988a1f1be/Nemotron-3.5-Bolt-E4B-Q4_K_M.gguf?download=true",
+          "license": "OpenMDW-1.1",
+          "default_thinking": false,
+          "supports_thinking_toggle": true,
+          "context_tokens": 8192,
+          "profiles": {
+            "thinking": {
+              "temperature": 1.0,
+              "top_p": 0.95,
+              "top_k": 0,
+              "min_p": 0.0,
+              "presence_penalty": 0.0,
+              "repeat_penalty": 1.0
+            },
+            "instruct": {
+              "temperature": 1.0,
+              "top_p": 0.95,
+              "top_k": 0,
+              "min_p": 0.0,
+              "presence_penalty": 0.0,
+              "repeat_penalty": 1.0
+            }
+          },
+          "chat_template_kwargs": {
+            "conversational_mode": false
+          },
+          "preserve_reasoning": false,
+          "thinking_budget_tokens": 768,
+          "model_key": "nemotron8b"
+        },
+        "initial_observation": {
+          "tcp_m": [
+            0.3999999999999998,
+            -0.11999999999999995,
+            0.2600000000000003
+          ],
+          "gripper_command": "open",
+          "finger_contact_objects": [],
+          "simulation_time_s": 0.5000000000000003,
+          "objects": [
+            {
+              "name": "red",
+              "shape": "cube",
+              "size_m": [
+                0.04,
+                0.04,
+                0.04
+              ],
+              "centre_m": [
+                0.4,
+                -0.11999999999990067,
+                0.019957398275961748
+              ]
+            },
+            {
+              "name": "blue",
+              "shape": "cube",
+              "size_m": [
+                0.04,
+                0.04,
+                0.04
+              ],
+              "centre_m": [
+                0.4,
+                0.1199999999999015,
+                0.019957398275961748
+              ]
+            }
+          ]
+        },
+        "rounds": [
+          {
+            "round": 1,
+            "stage": "evaluated",
+            "actions": [
+              {
+                "method": "move_to",
+                "args": [
+                  [
+                    0.4,
+                    -0.12,
+                    0.01
+                  ]
+                ],
+                "kwargs": {},
+                "time_s": 26.259999999996325,
+                "status": "ok"
+              },
+              {
+                "method": "gripper",
+                "args": [
+                  true
+                ],
+                "kwargs": {},
+                "time_s": 31.259999999993553,
+                "status": "ok"
+              }
+            ],
+            "generation": {
+              "model_id": "nvidia/NVIDIA-Nemotron-3.5-Bolt-E4B-4GB",
+              "original_revision": "1db54d5b12533ff1bcaa8e42cf4c667988a1f1be",
+              "total_parameters": 7996156490,
+              "model_sha256": "c8af2b8aea10a690a1d9491db744a9446660173cb38fc489612b556615a69612",
+              "quantization": "Q4_K_M",
+              "runtime": "llama.cpp",
+              "runtime_version": "b11951",
+              "model_key": "nemotron8b",
+              "thinking": false,
+              "temperature": 1.0,
+              "top_p": 0.95,
+              "top_k": 0,
+              "min_p": 0.0,
+              "presence_penalty": 0.0,
+              "repeat_penalty": 1.0,
+              "seed": 42,
+              "threads": 8,
+              "context_tokens": 8192,
+              "max_output_tokens": 2048,
+              "prompt_sha256": "a0c3fcbcfb466190513aa6f53c171ffed4420159af4f219edb1e51dad483f4cc",
+              "device": "CPU",
+              "inference": "Local subprocess; temporary loopback HTTP; no hosted API",
+              "prompt_format": "GGUF native chat template / Jinja",
+              "constrained_decoding": false,
+              "reasoning_budget_tokens": -1,
+              "model_load_seconds": 6.0738013159998445,
+              "finish_reason": "stop",
+              "usage": {
+                "completion_tokens": 52,
+                "prompt_tokens": 1073,
+                "total_tokens": 1125,
+                "prompt_tokens_details": {
+                  "cached_tokens": 0
+                }
+              },
+              "timings": {
+                "cache_n": 0,
+                "prompt_n": 1073,
+                "prompt_ms": 15398.397,
+                "prompt_per_token_ms": 14.35078937558248,
+                "prompt_per_second": 69.6825779982163,
+                "predicted_n": 52,
+                "predicted_ms": 4714.522,
+                "predicted_per_token_ms": 92.44160784313725,
+                "predicted_per_second": 10.817639624971525
+              },
+              "generation_seconds": 26.201160008000443
+            },
+            "feedback": {
+              "error": null,
+              "observation": {
+                "tcp_m": [
+                  0.40567434374349653,
+                  -0.1214915432582481,
+                  0.01648594388698936
+                ],
+                "gripper_command": "closed",
+                "finger_contact_objects": [
+                  "red"
+                ],
+                "simulation_time_s": 34.15999999999578,
+                "objects": [
+                  {
+                    "name": "red",
+                    "shape": "cube",
+                    "size_m": [
+                      0.04,
+                      0.04,
+                      0.04
+                    ],
+                    "centre_m": [
+                      0.4000575775760696,
+                      -0.12066315252794418,
+                      0.019993562863827082
+                    ]
+                  },
+                  {
+                    "name": "blue",
+                    "shape": "cube",
+                    "size_m": [
+                      0.04,
+                      0.04,
+                      0.04
+                    ],
+                    "centre_m": [
+                      0.4,
+                      0.1199999999999015,
+                      0.019957398275963014
+                    ]
+                  }
+                ]
+              },
+              "evaluation": {
+                "success": false,
+                "goal": {
+                  "type": "stack",
+                  "source": "red",
+                  "target": "blue"
+                },
+                "stack_checks": [
+                  {
+                    "source": "red",
+                    "target": "blue",
+                    "success": false,
+                    "stable_checks": 0,
+                    "checks": 20,
+                    "tool_clear": false,
+                    "diagnostics": {
+                      "xy_error_m": 0.24066315941543356,
+                      "height_error_m": 0.03996383541213593,
+                      "shapes_ok": true,
+                      "centered": false,
+                      "height_ok": false,
+                      "stationary": true,
+                      "touching": false,
+                      "supported": true,
+                      "valid": false
+                    }
+                  }
+                ]
+              },
+              "actions": [
+                {
+                  "method": "move_to",
+                  "args": [
+                    [
+                      0.4,
+                      -0.12,
+                      0.01
+                    ]
+                  ],
+                  "kwargs": {},
+                  "time_s": 26.259999999996325,
+                  "status": "ok"
+                },
+                {
+                  "method": "gripper",
+                  "args": [
+                    true
+                  ],
+                  "kwargs": {},
+                  "time_s": 31.259999999993553,
+                  "status": "ok"
+                }
+              ],
+              "local_variables_reset": true
+            },
+            "model_declared_done": false
+          },
+          {
+            "round": 2,
+            "stage": "evaluated",
+            "actions": [
+              {
+                "method": "move_to",
+                "args": [
+                  [
+                    0.4,
+                    0.12,
+                    0.24
+                  ]
+                ],
+                "kwargs": {},
+                "time_s": 46.90000000001135,
+                "status": "ok"
+              },
+              {
+                "method": "gripper",
+                "args": [
+                  false
+                ],
+                "kwargs": {},
+                "time_s": 53.38000000001927,
+                "status": "ok"
+              }
+            ],
+            "generation": {
+              "model_id": "nvidia/NVIDIA-Nemotron-3.5-Bolt-E4B-4GB",
+              "original_revision": "1db54d5b12533ff1bcaa8e42cf4c667988a1f1be",
+              "total_parameters": 7996156490,
+              "model_sha256": "c8af2b8aea10a690a1d9491db744a9446660173cb38fc489612b556615a69612",
+              "quantization": "Q4_K_M",
+              "runtime": "llama.cpp",
+              "runtime_version": "b11951",
+              "model_key": "nemotron8b",
+              "thinking": false,
+              "temperature": 1.0,
+              "top_p": 0.95,
+              "top_k": 0,
+              "min_p": 0.0,
+              "presence_penalty": 0.0,
+              "repeat_penalty": 1.0,
+              "seed": 43,
+              "threads": 8,
+              "context_tokens": 8192,
+              "max_output_tokens": 2048,
+              "prompt_sha256": "3f9a5b26f0aa23e1c0b033cd4820b4702bf4a4b7408449e759932bc1dbe4ab0d",
+              "device": "CPU",
+              "inference": "Local subprocess; temporary loopback HTTP; no hosted API",
+              "prompt_format": "GGUF native chat template / Jinja",
+              "constrained_decoding": false,
+              "reasoning_budget_tokens": -1,
+              "model_load_seconds": 0.0,
+              "finish_reason": "stop",
+              "usage": {
+                "completion_tokens": 53,
+                "prompt_tokens": 1764,
+                "total_tokens": 1817,
+                "prompt_tokens_details": {
+                  "cached_tokens": 1124
+                }
+              },
+              "timings": {
+                "cache_n": 1124,
+                "prompt_n": 640,
+                "prompt_ms": 8375.828,
+                "prompt_per_token_ms": 13.087231249999999,
+                "prompt_per_second": 76.4103560865863,
+                "predicted_n": 53,
+                "predicted_ms": 4452.655,
+                "predicted_per_token_ms": 85.62798076923076,
+                "predicted_per_second": 11.678425568565272
+              },
+              "generation_seconds": 12.868285814000046
+            },
+            "feedback": {
+              "error": null,
+              "observation": {
+                "tcp_m": [
+                  0.3999999999999806,
+                  0.11999999999999632,
+                  0.23999999999999683
+                ],
+                "gripper_command": "open",
+                "finger_contact_objects": [],
+                "simulation_time_s": 56.28000000002282,
+                "objects": [
+                  {
+                    "name": "red",
+                    "shape": "cube",
+                    "size_m": [
+                      0.04,
+                      0.04,
+                      0.04
+                    ],
+                    "centre_m": [
+                      0.39433562916353804,
+                      0.1199876891560062,
+                      0.05988400966149172
+                    ]
+                  },
+                  {
+                    "name": "blue",
+                    "shape": "cube",
+                    "size_m": [
+                      0.04,
+                      0.04,
+                      0.04
+                    ],
+                    "centre_m": [
+                      0.39998845701713426,
+                      0.11999997720575702,
+                      0.019915393520400382
+                    ]
+                  }
+                ]
+              },
+              "evaluation": {
+                "success": false,
+                "goal": {
+                  "type": "stack",
+                  "source": "red",
+                  "target": "blue"
+                },
+                "stack_checks": [
+                  {
+                    "source": "red",
+                    "target": "blue",
+                    "success": false,
+                    "stable_checks": 0,
+                    "checks": 20,
+                    "tool_clear": true,
+                    "diagnostics": {
+                      "xy_error_m": 0.00565284120938842,
+                      "height_error_m": 3.138385890866929e-05,
+                      "shapes_ok": true,
+                      "centered": false,
+                      "height_ok": true,
+                      "stationary": true,
+                      "touching": true,
+                      "supported": true,
+                      "valid": false
+                    }
+                  }
+                ]
+              },
+              "actions": [
+                {
+                  "method": "move_to",
+                  "args": [
+                    [
+                      0.4,
+                      0.12,
+                      0.24
+                    ]
+                  ],
+                  "kwargs": {},
+                  "time_s": 46.90000000001135,
+                  "status": "ok"
+                },
+                {
+                  "method": "gripper",
+                  "args": [
+                    false
+                  ],
+                  "kwargs": {},
+                  "time_s": 53.38000000001927,
+                  "status": "ok"
+                }
+              ],
+              "local_variables_reset": true
+            },
+            "model_declared_done": false
+          }
+        ],
+        "evaluation": {
+          "success": false,
+          "goal": {
+            "type": "stack",
+            "source": "red",
+            "target": "blue"
+          },
+          "stack_checks": [
+            {
+              "source": "red",
+              "target": "blue",
+              "success": false,
+              "stable_checks": 0,
+              "checks": 20,
+              "tool_clear": true,
+              "diagnostics": {
+                "xy_error_m": 0.00565284120938842,
+                "height_error_m": 3.138385890866929e-05,
+                "shapes_ok": true,
+                "centered": false,
+                "height_ok": true,
+                "stationary": true,
+                "touching": true,
+                "supported": true,
+                "valid": false
+              }
+            }
+          ]
+        },
+        "wall_seconds": 43.65207133500007,
+        "final_observation": {
+          "tcp_m": [
+            0.3999999999999806,
+            0.11999999999999632,
+            0.23999999999999683
+          ],
+          "gripper_command": "open",
+          "finger_contact_objects": [],
+          "simulation_time_s": 56.28000000002282,
+          "objects": [
+            {
+              "name": "red",
+              "shape": "cube",
+              "size_m": [
+                0.04,
+                0.04,
+                0.04
+              ],
+              "centre_m": [
+                0.39433562916353804,
+                0.1199876891560062,
+                0.05988400966149172
+              ]
+            },
+            {
+              "name": "blue",
+              "shape": "cube",
+              "size_m": [
+                0.04,
+                0.04,
+                0.04
+              ],
+              "centre_m": [
+                0.39998845701713426,
+                0.11999997720575702,
+                0.019915393520400382
+              ]
+            }
+          ]
+        }
+      },
+      "worker_returncode": 1
+    }
+  ],
+  "mode": "closed_loop_feedback",
+  "feedback_rounds": 2,
+  "note": "Development pilot; not a held-out scientific evaluation"
+}

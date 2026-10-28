@@ -1,0 +1,1 @@
+{"code": "robot.position(\"tcp\")", "done": false, "message": "Get current TCP position"}

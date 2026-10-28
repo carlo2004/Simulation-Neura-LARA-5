@@ -1,0 +1,127 @@
+{
+  "instruction": "Bewege den Greifer um 5 cm nach rechts, ohne die H\u00f6he zu ver\u00e4ndern.",
+  "goal": {
+    "type": "move",
+    "target_m": [
+      0.4499999999999998,
+      -0.11999999999999995,
+      0.2600000000000003
+    ]
+  },
+  "success": false,
+  "status": "budget_exhausted",
+  "mode": "closed_loop_feedback",
+  "max_rounds": 2,
+  "physics_during_inference": "paused; viewer remains responsive",
+  "model": {
+    "format_version": 2,
+    "max_total_parameters": 10000000000,
+    "runtime": "llama.cpp",
+    "runtime_version": "b11951",
+    "runtime_assets": {
+      "linux-x86_64": {
+        "filename": "llama-b11951-bin-ubuntu-x64.tar.gz",
+        "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11951/llama-b11951-bin-ubuntu-x64.tar.gz",
+        "sha256": "2897031960458f9422cd7c7bd37bdc7098da41893cf735ecce4b951ef5e2c658",
+        "bytes": 22646994
+      },
+      "windows-x86_64": {
+        "filename": "llama-b11951-bin-win-cpu-x64.zip",
+        "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11951/llama-b11951-bin-win-cpu-x64.zip",
+        "sha256": "ac5edf9c936132fb16c9ff863db8b627c2a67621ff2e796ffd184585aea567ea",
+        "bytes": 24378362
+      },
+      "darwin-arm64": {
+        "filename": "llama-b11951-bin-macos-arm64.tar.gz",
+        "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11951/llama-b11951-bin-macos-arm64.tar.gz",
+        "sha256": "e75da9f2e4696d2bf54f53b75c3cf5a2b6984bfc846904db1349834f867fa447",
+        "bytes": 16440283
+      },
+      "darwin-x86_64": {
+        "filename": "llama-b11951-bin-macos-x64.tar.gz",
+        "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11951/llama-b11951-bin-macos-x64.tar.gz",
+        "sha256": "bd4555e5ff1e4393b3326859688b663dc788fe5e070186de0b2b0b1aadc715bf",
+        "bytes": 12177301
+      }
+    },
+    "model_id": "Qwen/Qwen3.5-9B",
+    "original_revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+    "training_model_id": "Qwen/Qwen3.5-9B",
+    "training_revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+    "total_parameters": 9653104368,
+    "quantization": "Q4_K_M",
+    "gguf_repository": "unsloth/Qwen3.5-9B-GGUF",
+    "gguf_revision": "3885219b6810b007914f3a7950a8d1b469d598a5",
+    "model_filename": "Qwen3.5-9B-Q4_K_M.gguf",
+    "model_bytes": 5680522464,
+    "model_sha256": "03b74727a860a56338e042c4420bb3f04b2fec5734175f4cb9fa853daf52b7e8",
+    "model_url": "https://huggingface.co/unsloth/Qwen3.5-9B-GGUF/resolve/3885219b6810b007914f3a7950a8d1b469d598a5/Qwen3.5-9B-Q4_K_M.gguf?download=true",
+    "license": "Apache-2.0",
+    "default_thinking": true,
+    "supports_thinking_toggle": true,
+    "context_tokens": 8192,
+    "profiles": {
+      "instruct": {
+        "temperature": 0.7,
+        "top_p": 0.8,
+        "top_k": 20,
+        "min_p": 0.0,
+        "presence_penalty": 1.5,
+        "repeat_penalty": 1.0
+      },
+      "thinking": {
+        "temperature": 0.6,
+        "top_p": 0.95,
+        "top_k": 20,
+        "min_p": 0.0,
+        "presence_penalty": 0.0,
+        "repeat_penalty": 1.0
+      }
+    },
+    "chat_template_kwargs": {},
+    "preserve_reasoning": false,
+    "thinking_budget_tokens": 768,
+    "model_key": "qwen9b"
+  },
+  "initial_observation": {
+    "tcp_m": [
+      0.3999999999999998,
+      -0.11999999999999995,
+      0.2600000000000003
+    ],
+    "gripper_command": "open",
+    "finger_contact_objects": [],
+    "simulation_time_s": 0.5000000000000003,
+    "objects": [
+      {
+        "name": "red",
+        "shape": "cube",
+        "size_m": [
+          0.04,
+          0.04,
+          0.04
+        ],
+        "centre_m": [
+          0.4,
+          -0.11999999999990067,
+          0.019957398275961748
+        ]
+      },
+      {
+        "name": "blue",
+        "shape": "cube",
+        "size_m": [
+          0.04,
+          0.04,
+          0.04
+        ],
+        "centre_m": [
+          0.4,
+          0.1199999999999015,
+          0.019957398275961748
+        ]
+      }
+    ]
+  },
+  "rounds": []
+}

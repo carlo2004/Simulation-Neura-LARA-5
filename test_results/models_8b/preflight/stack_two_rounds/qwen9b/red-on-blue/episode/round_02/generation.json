@@ -1,0 +1,49 @@
+{
+  "model_id": "Qwen/Qwen3.5-9B",
+  "original_revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+  "total_parameters": 9653104368,
+  "model_sha256": "03b74727a860a56338e042c4420bb3f04b2fec5734175f4cb9fa853daf52b7e8",
+  "quantization": "Q4_K_M",
+  "runtime": "llama.cpp",
+  "runtime_version": "b11951",
+  "model_key": "qwen9b",
+  "thinking": true,
+  "temperature": 0.6,
+  "top_p": 0.95,
+  "top_k": 20,
+  "min_p": 0.0,
+  "presence_penalty": 0.0,
+  "repeat_penalty": 1.0,
+  "seed": 43,
+  "threads": 8,
+  "context_tokens": 8192,
+  "max_output_tokens": 2048,
+  "prompt_sha256": "4a7b2eb2da243115e497bd68aae6ac181590f9ff05959905405de13b95e926a5",
+  "device": "CPU",
+  "inference": "Local subprocess; temporary loopback HTTP; no hosted API",
+  "prompt_format": "GGUF native chat template / Jinja",
+  "constrained_decoding": false,
+  "reasoning_budget_tokens": 768,
+  "model_load_seconds": 0.0,
+  "finish_reason": "stop",
+  "usage": {
+    "completion_tokens": 757,
+    "prompt_tokens": 2128,
+    "total_tokens": 2885,
+    "prompt_tokens_details": {
+      "cached_tokens": 1041
+    }
+  },
+  "timings": {
+    "cache_n": 1041,
+    "prompt_n": 1087,
+    "prompt_ms": 19628.493,
+    "prompt_per_token_ms": 18.057491260349586,
+    "prompt_per_second": 55.37867833256482,
+    "predicted_n": 757,
+    "predicted_ms": 106065.817,
+    "predicted_per_token_ms": 140.29869973544973,
+    "predicted_per_second": 7.127649806346187
+  },
+  "generation_seconds": 125.70578813100019
+}

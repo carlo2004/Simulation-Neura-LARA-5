@@ -1,0 +1,3 @@
+Generate: red-on-blue
+FAIL red-on-blue (evaluated)
+0/1 successful; results: /workspace/scratch/18d9569da47e/lara5_lab/output/models_8b_live_quality/quality_qwen9b

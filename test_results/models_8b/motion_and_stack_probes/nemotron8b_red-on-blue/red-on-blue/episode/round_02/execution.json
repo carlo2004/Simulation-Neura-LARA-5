@@ -1,0 +1,223 @@
+{
+  "round": 2,
+  "stage": "evaluated",
+  "actions": [
+    {
+      "method": "move_to",
+      "args": [
+        [
+          0.4,
+          -0.12,
+          0.24
+        ]
+      ],
+      "kwargs": {},
+      "time_s": 13.360000000001131,
+      "status": "ok"
+    },
+    {
+      "method": "gripper",
+      "args": [
+        true
+      ],
+      "kwargs": {},
+      "time_s": 19.779999999999916,
+      "status": "ok"
+    },
+    {
+      "method": "move_to",
+      "args": [
+        [
+          0.4,
+          -0.12,
+          0.02
+        ]
+      ],
+      "kwargs": {},
+      "time_s": 20.479999999999528,
+      "status": "ok"
+    },
+    {
+      "method": "gripper",
+      "args": [
+        false
+      ],
+      "kwargs": {},
+      "time_s": 24.919999999997067,
+      "status": "ok"
+    }
+  ],
+  "generation": {
+    "model_id": "nvidia/NVIDIA-Nemotron-3.5-Bolt-E4B-4GB",
+    "original_revision": "1db54d5b12533ff1bcaa8e42cf4c667988a1f1be",
+    "total_parameters": 7996156490,
+    "model_sha256": "c8af2b8aea10a690a1d9491db744a9446660173cb38fc489612b556615a69612",
+    "quantization": "Q4_K_M",
+    "runtime": "llama.cpp",
+    "runtime_version": "b11951",
+    "model_key": "nemotron8b",
+    "thinking": false,
+    "temperature": 1.0,
+    "top_p": 0.95,
+    "top_k": 0,
+    "min_p": 0.0,
+    "presence_penalty": 0.0,
+    "repeat_penalty": 1.0,
+    "seed": 43,
+    "threads": 8,
+    "context_tokens": 8192,
+    "max_output_tokens": 2048,
+    "prompt_sha256": "519423cb7e291f685a6366ff9f3391e92b8851e089d1aa484024f61d212d29f4",
+    "device": "CPU",
+    "inference": "Local subprocess; temporary loopback HTTP; no hosted API",
+    "prompt_format": "GGUF native chat template / Jinja",
+    "constrained_decoding": false,
+    "reasoning_budget_tokens": -1,
+    "model_load_seconds": 0.0,
+    "finish_reason": "stop",
+    "usage": {
+      "completion_tokens": 89,
+      "prompt_tokens": 1980,
+      "total_tokens": 2069,
+      "prompt_tokens_details": {
+        "cached_tokens": 1201
+      }
+    },
+    "timings": {
+      "cache_n": 1201,
+      "prompt_n": 779,
+      "prompt_ms": 10441.131,
+      "prompt_per_token_ms": 13.403249037227214,
+      "prompt_per_second": 74.60877562018904,
+      "predicted_n": 89,
+      "predicted_ms": 8282.413,
+      "predicted_per_token_ms": 94.11832954545456,
+      "predicted_per_second": 10.62492295421636
+    },
+    "generation_seconds": 18.735548337999717
+  },
+  "feedback": {
+    "error": null,
+    "observation": {
+      "tcp_m": [
+        0.4000043996746558,
+        -0.1200075319875397,
+        0.020002857884828168
+      ],
+      "gripper_command": "open",
+      "finger_contact_objects": [
+        "red"
+      ],
+      "simulation_time_s": 27.81999999999546,
+      "objects": [
+        {
+          "name": "red",
+          "shape": "cube",
+          "size_m": [
+            0.04,
+            0.04,
+            0.04
+          ],
+          "centre_m": [
+            0.40327430876764603,
+            -0.1368823551991959,
+            0.01995722123313581
+          ]
+        },
+        {
+          "name": "blue",
+          "shape": "cube",
+          "size_m": [
+            0.04,
+            0.04,
+            0.04
+          ],
+          "centre_m": [
+            0.40293766522608654,
+            0.09106872909854137,
+            0.019957398275963018
+          ]
+        }
+      ]
+    },
+    "evaluation": {
+      "success": false,
+      "goal": {
+        "type": "stack",
+        "source": "red",
+        "target": "blue"
+      },
+      "stack_checks": [
+        {
+          "source": "red",
+          "target": "blue",
+          "success": false,
+          "stable_checks": 0,
+          "checks": 20,
+          "tool_clear": false,
+          "diagnostics": {
+            "xy_error_m": 0.22795133287916564,
+            "height_error_m": 0.04000017704282721,
+            "shapes_ok": true,
+            "centered": false,
+            "height_ok": false,
+            "stationary": true,
+            "touching": false,
+            "supported": true,
+            "valid": false
+          }
+        }
+      ]
+    },
+    "actions": [
+      {
+        "method": "move_to",
+        "args": [
+          [
+            0.4,
+            -0.12,
+            0.24
+          ]
+        ],
+        "kwargs": {},
+        "time_s": 13.360000000001131,
+        "status": "ok"
+      },
+      {
+        "method": "gripper",
+        "args": [
+          true
+        ],
+        "kwargs": {},
+        "time_s": 19.779999999999916,
+        "status": "ok"
+      },
+      {
+        "method": "move_to",
+        "args": [
+          [
+            0.4,
+            -0.12,
+            0.02
+          ]
+        ],
+        "kwargs": {},
+        "time_s": 20.479999999999528,
+        "status": "ok"
+      },
+      {
+        "method": "gripper",
+        "args": [
+          false
+        ],
+        "kwargs": {},
+        "time_s": 24.919999999997067,
+        "status": "ok"
+      }
+    ],
+    "local_variables_reset": true,
+    "remaining_blocks": 2,
+    "model_declared_done": true
+  },
+  "model_declared_done": true
+}

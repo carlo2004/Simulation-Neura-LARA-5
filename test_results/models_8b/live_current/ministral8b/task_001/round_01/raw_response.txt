@@ -1,0 +1,7 @@
+```json
+{
+  "code": "robot.jog(\"x\", 0.05)",
+  "done": false,
+  "message": "Bewegt den Greifer 5 cm nach rechts (X-Achse). Warte auf Bestätigung, dass die Bewegung abgeschlossen ist."
+}
+```

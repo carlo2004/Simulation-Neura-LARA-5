@@ -1,0 +1,31 @@
+{
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "message": {
+        "role": "assistant",
+        "content": "{\"code\": \"robot.move_to([0.35, -0.12, 0.26])\", \"done\": false, \"message\": \"Move TCP 5 cm left (from X=0.45 to X=0.35) keeping Z fixed\"}",
+        "reasoning_content": ""
+      }
+    }
+  ],
+  "usage": {
+    "completion_tokens": 64,
+    "prompt_tokens": 1376,
+    "total_tokens": 1440,
+    "prompt_tokens_details": {
+      "cached_tokens": 1056
+    }
+  },
+  "timings": {
+    "cache_n": 1056,
+    "prompt_n": 320,
+    "prompt_ms": 4595.745,
+    "prompt_per_token_ms": 14.361703125,
+    "prompt_per_second": 69.62962479423902,
+    "predicted_n": 64,
+    "predicted_ms": 6182.707,
+    "predicted_per_token_ms": 98.13820634920636,
+    "predicted_per_second": 10.189711399877108
+  }
+}

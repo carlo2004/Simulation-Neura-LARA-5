@@ -1,0 +1,6 @@
+robot.gripper(closed=False)
+robot.move_to([0.4, -0.12, 0.24])
+robot.gripper(closed=True)
+robot.move_to([0.4, 0.12, 0.24])
+robot.gripper(closed=False)
+robot.step(1.0)

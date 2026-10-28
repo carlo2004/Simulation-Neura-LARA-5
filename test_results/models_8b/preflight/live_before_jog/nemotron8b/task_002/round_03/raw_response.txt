@@ -1,0 +1,1 @@
+{"code": "robot.step(0.1)", "done": false, "message": "Advance simulation slightly"}

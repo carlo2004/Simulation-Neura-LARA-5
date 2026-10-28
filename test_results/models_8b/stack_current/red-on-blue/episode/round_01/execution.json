@@ -1,0 +1,345 @@
+{
+  "round": 1,
+  "stage": "evaluated",
+  "actions": [
+    {
+      "method": "gripper",
+      "args": [],
+      "kwargs": {
+        "closed": true
+      },
+      "time_s": 0.5000000000000003,
+      "status": "ok"
+    },
+    {
+      "method": "move_to",
+      "args": [
+        [
+          0.4,
+          -0.12,
+          0.3
+        ]
+      ],
+      "kwargs": {},
+      "time_s": 1.2000000000000008,
+      "status": "ok"
+    },
+    {
+      "method": "jog",
+      "args": [
+        "y",
+        0.24
+      ],
+      "kwargs": {},
+      "time_s": 2.2999999999999683,
+      "status": "ok"
+    },
+    {
+      "method": "gripper",
+      "args": [],
+      "kwargs": {
+        "closed": false
+      },
+      "time_s": 7.09999999999944,
+      "status": "ok"
+    },
+    {
+      "method": "move_to",
+      "args": [
+        [
+          0.4,
+          0.12,
+          0.3
+        ]
+      ],
+      "kwargs": {},
+      "time_s": 7.799999999999363,
+      "status": "ok"
+    },
+    {
+      "method": "jog",
+      "args": [
+        "x",
+        0.04
+      ],
+      "kwargs": {},
+      "time_s": 8.899999999999642,
+      "status": "ok"
+    },
+    {
+      "method": "jog",
+      "args": [
+        "z",
+        -0.25
+      ],
+      "kwargs": {},
+      "time_s": 10.000000000000009,
+      "status": "ok"
+    },
+    {
+      "method": "gripper",
+      "args": [],
+      "kwargs": {
+        "closed": true
+      },
+      "time_s": 15.000000000001679,
+      "status": "ok"
+    },
+    {
+      "method": "move_to",
+      "args": [
+        [
+          0.6,
+          0.0,
+          0.3
+        ]
+      ],
+      "kwargs": {},
+      "time_s": 15.700000000001912,
+      "status": "ok"
+    },
+    {
+      "method": "gripper",
+      "args": [],
+      "kwargs": {
+        "closed": false
+      },
+      "time_s": 22.019999999998674,
+      "status": "ok"
+    }
+  ],
+  "generation": {
+    "model_id": "Qwen/Qwen3.5-9B",
+    "original_revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+    "total_parameters": 9653104368,
+    "model_sha256": "03b74727a860a56338e042c4420bb3f04b2fec5734175f4cb9fa853daf52b7e8",
+    "quantization": "Q4_K_M",
+    "runtime": "llama.cpp",
+    "runtime_version": "b11951",
+    "training_model_id": "Qwen/Qwen3.5-9B",
+    "training_revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+    "model_key": "qwen9b",
+    "thinking": false,
+    "temperature": 0.7,
+    "top_p": 0.8,
+    "top_k": 20,
+    "min_p": 0.0,
+    "presence_penalty": 1.5,
+    "repeat_penalty": 1.0,
+    "seed": 42,
+    "threads": 8,
+    "context_tokens": 8192,
+    "max_output_tokens": 2048,
+    "prompt_sha256": "8977cba8e2996543a368631d710181a8e9f6d1e0984ecd88c7f8603926cc9f07",
+    "device": "CPU",
+    "inference": "Local subprocess; temporary loopback HTTP; no hosted API",
+    "prompt_format": "GGUF native chat template / Jinja",
+    "constrained_decoding": false,
+    "reasoning_budget_tokens": -1,
+    "model_load_seconds": 13.852124484999877,
+    "finish_reason": "stop",
+    "usage": {
+      "completion_tokens": 169,
+      "prompt_tokens": 1049,
+      "total_tokens": 1218,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    "timings": {
+      "cache_n": 0,
+      "prompt_n": 1049,
+      "prompt_ms": 20843.102,
+      "prompt_per_token_ms": 19.869496663489038,
+      "prompt_per_second": 50.32840121398437,
+      "predicted_n": 169,
+      "predicted_ms": 20849.553,
+      "predicted_per_token_ms": 124.10448214285714,
+      "predicted_per_second": 8.057726705220011
+    },
+    "generation_seconds": 55.553547473000435
+  },
+  "feedback": {
+    "error": null,
+    "observation": {
+      "tcp_m": [
+        0.5999999999999388,
+        -4.476974346800997e-15,
+        0.29999999999997873
+      ],
+      "gripper_command": "open",
+      "finger_contact_objects": [],
+      "simulation_time_s": 24.919999999997067,
+      "objects": [
+        {
+          "name": "red",
+          "shape": "cube",
+          "size_m": [
+            0.04,
+            0.04,
+            0.04
+          ],
+          "centre_m": [
+            0.4,
+            -0.11999999999990067,
+            0.019957398275963014
+          ]
+        },
+        {
+          "name": "blue",
+          "shape": "cube",
+          "size_m": [
+            0.04,
+            0.04,
+            0.04
+          ],
+          "centre_m": [
+            0.4,
+            0.1199999999999015,
+            0.019957398275963014
+          ]
+        }
+      ]
+    },
+    "evaluation": {
+      "success": false,
+      "goal": {
+        "type": "stack",
+        "source": "red",
+        "target": "blue"
+      },
+      "stack_checks": [
+        {
+          "source": "red",
+          "target": "blue",
+          "success": false,
+          "stable_checks": 0,
+          "checks": 20,
+          "tool_clear": true,
+          "diagnostics": {
+            "xy_error_m": 0.23999999999980218,
+            "height_error_m": 0.04,
+            "shapes_ok": true,
+            "centered": false,
+            "height_ok": false,
+            "stationary": true,
+            "touching": false,
+            "supported": true,
+            "valid": false
+          }
+        }
+      ]
+    },
+    "actions": [
+      {
+        "method": "gripper",
+        "args": [],
+        "kwargs": {
+          "closed": true
+        },
+        "time_s": 0.5000000000000003,
+        "status": "ok"
+      },
+      {
+        "method": "move_to",
+        "args": [
+          [
+            0.4,
+            -0.12,
+            0.3
+          ]
+        ],
+        "kwargs": {},
+        "time_s": 1.2000000000000008,
+        "status": "ok"
+      },
+      {
+        "method": "jog",
+        "args": [
+          "y",
+          0.24
+        ],
+        "kwargs": {},
+        "time_s": 2.2999999999999683,
+        "status": "ok"
+      },
+      {
+        "method": "gripper",
+        "args": [],
+        "kwargs": {
+          "closed": false
+        },
+        "time_s": 7.09999999999944,
+        "status": "ok"
+      },
+      {
+        "method": "move_to",
+        "args": [
+          [
+            0.4,
+            0.12,
+            0.3
+          ]
+        ],
+        "kwargs": {},
+        "time_s": 7.799999999999363,
+        "status": "ok"
+      },
+      {
+        "method": "jog",
+        "args": [
+          "x",
+          0.04
+        ],
+        "kwargs": {},
+        "time_s": 8.899999999999642,
+        "status": "ok"
+      },
+      {
+        "method": "jog",
+        "args": [
+          "z",
+          -0.25
+        ],
+        "kwargs": {},
+        "time_s": 10.000000000000009,
+        "status": "ok"
+      },
+      {
+        "method": "gripper",
+        "args": [],
+        "kwargs": {
+          "closed": true
+        },
+        "time_s": 15.000000000001679,
+        "status": "ok"
+      },
+      {
+        "method": "move_to",
+        "args": [
+          [
+            0.6,
+            0.0,
+            0.3
+          ]
+        ],
+        "kwargs": {},
+        "time_s": 15.700000000001912,
+        "status": "ok"
+      },
+      {
+        "method": "gripper",
+        "args": [],
+        "kwargs": {
+          "closed": false
+        },
+        "time_s": 22.019999999998674,
+        "status": "ok"
+      }
+    ],
+    "local_variables_reset": true,
+    "remaining_blocks": 3,
+    "model_declared_done": false
+  },
+  "model_declared_done": false
+}

@@ -1,0 +1,31 @@
+{
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "message": {
+        "role": "assistant",
+        "content": "{\"code\": \"robot.move_to([0.4030325462235626, 0.0550419538590129, 0.24])\\nrobot.gripper(True)\\nrobot.move_to([0.4030325462235626, 0.0550419538590129, 0.02])\\nrobot.gripper(False)\", \"done\": true, \"message\": \"Move to blue cube, grasp, lift, move to blue cube, release red on blue\"}",
+        "reasoning_content": ""
+      }
+    }
+  ],
+  "usage": {
+    "completion_tokens": 152,
+    "prompt_tokens": 2882,
+    "total_tokens": 3034,
+    "prompt_tokens_details": {
+      "cached_tokens": 1108
+    }
+  },
+  "timings": {
+    "cache_n": 1108,
+    "prompt_n": 1774,
+    "prompt_ms": 22849.762,
+    "prompt_per_token_ms": 12.880361894024801,
+    "prompt_per_second": 77.63757014186844,
+    "predicted_n": 152,
+    "predicted_ms": 14066.891,
+    "predicted_per_token_ms": 93.15821854304636,
+    "predicted_per_second": 10.734425965197286
+  }
+}

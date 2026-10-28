@@ -1,0 +1,1 @@
+{"code": "robot.move_to([0.35, -0.12, 0.26])\nrobot.step(0.5)", "done": false, "message": "Moving the grasped red cube 5cm left (to x=0.35) while holding it."}

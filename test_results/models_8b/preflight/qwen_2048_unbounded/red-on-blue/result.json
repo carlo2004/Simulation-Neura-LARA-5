@@ -1,0 +1,10 @@
+{
+  "case": "red-on-blue",
+  "instruction": "Staple den roten W\u00fcrfel auf den blauen W\u00fcrfel.",
+  "source": "red",
+  "target": "blue",
+  "success": false,
+  "stage": "generation",
+  "seed": 42,
+  "error": "ValueError: Generation did not finish normally: length"
+}

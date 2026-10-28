@@ -1,0 +1,1 @@
+{"code": "tcp = robot.position(\"tcp\")\nx = tcp[0] + 0.05\ny = tcp[1]\nz = tcp[2]\nrobot.move_to([x, y, z])", "done": false, "message": "Move TCP 5cm right keeping height constant."}

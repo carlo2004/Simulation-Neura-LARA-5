@@ -1,0 +1,131 @@
+{
+  "round": 1,
+  "stage": "evaluated",
+  "actions": [
+    {
+      "method": "jog",
+      "args": [
+        "x",
+        0.05
+      ],
+      "kwargs": {},
+      "time_s": 0.5000000000000003,
+      "status": "ok"
+    }
+  ],
+  "generation": {
+    "model_id": "Qwen/Qwen3.5-9B",
+    "original_revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+    "total_parameters": 9653104368,
+    "model_sha256": "03b74727a860a56338e042c4420bb3f04b2fec5734175f4cb9fa853daf52b7e8",
+    "quantization": "Q4_K_M",
+    "runtime": "llama.cpp",
+    "runtime_version": "b11951",
+    "training_model_id": "Qwen/Qwen3.5-9B",
+    "training_revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+    "model_key": "qwen9b",
+    "thinking": false,
+    "temperature": 0.7,
+    "top_p": 0.8,
+    "top_k": 20,
+    "min_p": 0.0,
+    "presence_penalty": 1.5,
+    "repeat_penalty": 1.0,
+    "seed": 42,
+    "threads": 8,
+    "context_tokens": 8192,
+    "max_output_tokens": 2048,
+    "prompt_sha256": "69b480672161eca4e31d64c6022bb35fe112bbbf6cf8d5561264d03fb10e84fe",
+    "device": "CPU",
+    "inference": "Local subprocess; temporary loopback HTTP; no hosted API",
+    "prompt_format": "GGUF native chat template / Jinja",
+    "constrained_decoding": false,
+    "reasoning_budget_tokens": -1,
+    "model_load_seconds": 13.640683740000895,
+    "finish_reason": "stop",
+    "usage": {
+      "completion_tokens": 37,
+      "prompt_tokens": 1047,
+      "total_tokens": 1084,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    "timings": {
+      "cache_n": 0,
+      "prompt_n": 1047,
+      "prompt_ms": 25686.852,
+      "prompt_per_token_ms": 24.53376504297994,
+      "prompt_per_second": 40.760152314499265,
+      "predicted_n": 37,
+      "predicted_ms": 9245.081,
+      "predicted_per_token_ms": 256.80780555555555,
+      "predicted_per_second": 3.8939626380774817
+    },
+    "generation_seconds": 48.58686093600045
+  },
+  "feedback": {
+    "error": null,
+    "observation": {
+      "tcp_m": [
+        0.4499974300210504,
+        -0.12000003939241254,
+        0.25999817035800943
+      ],
+      "gripper_command": "open",
+      "finger_contact_objects": [],
+      "simulation_time_s": 1.9400000000000015,
+      "objects": [
+        {
+          "name": "red",
+          "shape": "cube",
+          "size_m": [
+            0.04,
+            0.04,
+            0.04
+          ],
+          "centre_m": [
+            0.4,
+            -0.11999999999990067,
+            0.019957398275963014
+          ]
+        },
+        {
+          "name": "blue",
+          "shape": "cube",
+          "size_m": [
+            0.04,
+            0.04,
+            0.04
+          ],
+          "centre_m": [
+            0.4,
+            0.1199999999999015,
+            0.019957398275963014
+          ]
+        }
+      ]
+    },
+    "evaluation": {
+      "success": null,
+      "goal": null,
+      "stack_checks": []
+    },
+    "actions": [
+      {
+        "method": "jog",
+        "args": [
+          "x",
+          0.05
+        ],
+        "kwargs": {},
+        "time_s": 0.5000000000000003,
+        "status": "ok"
+      }
+    ],
+    "local_variables_reset": true,
+    "remaining_blocks": 3,
+    "model_declared_done": false
+  },
+  "model_declared_done": false
+}

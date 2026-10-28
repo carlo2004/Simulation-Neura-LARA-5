@@ -1,0 +1,31 @@
+{
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "message": {
+        "role": "assistant",
+        "content": "{\"code\": \"robot.move_to([0.45, -0.12, 0.26])\", \"done\": false, \"message\": \"Move 0.05m right while maintaining height\"}",
+        "reasoning_content": ""
+      }
+    }
+  ],
+  "usage": {
+    "completion_tokens": 50,
+    "prompt_tokens": 1341,
+    "total_tokens": 1391,
+    "prompt_tokens_details": {
+      "cached_tokens": 1025
+    }
+  },
+  "timings": {
+    "cache_n": 1025,
+    "prompt_n": 316,
+    "prompt_ms": 4178.226,
+    "prompt_per_token_ms": 13.222234177215189,
+    "prompt_per_second": 75.63018371911907,
+    "predicted_n": 50,
+    "predicted_ms": 4955.765,
+    "predicted_per_token_ms": 101.1380612244898,
+    "predicted_per_second": 9.887474486784583
+  }
+}

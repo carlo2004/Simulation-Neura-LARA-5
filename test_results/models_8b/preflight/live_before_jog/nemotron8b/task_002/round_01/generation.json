@@ -1,0 +1,51 @@
+{
+  "model_id": "nvidia/NVIDIA-Nemotron-3.5-Bolt-E4B-4GB",
+  "original_revision": "1db54d5b12533ff1bcaa8e42cf4c667988a1f1be",
+  "total_parameters": 7996156490,
+  "model_sha256": "c8af2b8aea10a690a1d9491db744a9446660173cb38fc489612b556615a69612",
+  "quantization": "Q4_K_M",
+  "runtime": "llama.cpp",
+  "runtime_version": "b11951",
+  "training_model_id": "nvidia/NVIDIA-Nemotron-3.5-Bolt-E4B-BF16",
+  "training_revision": "49843eed8db1f1c616c47af75cfd36e07aec0667",
+  "model_key": "nemotron8b",
+  "thinking": false,
+  "temperature": 1.0,
+  "top_p": 0.95,
+  "top_k": 0,
+  "min_p": 0.0,
+  "presence_penalty": 0.0,
+  "repeat_penalty": 1.0,
+  "seed": 42,
+  "threads": 8,
+  "context_tokens": 8192,
+  "max_output_tokens": 2048,
+  "prompt_sha256": "85aa6801207d44342fd1add0f377785d1b58d626a9118671814b1b46e0bd4950",
+  "device": "CPU",
+  "inference": "Local subprocess; temporary loopback HTTP; no hosted API",
+  "prompt_format": "GGUF native chat template / Jinja",
+  "constrained_decoding": false,
+  "reasoning_budget_tokens": -1,
+  "model_load_seconds": 0.0,
+  "finish_reason": "stop",
+  "usage": {
+    "completion_tokens": 31,
+    "prompt_tokens": 1026,
+    "total_tokens": 1057,
+    "prompt_tokens_details": {
+      "cached_tokens": 772
+    }
+  },
+  "timings": {
+    "cache_n": 772,
+    "prompt_n": 254,
+    "prompt_ms": 3160.445,
+    "prompt_per_token_ms": 12.442696850393702,
+    "prompt_per_second": 80.3684291294422,
+    "predicted_n": 31,
+    "predicted_ms": 2490.982,
+    "predicted_per_token_ms": 83.03273333333333,
+    "predicted_per_second": 12.043443107979101
+  },
+  "generation_seconds": 6.036797711998588
+}

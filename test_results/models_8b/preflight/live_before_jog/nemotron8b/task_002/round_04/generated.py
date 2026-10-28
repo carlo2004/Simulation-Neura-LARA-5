@@ -1,0 +1,1 @@
+robot.gripper(closed=True)

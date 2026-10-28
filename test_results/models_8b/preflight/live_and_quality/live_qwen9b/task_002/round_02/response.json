@@ -1,0 +1,31 @@
+{
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "message": {
+        "role": "assistant",
+        "content": "{\"code\": \"robot.move_to([0.4, -0.12, 0.26])\\nrobot.gripper(False)\\nrobot.step(0.5)\", \"done\": false, \"message\": \"Approaching the red cube at its center to grasp it properly.\"}",
+        "reasoning_content": ""
+      }
+    }
+  ],
+  "usage": {
+    "completion_tokens": 63,
+    "prompt_tokens": 1696,
+    "total_tokens": 1759,
+    "prompt_tokens_details": {
+      "cached_tokens": 1102
+    }
+  },
+  "timings": {
+    "cache_n": 1102,
+    "prompt_n": 594,
+    "prompt_ms": 11220.708,
+    "prompt_per_token_ms": 18.89008080808081,
+    "prompt_per_second": 52.9378360082091,
+    "predicted_n": 63,
+    "predicted_ms": 7319.283,
+    "predicted_per_token_ms": 118.05295161290323,
+    "predicted_per_second": 8.470775074553067
+  }
+}

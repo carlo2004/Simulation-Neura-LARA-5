@@ -1,0 +1,3 @@
+Generate: move-right
+PASS move-right (feedback_evaluated)
+1/1 successful; results: /workspace/scratch/18d9569da47e/lara5_lab/output/models_8b_final/qwen9b_move-right

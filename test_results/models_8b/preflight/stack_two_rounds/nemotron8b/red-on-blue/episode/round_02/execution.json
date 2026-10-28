@@ -1,0 +1,175 @@
+{
+  "round": 2,
+  "stage": "evaluated",
+  "actions": [
+    {
+      "method": "move_to",
+      "args": [
+        [
+          0.4,
+          0.12,
+          0.24
+        ]
+      ],
+      "kwargs": {},
+      "time_s": 46.90000000001135,
+      "status": "ok"
+    },
+    {
+      "method": "gripper",
+      "args": [
+        false
+      ],
+      "kwargs": {},
+      "time_s": 53.38000000001927,
+      "status": "ok"
+    }
+  ],
+  "generation": {
+    "model_id": "nvidia/NVIDIA-Nemotron-3.5-Bolt-E4B-4GB",
+    "original_revision": "1db54d5b12533ff1bcaa8e42cf4c667988a1f1be",
+    "total_parameters": 7996156490,
+    "model_sha256": "c8af2b8aea10a690a1d9491db744a9446660173cb38fc489612b556615a69612",
+    "quantization": "Q4_K_M",
+    "runtime": "llama.cpp",
+    "runtime_version": "b11951",
+    "model_key": "nemotron8b",
+    "thinking": false,
+    "temperature": 1.0,
+    "top_p": 0.95,
+    "top_k": 0,
+    "min_p": 0.0,
+    "presence_penalty": 0.0,
+    "repeat_penalty": 1.0,
+    "seed": 43,
+    "threads": 8,
+    "context_tokens": 8192,
+    "max_output_tokens": 2048,
+    "prompt_sha256": "3f9a5b26f0aa23e1c0b033cd4820b4702bf4a4b7408449e759932bc1dbe4ab0d",
+    "device": "CPU",
+    "inference": "Local subprocess; temporary loopback HTTP; no hosted API",
+    "prompt_format": "GGUF native chat template / Jinja",
+    "constrained_decoding": false,
+    "reasoning_budget_tokens": -1,
+    "model_load_seconds": 0.0,
+    "finish_reason": "stop",
+    "usage": {
+      "completion_tokens": 53,
+      "prompt_tokens": 1764,
+      "total_tokens": 1817,
+      "prompt_tokens_details": {
+        "cached_tokens": 1124
+      }
+    },
+    "timings": {
+      "cache_n": 1124,
+      "prompt_n": 640,
+      "prompt_ms": 8375.828,
+      "prompt_per_token_ms": 13.087231249999999,
+      "prompt_per_second": 76.4103560865863,
+      "predicted_n": 53,
+      "predicted_ms": 4452.655,
+      "predicted_per_token_ms": 85.62798076923076,
+      "predicted_per_second": 11.678425568565272
+    },
+    "generation_seconds": 12.868285814000046
+  },
+  "feedback": {
+    "error": null,
+    "observation": {
+      "tcp_m": [
+        0.3999999999999806,
+        0.11999999999999632,
+        0.23999999999999683
+      ],
+      "gripper_command": "open",
+      "finger_contact_objects": [],
+      "simulation_time_s": 56.28000000002282,
+      "objects": [
+        {
+          "name": "red",
+          "shape": "cube",
+          "size_m": [
+            0.04,
+            0.04,
+            0.04
+          ],
+          "centre_m": [
+            0.39433562916353804,
+            0.1199876891560062,
+            0.05988400966149172
+          ]
+        },
+        {
+          "name": "blue",
+          "shape": "cube",
+          "size_m": [
+            0.04,
+            0.04,
+            0.04
+          ],
+          "centre_m": [
+            0.39998845701713426,
+            0.11999997720575702,
+            0.019915393520400382
+          ]
+        }
+      ]
+    },
+    "evaluation": {
+      "success": false,
+      "goal": {
+        "type": "stack",
+        "source": "red",
+        "target": "blue"
+      },
+      "stack_checks": [
+        {
+          "source": "red",
+          "target": "blue",
+          "success": false,
+          "stable_checks": 0,
+          "checks": 20,
+          "tool_clear": true,
+          "diagnostics": {
+            "xy_error_m": 0.00565284120938842,
+            "height_error_m": 3.138385890866929e-05,
+            "shapes_ok": true,
+            "centered": false,
+            "height_ok": true,
+            "stationary": true,
+            "touching": true,
+            "supported": true,
+            "valid": false
+          }
+        }
+      ]
+    },
+    "actions": [
+      {
+        "method": "move_to",
+        "args": [
+          [
+            0.4,
+            0.12,
+            0.24
+          ]
+        ],
+        "kwargs": {},
+        "time_s": 46.90000000001135,
+        "status": "ok"
+      },
+      {
+        "method": "gripper",
+        "args": [
+          false
+        ],
+        "kwargs": {},
+        "time_s": 53.38000000001927,
+        "status": "ok"
+      }
+    ],
+    "local_variables_reset": true
+  },
+  "model_declared_done": false
+}

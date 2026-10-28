@@ -1,0 +1,385 @@
+{
+  "round": 4,
+  "stage": "evaluated",
+  "actions": [
+    {
+      "method": "gripper",
+      "args": [],
+      "kwargs": {
+        "closed": true
+      },
+      "time_s": 72.08000000001341,
+      "status": "ok"
+    },
+    {
+      "method": "move_to",
+      "args": [
+        [
+          0.4,
+          -0.12,
+          0.3
+        ]
+      ],
+      "kwargs": {},
+      "time_s": 72.78000000001178,
+      "status": "ok"
+    },
+    {
+      "method": "jog",
+      "args": [
+        "y",
+        0.24
+      ],
+      "kwargs": {},
+      "time_s": 77.46000000000087,
+      "status": "ok"
+    },
+    {
+      "method": "gripper",
+      "args": [],
+      "kwargs": {
+        "closed": false
+      },
+      "time_s": 82.25999999998969,
+      "status": "ok"
+    },
+    {
+      "method": "move_to",
+      "args": [
+        [
+          0.4,
+          0.12,
+          0.28
+        ]
+      ],
+      "kwargs": {},
+      "time_s": 82.95999999998806,
+      "status": "ok"
+    },
+    {
+      "method": "jog",
+      "args": [
+        "x",
+        0.02
+      ],
+      "kwargs": {},
+      "time_s": 84.0599999999855,
+      "status": "ok"
+    },
+    {
+      "method": "jog",
+      "args": [
+        "x",
+        -0.02
+      ],
+      "kwargs": {},
+      "time_s": 85.15999999998293,
+      "status": "ok"
+    },
+    {
+      "method": "jog",
+      "args": [
+        "y",
+        0.02
+      ],
+      "kwargs": {},
+      "time_s": 86.25999999998037,
+      "status": "ok"
+    },
+    {
+      "method": "jog",
+      "args": [
+        "y",
+        -0.02
+      ],
+      "kwargs": {},
+      "time_s": 87.3599999999778,
+      "status": "ok"
+    },
+    {
+      "method": "gripper",
+      "args": [],
+      "kwargs": {
+        "closed": true
+      },
+      "time_s": 88.45999999997524,
+      "status": "ok"
+    },
+    {
+      "method": "move_to",
+      "args": [
+        [
+          0.4,
+          0.12,
+          0.3
+        ]
+      ],
+      "kwargs": {},
+      "time_s": 89.1599999999736,
+      "status": "ok"
+    },
+    {
+      "method": "gripper",
+      "args": [],
+      "kwargs": {
+        "closed": false
+      },
+      "time_s": 90.25999999997104,
+      "status": "ok"
+    }
+  ],
+  "generation": {
+    "model_id": "Qwen/Qwen3.5-9B",
+    "original_revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+    "total_parameters": 9653104368,
+    "model_sha256": "03b74727a860a56338e042c4420bb3f04b2fec5734175f4cb9fa853daf52b7e8",
+    "quantization": "Q4_K_M",
+    "runtime": "llama.cpp",
+    "runtime_version": "b11951",
+    "training_model_id": "Qwen/Qwen3.5-9B",
+    "training_revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+    "model_key": "qwen9b",
+    "thinking": false,
+    "temperature": 0.7,
+    "top_p": 0.8,
+    "top_k": 20,
+    "min_p": 0.0,
+    "presence_penalty": 1.5,
+    "repeat_penalty": 1.0,
+    "seed": 45,
+    "threads": 8,
+    "context_tokens": 8192,
+    "max_output_tokens": 2048,
+    "prompt_sha256": "a60e1685770ab232184f6e8c2961f29369affe1c9c1c9c6fbd894f1013bec7ee",
+    "device": "CPU",
+    "inference": "Local subprocess; temporary loopback HTTP; no hosted API",
+    "prompt_format": "GGUF native chat template / Jinja",
+    "constrained_decoding": false,
+    "reasoning_budget_tokens": -1,
+    "model_load_seconds": 0.0,
+    "finish_reason": "stop",
+    "usage": {
+      "completion_tokens": 192,
+      "prompt_tokens": 3030,
+      "total_tokens": 3222,
+      "prompt_tokens_details": {
+        "cached_tokens": 1045
+      }
+    },
+    "timings": {
+      "cache_n": 1045,
+      "prompt_n": 1985,
+      "prompt_ms": 40367.5,
+      "prompt_per_token_ms": 20.336272040302266,
+      "prompt_per_second": 49.1732210317706,
+      "predicted_n": 192,
+      "predicted_ms": 25314.903,
+      "predicted_per_token_ms": 132.53875916230365,
+      "predicted_per_second": 7.544962743882527
+    },
+    "generation_seconds": 66.34943882400148
+  },
+  "feedback": {
+    "error": null,
+    "observation": {
+      "tcp_m": [
+        0.39999999998611396,
+        0.11999999999587024,
+        0.29999999999702687
+      ],
+      "gripper_command": "open",
+      "finger_contact_objects": [],
+      "simulation_time_s": 93.15999999996428,
+      "objects": [
+        {
+          "name": "red",
+          "shape": "cube",
+          "size_m": [
+            0.04,
+            0.04,
+            0.04
+          ],
+          "centre_m": [
+            0.4,
+            -0.11999999999990067,
+            0.019957398275963014
+          ]
+        },
+        {
+          "name": "blue",
+          "shape": "cube",
+          "size_m": [
+            0.04,
+            0.04,
+            0.04
+          ],
+          "centre_m": [
+            0.4,
+            0.1199999999999015,
+            0.019957398275963014
+          ]
+        }
+      ]
+    },
+    "evaluation": {
+      "success": false,
+      "goal": {
+        "type": "stack",
+        "source": "red",
+        "target": "blue"
+      },
+      "stack_checks": [
+        {
+          "source": "red",
+          "target": "blue",
+          "success": false,
+          "stable_checks": 0,
+          "checks": 20,
+          "tool_clear": true,
+          "diagnostics": {
+            "xy_error_m": 0.23999999999980218,
+            "height_error_m": 0.04,
+            "shapes_ok": true,
+            "centered": false,
+            "height_ok": false,
+            "stationary": true,
+            "touching": false,
+            "supported": true,
+            "valid": false
+          }
+        }
+      ]
+    },
+    "actions": [
+      {
+        "method": "gripper",
+        "args": [],
+        "kwargs": {
+          "closed": true
+        },
+        "time_s": 72.08000000001341,
+        "status": "ok"
+      },
+      {
+        "method": "move_to",
+        "args": [
+          [
+            0.4,
+            -0.12,
+            0.3
+          ]
+        ],
+        "kwargs": {},
+        "time_s": 72.78000000001178,
+        "status": "ok"
+      },
+      {
+        "method": "jog",
+        "args": [
+          "y",
+          0.24
+        ],
+        "kwargs": {},
+        "time_s": 77.46000000000087,
+        "status": "ok"
+      },
+      {
+        "method": "gripper",
+        "args": [],
+        "kwargs": {
+          "closed": false
+        },
+        "time_s": 82.25999999998969,
+        "status": "ok"
+      },
+      {
+        "method": "move_to",
+        "args": [
+          [
+            0.4,
+            0.12,
+            0.28
+          ]
+        ],
+        "kwargs": {},
+        "time_s": 82.95999999998806,
+        "status": "ok"
+      },
+      {
+        "method": "jog",
+        "args": [
+          "x",
+          0.02
+        ],
+        "kwargs": {},
+        "time_s": 84.0599999999855,
+        "status": "ok"
+      },
+      {
+        "method": "jog",
+        "args": [
+          "x",
+          -0.02
+        ],
+        "kwargs": {},
+        "time_s": 85.15999999998293,
+        "status": "ok"
+      },
+      {
+        "method": "jog",
+        "args": [
+          "y",
+          0.02
+        ],
+        "kwargs": {},
+        "time_s": 86.25999999998037,
+        "status": "ok"
+      },
+      {
+        "method": "jog",
+        "args": [
+          "y",
+          -0.02
+        ],
+        "kwargs": {},
+        "time_s": 87.3599999999778,
+        "status": "ok"
+      },
+      {
+        "method": "gripper",
+        "args": [],
+        "kwargs": {
+          "closed": true
+        },
+        "time_s": 88.45999999997524,
+        "status": "ok"
+      },
+      {
+        "method": "move_to",
+        "args": [
+          [
+            0.4,
+            0.12,
+            0.3
+          ]
+        ],
+        "kwargs": {},
+        "time_s": 89.1599999999736,
+        "status": "ok"
+      },
+      {
+        "method": "gripper",
+        "args": [],
+        "kwargs": {
+          "closed": false
+        },
+        "time_s": 90.25999999997104,
+        "status": "ok"
+      }
+    ],
+    "local_variables_reset": true,
+    "remaining_blocks": 0,
+    "model_declared_done": false
+  },
+  "model_declared_done": false
+}

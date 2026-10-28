@@ -1,0 +1,31 @@
+{
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "message": {
+        "role": "assistant",
+        "content": "{\"code\": \"robot.move_to([0.4, -0.12, 0.26])\\nrobot.gripper(True)\\nrobot.step(0.5)\", \"done\": false, \"message\": \"Closing gripper at the red cube's center to grasp it.\"}",
+        "reasoning_content": ""
+      }
+    }
+  ],
+  "usage": {
+    "completion_tokens": 63,
+    "prompt_tokens": 2274,
+    "total_tokens": 2337,
+    "prompt_tokens_details": {
+      "cached_tokens": 1692
+    }
+  },
+  "timings": {
+    "cache_n": 1692,
+    "prompt_n": 582,
+    "prompt_ms": 11287.644,
+    "prompt_per_token_ms": 19.39457731958763,
+    "prompt_per_second": 51.56080400834753,
+    "predicted_n": 63,
+    "predicted_ms": 6911.756,
+    "predicted_per_token_ms": 111.47993548387097,
+    "predicted_per_second": 8.97022406462265
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "message": {
+        "role": "assistant",
+        "content": "{\"code\": \"tcp = robot.position(\\\"tcp\\\")\\nx, y, z = tcp[0], tcp[1], tcp[2]\\nrobot.move_to([x + 0.05, y, z])\", \"done\": false, \"message\": \"Moving TCP 5cm right (along +X).\"}",
+        "reasoning_content": ""
+      }
+    }
+  ],
+  "usage": {
+    "completion_tokens": 70,
+    "prompt_tokens": 1082,
+    "total_tokens": 1152,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    }
+  },
+  "timings": {
+    "cache_n": 0,
+    "prompt_n": 1082,
+    "prompt_ms": 21372.856,
+    "prompt_per_token_ms": 19.75310166358595,
+    "prompt_per_second": 50.62496093175381,
+    "predicted_n": 70,
+    "predicted_ms": 7674.617,
+    "predicted_per_token_ms": 111.22633333333333,
+    "predicted_per_second": 8.990676668294977
+  }
+}

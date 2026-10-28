@@ -1,0 +1,1 @@
+{"code": "robot.move_to([0.4, -0.12, 0.01])\nrobot.gripper(True)", "done": false, "message": "Move to red cube, close gripper"}

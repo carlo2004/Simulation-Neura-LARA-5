@@ -1,0 +1,14 @@
+{
+  "tasks": [
+    {
+      "instruction": "Bewege den Greifer 5 cm nach rechts.",
+      "status": "model_finished",
+      "verified_success": null
+    },
+    {
+      "instruction": "Bewege den Greifer danach 5 cm nach links.",
+      "status": "budget_exhausted",
+      "verified_success": null
+    }
+  ]
+}

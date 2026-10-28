@@ -1,0 +1,7 @@
+```json
+{
+  "code": "",
+  "done": true,
+  "message": "Der Greifer wurde erfolgreich 5 cm nach rechts bewegt. Aufgabe abgeschlossen."
+}
+```

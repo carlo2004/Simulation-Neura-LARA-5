@@ -1,0 +1,62 @@
+{
+  "error": null,
+  "observation": {
+    "tcp_m": [
+      0.45000000040057114,
+      -0.1200000000639404,
+      0.25999999794479367
+    ],
+    "gripper_command": "open",
+    "finger_contact_objects": [],
+    "simulation_time_s": 2.73999999999992,
+    "objects": [
+      {
+        "name": "red",
+        "shape": "cube",
+        "size_m": [
+          0.04,
+          0.04,
+          0.04
+        ],
+        "centre_m": [
+          0.4,
+          -0.11999999999990067,
+          0.019957398275963014
+        ]
+      },
+      {
+        "name": "blue",
+        "shape": "cube",
+        "size_m": [
+          0.04,
+          0.04,
+          0.04
+        ],
+        "centre_m": [
+          0.4,
+          0.1199999999999015,
+          0.019957398275963014
+        ]
+      }
+    ]
+  },
+  "evaluation": {
+    "success": null,
+    "goal": null,
+    "stack_checks": []
+  },
+  "actions": [
+    {
+      "method": "step",
+      "args": [
+        0.1
+      ],
+      "kwargs": {},
+      "time_s": 2.439999999999953,
+      "status": "ok"
+    }
+  ],
+  "local_variables_reset": true,
+  "remaining_blocks": 0,
+  "model_declared_done": false
+}
