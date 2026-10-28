@@ -1,7 +1,8 @@
+from stacklab.paths import ROOT
 import json, unittest
 import numpy as np
 import mujoco
-from stacklab.sim.robot import ROOT, scene_xml
+from stacklab.sim.robot import scene_xml
 from stacklab.config import Config
 
 class LaraModelTests(unittest.TestCase):

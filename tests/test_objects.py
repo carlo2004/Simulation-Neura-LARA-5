@@ -1,3 +1,4 @@
+from stacklab.paths import ROOT
 import contextlib, io, tempfile, unittest
 from dataclasses import replace
 from pathlib import Path
@@ -5,7 +6,7 @@ import mujoco
 import numpy as np
 from stacklab.config import Config, ObjectSpec
 from stacklab.cli.console import Controller
-from stacklab.sim.robot import ROOT, Simulation
+from stacklab.sim.robot import Simulation
 
 class ObjectDescriptionTests(unittest.TestCase):
     def test_dimensions_and_colors(self):

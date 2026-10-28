@@ -1,4 +1,5 @@
 """Reusable local llama.cpp session with streamed output and explicit cancellation."""
+from stacklab.paths import ROOT, CACHE_ROOT
 import hashlib
 import json
 import socket
@@ -6,7 +7,7 @@ import subprocess
 import time
 import urllib.request
 from pathlib import Path
-from stacklab.llm.catalog import CACHE_ROOT, ROOT, find_executable, lock, runtime_env
+from stacklab.llm.catalog import find_executable, lock, runtime_env
 
 
 class GenerationCancelled(RuntimeError):
@@ -15,6 +16,8 @@ class GenerationCancelled(RuntimeError):
 
 class LocalModel:
     def __init__(self, model=None, threads=8):
+        if type(threads) is not int or threads < 1:
+            raise ValueError('threads must be a positive integer')
         self.config = lock(model)
         self.model = self.config.get('model_key', model)
         self.threads = threads
@@ -67,6 +70,10 @@ class LocalModel:
     def complete(self, messages, output, *, max_tokens=2048, seed=42, thinking=None,
                  timeout=600, on_delta=None, cancelled=None, thinking_budget=None):
         config = self.config
+        if type(max_tokens) is not int or not 0 < max_tokens < config.get('context_tokens', 4096):
+            raise ValueError('max-tokens must be positive and smaller than the model context')
+        if timeout <= 0:
+            raise ValueError('Generation timeout must be positive')
         thinking = config.get('default_thinking', False) if thinking is None else thinking
         if not thinking and not config.get('supports_thinking_toggle', True):
             raise ValueError('This reasoning model has no non-thinking mode')
@@ -78,9 +85,6 @@ class LocalModel:
         if prefix:
             messages[0]['content'] = (ROOT/prefix).read_text(encoding='utf-8')+'\n\n'+messages[0]['content']
         canonical = json.dumps(messages, ensure_ascii=False, sort_keys=True)
-        (output/'messages.json').write_text(canonical, encoding='utf-8')
-        (output/'system_prompt.txt').write_text(messages[0]['content'], encoding='utf-8')
-        (output/'user_prompt.txt').write_text(messages[-1]['content'], encoding='utf-8')
         template = dict(config.get('chat_template_kwargs', {}), enable_thinking=thinking)
         payload = dict(model='local', messages=messages, max_tokens=max_tokens, **sampling,
                        seed=seed, chat_template_kwargs=template, stream=True,
@@ -152,9 +156,6 @@ class LocalModel:
             raise error
         finally:
             raw, thoughts = ''.join(content), ''.join(reasoning)
-            (output/'raw_response.txt').write_text(raw, encoding='utf-8')
-            if thoughts:
-                (output/'reasoning.txt').write_text(thoughts, encoding='utf-8')
             reply['choices'] = [dict(finish_reason=finish, message=dict(role='assistant', content=raw, reasoning_content=thoughts))]
             (output/'response.json').write_text(json.dumps(reply, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
             metadata['generation_seconds'] = time.monotonic()-started

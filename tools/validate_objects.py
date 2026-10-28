@@ -1,11 +1,12 @@
 """Regression for named objects, varied sizes and three-cube support chains."""
+from stacklab.paths import ROOT
 from stacklab.paths import RUNS_ROOT
 import argparse,contextlib,io,time,platform
 from dataclasses import replace
 from pathlib import Path
 import mujoco,numpy,scipy
 from stacklab.config import Config,write_json
-from stacklab.sim.robot import ROOT,Simulation
+from stacklab.sim.robot import Simulation
 
 def main():
     parser=argparse.ArgumentParser()

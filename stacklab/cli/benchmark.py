@@ -1,4 +1,5 @@
 """First local-model pilot: natural language -> bounded Python -> independent physics check."""
+from stacklab.paths import ROOT, CACHE_ROOT
 from stacklab.paths import RUNS_ROOT
 import argparse
 from dataclasses import replace
@@ -9,7 +10,7 @@ import subprocess
 import sys
 import time
 from stacklab.config import Config, write_json
-from stacklab.llm.catalog import ROOT, CACHE_ROOT, lock, setup, model_keys
+from stacklab.llm.catalog import lock, setup, model_keys
 
 CASES = {
     'red-on-blue': ('Staple den roten Würfel auf den blauen Würfel.', 'red', 'blue', 'scenes/default.json', 0),
@@ -87,7 +88,7 @@ def main(argv=None):
     test.add_argument('--case', choices=CASES, default='red-on-blue')
     test.add_argument('--model', help='Model alias or exact Hugging Face model ID; default: qwen9b')
     test.add_argument('--feedback-rounds', type=int, default=0,
-                      help='0: open-loop baseline; 1–6: allow corrections from real simulation feedback')
+                      help='0: one-block baseline; positive N: up to N blocks using real simulation feedback')
     test.add_argument('--suite', action='store_true', help='Run four development cases')
     test.add_argument('--instruction', help='Override wording; expected source/target remain those of --case')
     test.add_argument('--gui', action='store_true', help='Show the generated program acting in the native viewer')
@@ -118,16 +119,16 @@ def main(argv=None):
                 setup(name)
             return 0
         config = lock(args.model)
-        if not 0 <= args.feedback_rounds <= 6:
-            raise ValueError('feedback-rounds must be 0–6')
+        if args.feedback_rounds < 0:
+            raise ValueError('feedback-rounds must be non-negative')
         if args.thinking is None:
             args.thinking = config.get('default_thinking', False)
         if args.max_tokens is None:
             args.max_tokens = 2048 if args.thinking else 768
-        if not 128 <= args.max_tokens <= 4096 or not 1 <= args.threads <= 64:
-            raise ValueError('max-tokens must be 128–4096; threads must be 1–64')
-        if not 10 <= args.generation_timeout <= 1800 or not 10 <= args.execution_timeout <= 600:
-            raise ValueError('Generation timeout: 10–1800 s; execution timeout: 10–600 s')
+        if min(args.max_tokens, args.threads) < 1:
+            raise ValueError('tokens and threads must be positive')
+        if min(args.generation_timeout, args.execution_timeout) <= 0:
+            raise ValueError('Generation and execution timeouts must be positive')
         if args.suite and args.instruction:
             raise ValueError('Use --instruction for one case, not --suite')
         directory = (args.output or RUNS_ROOT/('llm_'+time.strftime('%Y%m%d_%H%M%S'))).resolve()

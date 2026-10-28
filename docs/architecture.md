@@ -38,3 +38,15 @@ Arbeitsraum- und Kontaktprüfungen hängen an realer Geometrie. Ressourcenbudget
 ## Versionspflege
 
 `stacklab.__version__` ist die Versionsquelle; `pyproject.toml` übernimmt sie. `requirements.txt` ist die Abhängigkeitsquelle für Setup und Paketinstallation. Eingefrorene Paketstände eines alten Experiments gehören zu dessen Archiv, nicht zu einer zweiten Installationsanleitung.
+
+## Budgets anpassen
+
+`config/policy.json` enthält Überschreibungen der Defaults aus `ExecutionLimits`; eine leere Datei mit `{}` verwendet sie unverändert. Zum Beispiel:
+
+```json
+{"api_calls": 128, "wait_per_call_s": 10, "wait_total_s": 30}
+```
+
+Alternativ `STACKLAB_POLICY_LIMITS` auf eine Versuchskonfiguration setzen oder `Agent(..., policy_limits=ExecutionLimits(...))` übergeben. Die aufgelösten Werte werden jeder Aufgabe mitgegeben und im Ergebnis gespeichert. Die aktuelle Sprache bleibt ein kleiner Interpreter für einzelne Roboteraktionen und Variablen; eigener direkter Python-Code kann die normale Simulations-API verwenden.
+
+Runden, Threads und Timeouts haben keine versteckte obere Produktgrenze. Ausgabetokens müssen zum Modellkontext passen. Der Modellkatalog behält für die Seminar-Auswahl ein 10B-Gesamtparameterbudget; ein anderer Katalog darf dieses Budget ändern oder mit `null` entfernen.

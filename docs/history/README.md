@@ -35,3 +35,11 @@ Nach einem Update einmal `python bootstrap.py --test` ausführen. Der bisherige 
 ## Entfernte Relikte
 
 Redundante Promptkopien, doppelte Antwortdarstellungen und technische Vorversuche liegen nicht mehr in der aktuellen Projektansicht. Die vollständige ursprüngliche Sammlung bleibt unverändert im [Stand 9e21335](https://github.com/carlo2004/Simulation-Neura-LARA-5/tree/9e21335661a5d267259ad0f6b8069e5a7a533950/test_results). Die Git-Historie wird nicht umgeschrieben. Das Archivmanifest benennt den ursprünglichen Pfad jeder übernommenen Datei.
+
+## Protokolländerungen in Version 3
+
+Der Agent akzeptiert JSON, einen einzelnen Python-Codeblock oder direktes Python. Er schreibt keinen Modellcode um. Eine erfolgreiche Ausführung mit `done=true` beendet eine freie Aufgabe unmittelbar; die zusätzliche leere Abschlussbestätigung entfällt. Bei einem vorgegebenen physikalischen Ziel entscheidet weiterhin dessen Prüfung.
+
+Code-, AST-, Sequenz- und API-Budgets sind explizit konfigurierbar. Die Defaults erlauben 256 Statements/API-Aufrufe, 4096 AST-Knoten und 64.000 Zeichen; Wartebudgets bleiben zunächst 5 s pro Aufruf und 15 s gesamt. Das Ergebnis enthält die wirksamen Werte. Die früheren Messungen verwendeten die kleineren damaligen Limits und das ältere Protokoll.
+
+Neue Inferenzprotokolle speichern Prompt und Antwort kanonisch als `request.json` und `response.json`. Die mehrfachen Klartextkopien entfallen. Vorhandenes Reasoning und Usage bleiben in der Antwort erhalten, Metadaten in `generation.json`; Streamdaten und ausführbarer Code bleiben verfügbar.

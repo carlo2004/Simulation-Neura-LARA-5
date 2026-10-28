@@ -1,4 +1,5 @@
 """Prompt the local model live while the same MuJoCo scene stays open."""
+from stacklab.paths import ROOT
 from stacklab.paths import RUNS_ROOT
 import argparse
 from dataclasses import replace
@@ -15,7 +16,7 @@ from stacklab.cli.console import Controller
 from stacklab.config import Config
 from stacklab.llm.agent import Agent
 from stacklab.evaluation import evaluate, observe
-from stacklab.llm.catalog import ROOT, lock, model_keys
+from stacklab.llm.catalog import lock, model_keys
 from stacklab.llm.runtime import LocalModel
 
 HELP = '''Freie Sprache: z.B. "Bewege den Greifer 5 cm nach rechts."
@@ -93,7 +94,7 @@ class Presenter:
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description='Live natural-language control through a local model and execution feedback')
-    parser.add_argument('--model', default='qwen9b')
+    parser.add_argument('--model', help='Model alias; default from config/models.lock.json')
     parser.add_argument('--headless', action='store_true')
     parser.add_argument('--config', type=Path, default=ROOT/'scenes/three_cubes.json')
     parser.add_argument('--axes', action='store_true')
@@ -127,9 +128,9 @@ def main(argv=None):
     pending = queue.Queue()
     try:
         lock(args.model)
-        if not 1 <= args.max_rounds <= 6 or not 128 <= args.max_tokens <= 4096 or not 1 <= args.threads <= 64:
-            raise ValueError('rounds: 1–6; tokens: 128–4096; threads: 1–64')
-        if not 10 <= args.generation_timeout <= 1800 or not 10 <= args.execution_timeout <= 600:
+        if min(args.max_rounds, args.max_tokens, args.threads) < 1:
+            raise ValueError('rounds, tokens and threads must be positive')
+        if min(args.generation_timeout, args.execution_timeout) <= 0:
             raise ValueError('Invalid generation/execution time limit')
         if args.goal_stack and (not args.prompt or len(args.prompt) != 1):
             raise ValueError('--goal-stack requires exactly one --prompt')

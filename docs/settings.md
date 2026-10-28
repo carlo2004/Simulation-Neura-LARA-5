@@ -20,7 +20,7 @@ https://mujoco.readthedocs.io/en/3.3.7/python.html#passive-viewer
 ## Werte im Menü
 
 Die optionalen Koordinaten- und Stapelanzeigen ab Version 2.3 sind eigener
-Anwendungscode in `overlays.py`, dargestellt mit MuJoCos Visualisierungsfunktionen.
+Anwendungscode in `stacklab/sim/overlays.py`, dargestellt mit MuJoCos Visualisierungsfunktionen.
 Sie sind kein offizielles NEURA-Bedienelement. `axes on/off` und
 `stackviz SOURCE TARGET` beziehungsweise `stackviz off` steuern ihre Sichtbarkeit;
 beim normalen Start sind beide aus. Die Stapelanzeige verwendet dieselben
@@ -65,7 +65,7 @@ oder eine vollständige Reproduktion des Code-as-Policies-Experiments.
 Ab Version 2.4 sind Tastatursteuerung, `goto-selected`, die einfache Schiebestrategie
 und die Mesh-Aufbereitung ebenfalls eigener Anwendungscode. Die Doppelklick-Auswahl
 und das Anwenden von Mauskräften gehören zu MuJoCo. Die enthaltene Entengeometrie
-stammt dagegen von Sony über Khronos; Attribution/Lizenz stehen in `source/duck`.
+stammt dagegen von Sony über Khronos; Attribution/Lizenz stehen in `assets/sources/duck`.
 Konvexe Kollisionshülle, Masse und Reibung des importierten Beispiels sind keine
 gemessenen Eigenschaften einer realen Gummiente.
 Eigene Bedienvorgaben: 5 mm Tastenschritt, 4 cm/s Referenzbewegung, maximal
@@ -73,11 +73,11 @@ Eigene Bedienvorgaben: 5 mm Tastenschritt, 4 cm/s Referenzbewegung, maximal
 Oberfläche und mindestens die konfigurierte Transporthöhe.
 
 
-- `models/lara5/parameters.json`: extrahierte Kinematik/Grenzen und angenommene Massen.
-- `convert_model.py`: Näherungen für Dynamik, Kollisionskörper und Armregelung.
-- `simulation.py`: Tisch, Greifer, Reibung, Physikvorgaben und Erfolgskontrolle.
-- `core.py`, `scenes/default.json`, `scenes/*.json`: Versuchsszenen und Objektparameter.
-- `source/NOTICE.md`: Herkunft und Prüfsumme der unveränderten RoboDK-Quelldatei.
+- `assets/robots/lara5/parameters.json`: extrahierte Kinematik/Grenzen und angenommene Massen.
+- `stacklab/sim/convert.py`: Näherungen für Dynamik, Kollisionskörper und Armregelung.
+- `stacklab/sim/robot.py`: Tisch, Greifer, Reibung, Physikvorgaben und Erfolgskontrolle.
+- `stacklab/config.py`, `scenes/default.json`, `scenes/*.json`: Versuchsszenen und Objektparameter.
+- `assets/sources/NOTICE.md`: Herkunft und Prüfsumme der unveränderten RoboDK-Quelldatei.
 
 Modellquelle: https://robodk.com/robot/Neura/LARA-5
 
@@ -87,7 +87,7 @@ realen LARA 5. Für den Praktikumsbericht sollten diese Quellen und Annahmen
 als Teil des Versuchsaufbaus angegeben werden.
 # Ergänzung 2.6: lokale Modelle und Agentensteuerung
 
-Die Parameter in `local_model.lock.json` sind keine NEURA-Einstellungen. Modell-IDs,
+Die Parameter in `config/models.lock.json` sind keine NEURA-Einstellungen. Modell-IDs,
 Revisionen, Dateigrößen und Prüfsummen stammen aus den veröffentlichten Modellquellen.
 Qwen-Samplingprofile, Bolt-Temperatur/top-p und Ministrals Temperatur 0,7 folgen
 den Modellkarten; die übrigen festgelegten Werte sind im Lockfile dokumentiert.
@@ -97,4 +97,4 @@ Kontextlänge 8192, Denkbudget 768, Ausgabebudgets, maximal vier Live-Blöcke,
 Zeitlimits und die Weltachsen-Konvention für „rechts“ sind eigene Entscheidungen
 für diesen Teststand. Die 4-mm-Zentrierung und sonstigen Stapelkriterien bleiben
 eigene Prüfkriterien. Die Physik pausiert während der Inferenz, während die Ansicht
-bedienbar bleibt. Details und Überschreibungsoptionen: `LOCAL_LLM.md`.
+bedienbar bleibt. Details und Überschreibungsoptionen: [Modelle](models.md).

@@ -13,7 +13,7 @@ Nach erfolgreicher Einrichtung den ausgegebenen Interpreter verwenden. Linux-Bei
 .venv/bin/python -m stacklab demo --video
 ```
 
-Windows: `.\.venv\Scripts\python.exe` statt `.venv/bin/python`. macOS-Fenster benötigen MuJoCos `mjpython`; die GUI-Einstiege erkennen es in derselben Umgebung.
+Windows: `.\.venv\Scripts\python.exe` statt `.venv/bin/python`. macOS-Fenster benötigen MuJoCos `mjpython`. Für Demo und Konsole z. B. `.venv/bin/mjpython -m stacklab console` verwenden. Chat und Benchmark erkennen den Wrapper automatisch in derselben Umgebung.
 
 Jeder Befehl hat `--help`. `python -m stacklab --version` zeigt die Softwareversion.
 

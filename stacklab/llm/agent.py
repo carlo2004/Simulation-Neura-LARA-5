@@ -1,50 +1,21 @@
 """Feedback loop shared by the live console and independently graded experiments."""
+from stacklab.paths import ROOT
 from concurrent.futures import ThreadPoolExecutor
+from dataclasses import asdict
 import json
 from pathlib import Path
 import threading
 import time
 from stacklab.config import write_json
-from stacklab.llm.catalog import ROOT
+from stacklab.provenance import software_provenance
+
 from stacklab.llm.runtime import GenerationCancelled
 from stacklab.evaluation import evaluate, observe, physics_state
-from stacklab.policy import Interpreter, PolicyCancelled, validate
-
-PROTOCOL = '''Return a JSON object with "code" (Python string), "done" (boolean),
-and "message" (short explanation for the user). No Markdown around the JSON.
-Break long tasks into blocks if needed. Each block gets fresh local variables;
-only the physical world persists. Read the execution feedback before continuing.
-Set done=true only when your requested task is complete; an empty code string is
-allowed to finish without another action. A done claim is not a physical grade.
-After actions, you receive feedback before finishing. Confirm completion with an
-empty code string and done=true if the observations show the task is complete.
-Never repeat an already completed displacement just because feedback is returned.
-If an action failed, inspect current observations and correct the program.
-'''
-
+from stacklab.policy import ExecutionLimits, Interpreter, PolicyCancelled, validate
+from stacklab.llm.responses import parse_reply
 
 def system_prompt():
-    text = (ROOT/'config/prompts/robot_api.md').read_text(encoding='utf-8')
-    old = 'Return a JSON object with exactly one key, "code", whose string is the program.'
-    if old not in text:
-        raise ValueError('API reply-format marker missing')
-    return text.replace(old, PROTOCOL)
-
-
-def parse_reply(raw):
-    decoder = json.JSONDecoder()
-    for i, char in enumerate(raw):
-        if char != '{':
-            continue
-        try:
-            value, _ = decoder.raw_decode(raw[i:])
-        except json.JSONDecodeError:
-            continue
-        if (isinstance(value, dict) and 'code' in value and set(value) <= {'code', 'done', 'message'}
-                and isinstance(value['code'], str) and type(value.get('done', False)) is bool
-                and isinstance(value.get('message', ''), str) and len(value.get('message', '')) <= 2000):
-            return dict(code=value['code'], done=value.get('done', False), message=value.get('message', ''))
-    raise ValueError('Expected JSON with code:string, done:boolean and optional message:string')
+    return (ROOT/'config/prompts/robot_api.md').read_text(encoding='utf-8')
 
 
 def model_json(value):
@@ -70,7 +41,8 @@ def hold(robot):
 
 class Agent:
     def __init__(self, robot, client, *, max_rounds=4, max_tokens=2048, thinking=None, seed=42,
-                 generation_timeout=600, execution_timeout=120, on_event=None, tick=None, thinking_budget=None):
+                 generation_timeout=600, execution_timeout=120, on_event=None, tick=None, thinking_budget=None, policy_limits=None):
+        self.policy_limits = policy_limits or ExecutionLimits.load()
         self.robot, self.client = robot, client
         self.max_rounds, self.max_tokens, self.thinking = max_rounds, max_tokens, thinking
         self.seed = seed
@@ -125,10 +97,10 @@ class Agent:
             self.generating.clear()
 
     def run_task(self, instruction, directory, goal=None):
-        if not instruction.strip() or len(instruction) > 4000:
-            raise ValueError('Instruction must contain 1–4000 characters')
-        if not 1 <= self.max_rounds <= 6:
-            raise ValueError('Choose 1–6 feedback rounds')
+        if not instruction.strip():
+            raise ValueError('Instruction must not be empty')
+        if self.max_rounds < 1:
+            raise ValueError('Choose at least one program block')
         if 'tcp' in self.robot.object_names:
             raise ValueError('The LLM API reserves the object name tcp for the tool centre')
         directory = Path(directory).resolve()
@@ -140,12 +112,13 @@ class Agent:
         write_json(directory/'initial_physics.json', physics_state(self.robot))
         initial = observe(self.robot)
         request = dict(instruction=instruction, observation=initial, units='world metres',
-                       recent_tasks=self.recent_tasks[-3:], program_block_budget=self.max_rounds)
+                       recent_tasks=self.recent_tasks[-3:], program_block_budget=self.max_rounds, policy_limits=asdict(self.policy_limits))
         first = dict(role='user', content=model_json(request))
         system = dict(role='system', content=system_prompt())
         history = []
         report = dict(instruction=instruction, goal=goal, success=False if goal else None,
                       status='budget_exhausted', mode='closed_loop_feedback', max_rounds=self.max_rounds,
+                      protocol_version=2, policy_limits=asdict(self.policy_limits), software=software_provenance(),
                       physics_during_inference='paused; viewer remains responsive',
                       model_observation_decimal_places=6,
                       model=self.client.config, initial_observation=initial, rounds=[])
@@ -169,19 +142,20 @@ class Agent:
                     raw, metadata = self.generate(messages, path, self.seed+index-1)
                     item['generation'] = metadata
                     assistant = dict(role='assistant', content=raw)
-                    if self.client.config.get('preserve_reasoning') and (path/'reasoning.txt').is_file():
-                        assistant['reasoning_content'] = (path/'reasoning.txt').read_text(encoding='utf-8')
+                    if self.client.config.get('preserve_reasoning') and (path/'response.json').is_file():
+                        response = json.loads((path/'response.json').read_text(encoding='utf-8'))
+                        assistant['reasoning_content'] = response['choices'][0]['message'].get('reasoning_content', '')
                     history.append(assistant)
                     record('assistant', dict(round=index, content=raw, generation=metadata))
                     reply = None
                     runner = None
                     error = None
                     try:
-                        reply = parse_reply(raw)
+                        reply = parse_reply(raw, self.policy_limits)
                         (path/'generated.py').write_text(reply['code'].rstrip()+'\n', encoding='utf-8')
                         self.on_event('program', dict(round=index, **reply))
                         if reply['code'].strip():
-                            validate(reply['code'])
+                            validate(reply['code'], self.policy_limits)
                             deadline = time.monotonic()+self.execution_timeout
 
                             def interrupt():
@@ -190,7 +164,7 @@ class Agent:
                                     raise TimeoutError('Execution time limit reached')
 
                             self.robot.command_interrupt = interrupt
-                            runner = Interpreter(self.robot, should_stop=self.cancelled.is_set,
+                            runner = Interpreter(self.robot, limits=self.policy_limits, should_stop=self.cancelled.is_set,
                                                  on_action=lambda phase, action: self.on_event('action', dict(phase=phase, **action)))
                             item['stage'] = 'execution'
                             runner.run(reply['code'])
@@ -220,18 +194,16 @@ class Agent:
                     item.update(stage='evaluated', feedback=feedback,
                                 model_declared_done=reply['done'] if reply else False)
                     write_json(path/'feedback.json', feedback)
-                    write_json(path/'execution.json', item)
                     record('environment_feedback', dict(round=index, **feedback))
                     self.on_event('feedback', feedback)
                     report['evaluation'] = grading
                     if goal and grading['success']:
                         report.update(success=True, status='verified_success')
                         break
-                    if not goal and reply and reply['done'] and not reply['code'].strip() and not error:
+                    if not goal and reply and reply['done'] and not error:
                         report['status'] = 'model_finished'
                         break
-                    reminder = ('You marked the task done. Verify this REAL feedback; confirm with empty code and done=true '
-                                'if complete, otherwise correct failures.' if reply and reply['done'] else
+                    reminder = ('Your done claim did not pass the trusted goal. Use this REAL feedback to correct failures.' if reply and reply['done'] else
                                 'Continue the ORIGINAL task using the current state; correct failures.')
                     history.append(dict(role='user', content=model_json(dict(feedback=feedback, reminder=reminder))))
             except (GenerationCancelled, PolicyCancelled) as error:

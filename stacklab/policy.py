@@ -1,10 +1,48 @@
 """A bounded Python subset for generated policies; no eval/exec or general Python access."""
 import ast
+from dataclasses import dataclass
+import json
+import os
+from pathlib import Path
+from stacklab.paths import ROOT
 import math
 import operator
 
 METHODS = {'position', 'move_to', 'jog', 'gripper', 'step'}
 OPS = {ast.Add: operator.add, ast.Sub: operator.sub, ast.Mult: operator.mul, ast.Div: operator.truediv}
+
+
+@dataclass(frozen=True)
+class ExecutionLimits:
+    """Resource budgets, independent of the task and its success criteria."""
+    code_characters: int = 64000
+    statements: int = 256
+    ast_nodes: int = 4096
+    api_calls: int = 256
+    sequence_items: int = 64
+    wait_per_call_s: float = 5.
+    wait_total_s: float = 15.
+
+    def __post_init__(self):
+        for name in ("code_characters", "statements", "ast_nodes", "api_calls", "sequence_items"):
+            value = getattr(self, name)
+            if type(value) is not int or value < 1:
+                raise ValueError(name+" must be a positive integer")
+        for name in ("wait_per_call_s", "wait_total_s"):
+            value = getattr(self, name)
+            if type(value) not in (int, float) or not math.isfinite(value) or value < 0:
+                raise ValueError(name+" must be finite and non-negative")
+
+    @classmethod
+    def load(cls, path=None):
+        path = Path(path or os.environ.get("STACKLAB_POLICY_LIMITS", ROOT/"config/policy.json"))
+        data = json.loads(path.read_text(encoding="utf-8"))
+        if not isinstance(data, dict):
+            raise ValueError("Policy limits must be a JSON object")
+        try:
+            return cls(**data)
+        except TypeError as error:
+            raise ValueError("Unknown policy-limit setting: "+str(error)) from None
 
 
 class PolicyError(ValueError):
@@ -15,22 +53,23 @@ class PolicyCancelled(PolicyError):
     pass
 
 
-def validate(code):
-    if not isinstance(code, str) or len(code) > 16000:
-        raise PolicyError('Program must be a string of at most 16000 characters')
+def validate(code, limits=None):
+    limits = limits or ExecutionLimits.load()
+    if not isinstance(code, str) or len(code) > limits.code_characters:
+        raise PolicyError(f'Program must be a string of at most {limits.code_characters} characters')
     try:
         tree = ast.parse(code)
     except SyntaxError as error:
         raise PolicyError(f'Invalid Python on line {error.lineno}: {error.msg}') from None
-    if not 1 <= len(tree.body) <= 64 or len(list(ast.walk(tree))) > 1200:
-        raise PolicyError('Program must have 1–64 statements and at most 1200 AST nodes')
+    if not 1 <= len(tree.body) <= limits.statements or len(list(ast.walk(tree))) > limits.ast_nodes:
+        raise PolicyError(f'Program budget: {limits.statements} statements, {limits.ast_nodes} AST nodes')
     allowed = (ast.Module, ast.Assign, ast.Expr, ast.Name, ast.Load, ast.Store, ast.Constant,
                ast.List, ast.Tuple, ast.Subscript, ast.BinOp, ast.Add, ast.Sub, ast.Mult,
                ast.Div, ast.UnaryOp, ast.UAdd, ast.USub, ast.Call, ast.Attribute, ast.keyword)
     for node in ast.walk(tree):
         if not isinstance(node, allowed):
             raise PolicyError('Unsupported Python construct: '+type(node).__name__)
-        if isinstance(node, ast.Name) and (node.id.startswith('_') or len(node.id) > 40):
+        if isinstance(node, ast.Name) and node.id.startswith('_'):
             raise PolicyError('Invalid variable name')
         if isinstance(node, ast.Constant):
             if type(node.value) not in (str, int, float, bool):
@@ -67,7 +106,8 @@ def number(value):
 
 
 class Interpreter:
-    def __init__(self, robot, on_action=None, should_stop=None):
+    def __init__(self, robot, on_action=None, should_stop=None, limits=None):
+        self.limits = limits or ExecutionLimits.load()
         self.robot = robot
         self.variables = {}
         self.actions = []
@@ -83,8 +123,8 @@ class Interpreter:
                 raise PolicyError('Undefined variable: '+node.id)
             return self.variables[node.id]
         if isinstance(node, (ast.List, ast.Tuple)):
-            if len(node.elts) > 3:
-                raise PolicyError('Lists/tuples may have at most three entries')
+            if len(node.elts) > self.limits.sequence_items:
+                raise PolicyError(f'Sequence budget: {self.limits.sequence_items} items')
             values = [self.expression(v) for v in node.elts]
             if any(type(v) not in (str, int, float, bool) for v in values):
                 raise PolicyError('Lists/tuples must be flat lists of scalar values')
@@ -111,8 +151,8 @@ class Interpreter:
     def call(self, method, args, kwargs):
         if self.should_stop and self.should_stop():
             raise PolicyCancelled('Execution cancelled')
-        if len(self.actions) >= 48:
-            raise PolicyError('At most 48 robot API calls are allowed')
+        if len(self.actions) >= self.limits.api_calls:
+            raise PolicyError(f'API call budget reached: {self.limits.api_calls}')
         action = dict(method=method, args=args, kwargs=kwargs, time_s=float(self.robot.data.time))
         self.actions.append(action)
         if self.on_action:
@@ -176,13 +216,14 @@ class Interpreter:
                 raise PolicyError('step expects one duration in seconds')
             seconds = number(args[0])
             self.wait_total += seconds
-            if not 0 <= seconds <= 5 or self.wait_total > 15:
-                raise PolicyError('Wait 0–5 seconds per call, at most 15 seconds total')
+            if not 0 <= seconds <= self.limits.wait_per_call_s or self.wait_total > self.limits.wait_total_s:
+                raise PolicyError(f'Wait budget: {self.limits.wait_per_call_s} s per call, '
+                                  f'{self.limits.wait_total_s} s total')
             self.robot.step(seconds)
         return None
 
     def run(self, code):
-        tree = validate(code)
+        tree = validate(code, self.limits)
         for statement in tree.body:
             if self.should_stop and self.should_stop():
                 raise PolicyCancelled('Execution cancelled')

@@ -1,4 +1,5 @@
 """Repeatable physical pushes and scripted key input, without pretending to test a desktop."""
+from stacklab.paths import ROOT
 from stacklab.paths import RUNS_ROOT
 import argparse
 from unittest.mock import patch
@@ -7,7 +8,7 @@ import numpy as np
 from stacklab.config import Config, ObjectSpec, write_json
 from stacklab.cli.console import Controller
 from stacklab.sim.manual import SPACE, ESCAPE
-from stacklab.sim.robot import ROOT, Simulation
+from stacklab.sim.robot import Simulation
 
 
 def main():

@@ -1,4 +1,5 @@
 """Exercise the real render pipeline and console, with before/after evidence."""
+from stacklab.paths import ROOT
 from stacklab.paths import RUNS_ROOT
 import contextlib
 import io
@@ -7,7 +8,7 @@ import numpy as np
 from PIL import Image
 from stacklab.cli.console import Controller, CommandError
 from stacklab.config import write_json
-from stacklab.sim.robot import ROOT, Simulation
+from stacklab.sim.robot import Simulation
 
 
 def main():

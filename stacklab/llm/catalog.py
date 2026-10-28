@@ -1,4 +1,4 @@
-"""Pinned local GGUF inference through a temporary, loopback-only llama.cpp process."""
+"""Pinned model catalog, verified downloads and local runtime installation."""
 import hashlib
 import json
 import os
@@ -9,7 +9,6 @@ import tarfile
 import urllib.request
 import zipfile
 
-from stacklab.paths import ROOT
 from stacklab.paths import CACHE_ROOT, REGISTRY_PATH
 DOWNLOAD_RESERVE_BYTES = 512*1024*1024
 
@@ -26,8 +25,11 @@ def lock(model=None):
         config.update(registry['models'][key], model_key=key)
     else:
         config = registry  # Read older single-model locks and archived configurations.
-    if not 0 < config['total_parameters'] <= config['max_total_parameters'] <= 10_000_000_000:
-        raise ValueError('Model exceeds the configured total-parameter limit (maximum 10B)')
+    total, ceiling = config['total_parameters'], config.get('max_total_parameters')
+    if type(total) is not int or total <= 0:
+        raise ValueError('total_parameters must be a positive integer')
+    if ceiling is not None and (type(ceiling) is not int or ceiling <= 0 or total > ceiling):
+        raise ValueError('Model exceeds the configured total-parameter budget')
     return config
 
 
@@ -148,27 +150,3 @@ def runtime_env(executable):
         env['LD_LIBRARY_PATH'] = str(executable.parent)+(os.pathsep+env['LD_LIBRARY_PATH'] if env.get('LD_LIBRARY_PATH') else '')
     return env
 
-
-def extract_program(raw):
-    decoder = json.JSONDecoder()
-    for index, char in enumerate(raw):
-        if char != '{':
-            continue
-        try:
-            value, _ = decoder.raw_decode(raw[index:])
-        except json.JSONDecodeError:
-            continue
-        if isinstance(value, dict) and set(value) == {'code'} and isinstance(value['code'], str):
-            return value['code']
-    raise ValueError('Model did not return a complete JSON object with one code field')
-
-
-def generate(system, user, output, *, max_tokens=2048, seed=42, threads=8, timeout=600, thinking=None, model=None, on_delta=None):
-    from stacklab.llm.runtime import LocalModel
-    with LocalModel(model, threads=threads) as client:
-        raw, metadata = client.complete([dict(role='system', content=system), dict(role='user', content=user)],
-                                        output, max_tokens=max_tokens, seed=seed, timeout=timeout,
-                                        thinking=thinking, on_delta=on_delta)
-    program = extract_program(raw)
-    (Path(output)/'generated.py').write_text(program.rstrip()+'\n', encoding='utf-8')
-    return program, metadata

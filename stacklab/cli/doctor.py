@@ -1,4 +1,5 @@
 """Show which interpreter/dependencies a command actually uses; no installation."""
+from stacklab.paths import ROOT
 import argparse
 import importlib
 import importlib.metadata
@@ -26,7 +27,7 @@ def main(argv=None):
             result['packages'][distribution] = importlib.metadata.version(distribution)
         except Exception as error:
             result['errors'].append(distribution+': '+str(error))
-    from stacklab.sim.assets import ROOT, model_ready
+    from stacklab.sim.assets import model_ready
     result['assets_ready'] = model_ready() and (ROOT/'assets/sources/Neura-LARA-5.robot').is_file()
     if not result['assets_ready']:
         result['errors'].append('Modelldaten fehlen: python bootstrap.py ausführen.')

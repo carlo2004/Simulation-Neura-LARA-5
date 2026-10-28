@@ -1,4 +1,5 @@
 """Offline harness controls. Fake model answers here are not model benchmark results."""
+from stacklab.paths import ROOT
 from contextlib import redirect_stdout, closing
 import io
 import json
@@ -13,7 +14,7 @@ from stacklab.config import Config
 from stacklab.sim.robot import Simulation
 from stacklab.llm.agent import Agent, parse_reply, system_prompt, model_json
 from stacklab.evaluation import observe
-from stacklab.llm.catalog import ROOT, lock, model_keys, download
+from stacklab.llm.catalog import lock, model_keys, download
 from stacklab.llm.runtime import GenerationCancelled, LocalModel
 from stacklab.policy import Interpreter, PolicyCancelled
 
@@ -43,8 +44,8 @@ class FakeModel:
         path = Path(directory)
         path.mkdir(parents=True, exist_ok=True)
         raw = json.dumps(next(self.replies))
-        (path/'raw_response.txt').write_text(raw)
-        (path/'messages.json').write_text(json.dumps(messages))
+        (path/'request.json').write_text(json.dumps(dict(messages=messages)))
+        (path/'response.json').write_text(json.dumps(dict(choices=[dict(message=dict(content=raw))])))
         return raw, dict(model_id='TEST FIXTURE; NOT REAL INFERENCE')
 
     def cancel(self):
@@ -56,7 +57,7 @@ class FakeModel:
 
 class FeedbackTests(unittest.TestCase):
     def test_registry_accepts_requested_models_and_exact_ids(self):
-        self.assertEqual(set(model_keys()), {'qwen4b', 'qwen9b', 'ministral8b', 'nemotron8b'})
+        self.assertTrue({'qwen4b', 'qwen9b', 'ministral8b', 'nemotron8b'}.issubset(model_keys()))
         for key in ['qwen9b', 'ministral8b', 'nemotron8b']:
             config = lock(key)
             self.assertGreater(config['total_parameters'], 7_000_000_000)
@@ -137,9 +138,10 @@ class FeedbackTests(unittest.TestCase):
     def test_free_form_live_task_never_claims_independent_semantic_success(self):
         with tempfile.TemporaryDirectory() as temp, closing(Simulation(Config.load(ROOT/'scenes/default.json'))) as robot:
             before = observe(robot)['tcp_m']
-            report = Agent(robot, FakeModel([dict(code=MOVE, done=True), dict(code='', done=True)])).run_task('rechts', Path(temp)/'episode')
+            report = Agent(robot, FakeModel([dict(code=MOVE, done=True)])).run_task('rechts', Path(temp)/'episode')
             self.assertIsNone(report['success'])
             self.assertEqual(report['status'], 'model_finished')
+            self.assertEqual(len(report['rounds']), 1)
             self.assertAlmostEqual(report['final_observation']['tcp_m'][0]-before[0], .05, delta=.004)
 
     def test_motion_can_be_interrupted_inside_a_move(self):
@@ -188,8 +190,7 @@ class FeedbackTests(unittest.TestCase):
     def test_live_cli_repeated_prompts_keep_the_same_world(self):
         from stacklab.cli import chat as llm_chat
         with tempfile.TemporaryDirectory() as temp, redirect_stdout(io.StringIO()) as stdout:
-            client = FakeModel([dict(code=MOVE, done=True), dict(code='', done=True),
-                                dict(code=MOVE, done=True), dict(code='', done=True)])
+            client = FakeModel([dict(code=MOVE, done=True), dict(code=MOVE, done=True)])
             with patch.object(llm_chat, 'LocalModel', return_value=client):
                 code = llm_chat.main(['--headless', '--prompt', 'rechts', '--prompt', 'nochmal rechts',
                                       '--output', str(Path(temp)/'chat')])
@@ -198,6 +199,7 @@ class FeedbackTests(unittest.TestCase):
             second = json.loads((Path(temp)/'chat/task_002/result.json').read_text())
             self.assertAlmostEqual(second['initial_observation']['tcp_m'][0],
                                    first['final_observation']['tcp_m'][0], delta=.001)
+            self.assertAlmostEqual(second['final_observation']['tcp_m'][0]-second['initial_observation']['tcp_m'][0], .05, delta=.004)
             self.assertIn('robot.position', stdout.getvalue())
 
     def test_cancelled_live_task_is_not_presented_as_model_completion(self):
@@ -299,7 +301,11 @@ class StreamTests(unittest.TestCase):
             self.assertEqual(json.loads(raw)['code'], 'robot.step(0.1)')
             self.assertEqual(metadata['usage']['completion_tokens'], 10)
             self.assertEqual(metadata['reasoning_budget_tokens'], 768)
-            self.assertEqual((Path(temp)/'reasoning.txt').read_text(), 'think')
+            response = json.loads((Path(temp)/'response.json').read_text())
+            self.assertEqual(response['choices'][0]['message']['reasoning_content'], 'think')
+            self.assertEqual(response['choices'][0]['message']['content'], raw)
+            self.assertFalse((Path(temp)/'messages.json').exists())
+            self.assertFalse((Path(temp)/'raw_response.txt').exists())
             request = json.loads(opened.call_args.args[0].data)
             self.assertEqual(request['reasoning_budget_tokens'], 768)
             self.assertNotIn('response_format', request)
