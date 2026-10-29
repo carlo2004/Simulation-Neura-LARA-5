@@ -5,6 +5,8 @@ import os
 from pathlib import Path
 import platform
 import shutil
+import site
+import sys
 import tarfile
 import urllib.request
 import zipfile
@@ -255,9 +257,25 @@ def runtime_env(executable):
     if platform.system() == 'Linux':
         root = next((p for p in executable.parents if (p/'installed.json').is_file()), executable.parent)
         directories = [executable.parent, *sorted({p.parent for p in root.rglob('*.so*')})]
+        # Colab can supply the driver and CUDA dependencies outside the project venv.
+        # Keep the pinned runtime's libraries first; never add CUDA linker stubs.
+        directories.append(Path('/usr/lib64-nvidia'))
+        package_roots = [*sys.path, *site.getsitepackages(), *site.getsitepackages([sys.base_prefix])]
+        version = f'python{sys.version_info.major}.{sys.version_info.minor}'
+        package_roots.append(str(Path(sys.base_prefix)/'lib'/version/'dist-packages'))
+        for package_root in dict.fromkeys(package_roots):
+            if package_root:
+                for package in ('cuda_runtime', 'cublas'):
+                    directories.append(Path(package_root)/'nvidia'/package/'lib')
+        directories = [p for p in directories if p.is_dir()]
         paths = list(dict.fromkeys(str(p) for p in directories))
         if env.get('LD_LIBRARY_PATH'):
             paths.append(env['LD_LIBRARY_PATH'])
         env['LD_LIBRARY_PATH'] = os.pathsep.join(paths)
+        backends = [executable.parent/'libggml-cuda.so', *sorted(root.rglob('libggml-cuda.so'))]
+        backend = next((p for p in backends if p.is_file()), None)
+        if backend is not None:
+            # GGML_BACKEND_PATH takes a library filename, not a search directory.
+            env['GGML_BACKEND_PATH'] = str(backend.resolve())
     return env
 

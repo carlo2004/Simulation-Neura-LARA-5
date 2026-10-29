@@ -1,6 +1,7 @@
 """CUDA interface controls using explicit fixtures; no claimed GPU inference."""
 import io
 import json
+import os
 from pathlib import Path
 import subprocess
 import tarfile
@@ -106,6 +107,73 @@ class CudaTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, 'missing or changed'):
                     catalog.find_executable('granite8b', device='cuda')
 
+    def test_colab_libraries_outside_venv_and_explicit_backend_are_discovered(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp).resolve()
+            runtime = root/'runtime'
+            executable = runtime/'bin/llama-server'
+            executable.parent.mkdir(parents=True)
+            executable.touch()
+            (runtime/'installed.json').write_text('{}', encoding='utf-8')
+            backend = runtime/'lib/libggml-cuda.so'
+            backend.parent.mkdir()
+            backend.touch()
+            base = root/'base'
+            version = f'python{catalog.sys.version_info.major}.{catalog.sys.version_info.minor}'
+            packages = base/'lib'/version/'dist-packages'
+            cuda = packages/'nvidia/cuda_runtime/lib'
+            cublas = packages/'nvidia/cublas/lib'
+            cuda.mkdir(parents=True)
+            cublas.mkdir(parents=True)
+            driver = Path('/usr/lib64-nvidia')
+            is_dir = Path.is_dir
+            with patch.object(catalog.platform, 'system', return_value='Linux'), \
+                    patch.object(catalog.sys, 'path', [str(root/'venv/site-packages')]), \
+                    patch.object(catalog.sys, 'base_prefix', str(base)), \
+                    patch.object(catalog.site, 'getsitepackages', return_value=[]), \
+                    patch.object(Path, 'is_dir', lambda p: p == driver or is_dir(p)), \
+                    patch.dict(catalog.os.environ, {'LD_LIBRARY_PATH': str(root/'user-libs'),
+                                                   'GGML_BACKEND_PATH': '/stale/backend.so'}):
+                env = catalog.runtime_env(executable)
+            paths = env['LD_LIBRARY_PATH'].split(os.pathsep)
+            self.assertEqual(paths[:2], [str(executable.parent), str(backend.parent)])
+            self.assertIn(str(driver), paths)
+            self.assertIn(str(cuda), paths)
+            self.assertIn(str(cublas), paths)
+            self.assertEqual(paths[-1], str(root/'user-libs'))
+            self.assertEqual(env['GGML_BACKEND_PATH'], str(backend))
+            self.assertEqual(len(paths), len(set(paths)))
+            self.assertFalse(any('stubs' in p for p in paths))
+
+    def test_python_site_and_import_paths_are_searched_without_loading_packages(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp).resolve()
+            executable = root/'runtime/llama-server'
+            executable.parent.mkdir()
+            libraries = [root/'venv/site-packages/nvidia/cuda_runtime/lib',
+                         root/'base/site-packages/nvidia/cublas/lib',
+                         root/'custom/site-packages/nvidia/cublas/lib']
+            for library in libraries:
+                library.mkdir(parents=True)
+            with patch.object(catalog.platform, 'system', return_value='Linux'), \
+                    patch.object(catalog.sys, 'path', [str(root/'custom/site-packages')]), \
+                    patch.object(catalog.site, 'getsitepackages',
+                                 side_effect=[[str(root/'venv/site-packages')],
+                                              [str(root/'base/site-packages')]]), \
+                    patch.dict(catalog.os.environ, {'GGML_BACKEND_PATH': '/stale/backend.so'}):
+                env = catalog.runtime_env(executable)
+            for library in libraries:
+                self.assertIn(str(library), env['LD_LIBRARY_PATH'].split(os.pathsep))
+            self.assertNotIn('GGML_BACKEND_PATH', env)
+
+    def test_non_linux_runtime_does_not_change_library_search(self):
+        with patch.object(catalog.platform, 'system', return_value='Windows'), \
+                patch.dict(catalog.os.environ, {'LD_LIBRARY_PATH': 'user-libs',
+                                               'GGML_BACKEND_PATH': '/stale/backend.so'}):
+            env = catalog.runtime_env(Path('/fixture/llama-server.exe'))
+        self.assertEqual(env['LD_LIBRARY_PATH'], 'user-libs')
+        self.assertNotIn('GGML_BACKEND_PATH', env)
+
     def test_requested_device_controls_native_command_and_saved_offload_evidence(self):
         class Process:
             def poll(self): return None
@@ -124,8 +192,10 @@ class CudaTests(unittest.TestCase):
                 weights.touch()
                 client.config=dict(config, model_bytes=0)
                 def launch(command, **kwargs):
-                    kwargs['stdout'].write('load_tensors: offloaded 33/33 layers to GPU\n')
-                    kwargs['stdout'].flush()
+                    # Reproduce the pinned runtime: offload proof requires verbose logs.
+                    if '-lv' in command and command[command.index('-lv')+1] == '5':
+                        kwargs['stdout'].write('load_tensors: offloaded 41/41 layers to GPU\n')
+                        kwargs['stdout'].flush()
                     return Process()
                 response=io.BytesIO(b'{}')
                 response.status=200
@@ -140,6 +210,12 @@ class CudaTests(unittest.TestCase):
                 command=started.call_args.args[0]
                 self.assertEqual(command[command.index('--gpu-layers')+1], '999' if device=='cuda' else '0')
                 self.assertEqual((path/'device.json').exists(), device=='cuda')
+                if device == 'cuda':
+                    evidence = json.loads((path/'device.json').read_text(encoding='utf-8'))
+                    self.assertEqual(evidence['offloaded_layers'], 41)
+                    self.assertEqual(evidence['total_layers'], 41)
+                else:
+                    self.assertNotIn('-lv', command)
                 client.close()
 
     def test_notebook_code_cells_compile_and_contain_no_fake_measurements(self):

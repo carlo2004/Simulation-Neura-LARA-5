@@ -95,6 +95,16 @@ python3 tools/start_remote.py --model granite8b --device cuda --threads 2
 
 Bei vorhandenem Checkout stattdessen dort `git pull --ff-only` ausführen. Der Helfer erstellt `.venv`, prüft die GPU, richtet gegebenenfalls die CUDA-Buildwerkzeuge ein und installiert nur das gewählte Modell. Ein erster Quellbuild kann deutlich länger als die Paketinstallation dauern; sein Fortschritt und der Logpfad werden angezeigt. Ein unveränderter Build wird in derselben VM wiederverwendet.
 
+Falls Colabs `python3 -m venv` wegen fehlendem `ensurepip` scheitert, die Projektumgebung mit `virtualenv` anlegen und den Helfer erneut starten (Python 3.12/3.13):
+
+```bash
+python3 -m pip install virtualenv
+python3 -m virtualenv .venv
+python3 tools/start_remote.py --model granite8b --device cuda --threads 2
+```
+
+Ist bereits eine unvollständige `.venv` vorhanden, vorher `mv .venv .venv-incomplete` ausführen. Das ist eine Einrichtung der jeweiligen Colab-Laufzeit; dafür muss der Projektcode nicht geändert werden.
+
 Auf folgende Meldung warten:
 
 ```text
@@ -102,6 +112,8 @@ READY http://127.0.0.1:8765
 ```
 
 Bei CUDA wird vor `READY` sowohl der CUDA-Backend als auch das tatsächliche Auslagern der Modellschichten geprüft. Ein fehlgeschlagener Start wird nicht als CPU-Erfolg ausgegeben. Der Server bindet ausschließlich `127.0.0.1`; SSH stellt die Verbindung her.
+
+Unter Linux ergänzt der Launcher die Bibliothekssuche um `/usr/lib64-nvidia` sowie vorhandene Python-Paketpfade für CUDA-Runtime und cuBLAS, auch außerhalb der Projektumgebung. Ein vorhandenes `libggml-cuda.so` aus der installierten Runtime wird über `GGML_BACKEND_PATH` explizit geladen. Der CUDA-Server startet mit `-lv 5`, damit `inference.log` die tatsächlich ausgelagerten Schichten meldet, zum Beispiel `offloaded 41/41 layers to GPU`. Die Layerzahl hängt vom Modell ab; sie ist kein fest vorgegebener Erfolgswert. Die gemessenen Zahlen stehen zusätzlich in `device.json`.
 
 Der Starthelfer verwendet denselben gesperrten Modellkatalog und dieselbe GLIBC-/CUDA-Auswahl wie das Batch-Notebook. Optionen: `--model`, `--device`, `--threads`, `--port`, `--cuda-runtime auto|binary|source`. Für später bereits eingerichtete Maschinen genügt:
 
