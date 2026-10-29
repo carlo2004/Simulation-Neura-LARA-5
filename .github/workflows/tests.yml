@@ -37,6 +37,9 @@ jobs:
         if: failure() && matrix.os == 'windows-latest' && matrix.python == '3.13'
         shell: python
         run: |
+          from pathlib import Path
+          import sys
+          sys.path.insert(0, str(Path.cwd()))
           from stacklab.llm.catalog import CACHE_ROOT, lock
           p = CACHE_ROOT/'runtime'/lock('dory4b')['runtime_version']/'build.log'
           print(p.read_text(encoding='utf-8', errors='replace')[-16000:] if p.is_file() else 'No source-build log')

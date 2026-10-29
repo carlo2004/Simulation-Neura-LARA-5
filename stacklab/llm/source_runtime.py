@@ -69,6 +69,11 @@ def build_runtime(config, directory):
                     raise ValueError('Source cache is not an empty directory: '+str(source))
                 source.mkdir(exist_ok=True)
                 run(['git', 'init', str(source)])
+                run(['git', '-C', str(source), 'config', 'core.autocrlf', 'false'])
+                # Keep the pinned blob bytes even with Windows/global line-ending filters.
+                attributes = source/'.git/info/attributes'
+                attributes.parent.mkdir(parents=True, exist_ok=True)
+                attributes.write_text('* -text\n', encoding='utf-8')
                 run(['git', '-C', str(source), 'remote', 'add', 'origin', spec['repository']])
             head = subprocess.run(['git', '-C', str(source), 'rev-parse', 'HEAD'],
                                   capture_output=True, text=True)
@@ -81,7 +86,9 @@ def build_runtime(config, directory):
             dirty = subprocess.check_output(['git', '-C', str(source), 'status', '--porcelain',
                                              '--untracked-files=no'], text=True)
             if dirty.strip():
-                raise ValueError('Source cache contains changes; move it aside before rebuilding')
+                log.write('Source cache changes:\n'+dirty+'\n')
+                log.flush()
+                raise ValueError('Source cache contains changes; move it aside before rebuilding: '+dirty.strip()[:1600])
             run([cmake, '-S', str(source), '-B', str(build), *flags])
             run([cmake, '--build', str(build), '--config', 'Release', '--target', 'llama-server',
                  '--parallel', str(min(4, os.cpu_count() or 1))])

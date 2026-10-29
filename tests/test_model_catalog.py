@@ -1,8 +1,10 @@
 """Requested model identities, pinned runtimes and cache reuse."""
 import hashlib
 import json
+import os
 from pathlib import Path
 import tempfile
+import subprocess
 import unittest
 from unittest.mock import patch
 
@@ -52,6 +54,43 @@ class CatalogTests(unittest.TestCase):
         config = dict(runtime_source=dict(repository='https://example.invalid/runtime.git', revision='main'))
         with tempfile.TemporaryDirectory() as temp, self.assertRaisesRegex(ValueError, 'complete Git commit'):
             source_runtime.build_runtime(config, temp)
+
+    def test_fresh_source_checkout_keeps_blob_bytes_despite_global_crlf_conversion(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp)
+            origin=root/'origin'
+            origin.mkdir()
+
+            def git(*args):
+                return subprocess.check_output(['git', '-C', str(origin), *args], text=True,
+                                               stderr=subprocess.DEVNULL).strip()
+
+            git('init')
+            attributes=origin/'.git/info/attributes'
+            attributes.write_text('* -text\n')
+            content=b'first\r\nsecond\r\n'
+            (origin/'sample.txt').write_bytes(content)
+            git('add', 'sample.txt')
+            git('-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid',
+                '-c', 'commit.gpgsign=false', 'commit', '-m', 'fixture')
+            config=dict(runtime_source=dict(repository=str(origin), revision=git('rev-parse', 'HEAD')))
+            directory=root/'runtime'
+            real_run=subprocess.run
+
+            def run(args, **kwargs):
+                if args[0] == 'fixture-cmake':
+                    if '--build' in args:
+                        binary=directory/'build/bin'/('llama-server.exe' if os.name == 'nt' else 'llama-server')
+                        binary.parent.mkdir(parents=True, exist_ok=True)
+                        binary.write_bytes(b'fixture binary')
+                    return subprocess.CompletedProcess(args, 0)
+                return real_run(args, **kwargs)
+
+            env=dict(GIT_CONFIG_COUNT='1', GIT_CONFIG_KEY_0='core.autocrlf', GIT_CONFIG_VALUE_0='true')
+            with patch.dict(os.environ, env), patch.object(source_runtime, 'cmake_executable', return_value='fixture-cmake'), \
+                 patch.object(source_runtime.subprocess, 'run', side_effect=run):
+                source_runtime.build_runtime(config, directory)
+            self.assertEqual((directory/'source/sample.txt').read_bytes(), content)
 
 
 if __name__ == '__main__':
