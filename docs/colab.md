@@ -2,7 +2,7 @@
 
 [Notebook direkt in Colab öffnen](https://colab.research.google.com/github/carlo2004/Simulation-Neura-LARA-5/blob/main/notebooks/colab_gpu.ipynb).
 
-Dasselbe Notebook unterstützt beide Karten. In Colab eine GPU-Laufzeit auswählen, zunächst L4, und die Zellen der Reihe nach ausführen. Es werden nur die ausgewählten Modelle installiert. Die Standardeinstellung ist Granite 8B mit einem Bewegungs- und einem Stapelfall sowie einem beziehungsweise bis zu vier Programmblöcken.
+Dasselbe Notebook unterstützt beide Karten. In Colab eine GPU-Laufzeit auswählen, zunächst L4, und die Zellen der Reihe nach ausführen. Es werden nur die ausgewählten Modelle installiert. Die Standardeinstellung ist Granite 8B mit einem Bewegungs- und einem Stapelfall sowie einem beziehungsweise bis zu vier Programmblöcken. Der voreingestellte `REPO_REF` pinnt den Projektcode auf denselben Stand für L4 und A100.
 
 ## Was eingerichtet wird
 
@@ -23,7 +23,7 @@ Quellbuilds erzeugen FlashAttention-Kernel für die verwendeten f16-KV-Caches. B
 
 1. Auf L4 ausführen und die ausgegebene Commit-SHA, Modellwahl, Budgets und Seeds festhalten.
 2. Prüfen, dass die ZIP-Sicherung in `MyDrive/LARA-Stack-Lab/experiments` angekommen ist.
-3. Eine neue Laufzeit mit A100 auswählen. `REPO_REF` auf dieselbe Commit-SHA setzen und dieselben Modelleinstellungen benutzen.
+3. Eine neue Laufzeit mit A100 auswählen. Den voreingestellten `REPO_REF` und dieselben Modelleinstellungen beibehalten.
 4. Dasselbe Notebook erneut ausführen und denselben Drive-Ordner wählen. Die letzte Auswertungszelle liest alle Sicherungen und erzeugt `comparison.csv`.
 
 Die Tabelle nennt Hardware, Modell, Blockbudget, Aufgabenfamilie, Erfolge/bewertete/geplante Episoden, technische Ausfälle, offene Versuche, native Tokens/s und mittlere Episodenzeit. Sie weist fehlerhafte Archive aus und mischt unterschiedliche Pläne nicht still zu einer Erfolgsquote. Nur passende Fall-/Bedingungsidentitäten mit gleichem API-, Prompt- und Softwarestand direkt vergleichen. Die tatsächlichen GPU-Daten und Treiber bleiben als Versuchsbedingung sichtbar. GPU-Inferenz verspricht keine bitgleichen Antworten auf anderer Hardware.
