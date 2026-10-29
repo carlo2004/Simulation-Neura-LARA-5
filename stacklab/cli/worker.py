@@ -2,10 +2,10 @@
 import argparse
 from pathlib import Path
 import time
+import sys
 from stacklab.evaluation import tool_clear, evaluate
 from stacklab.config import Config, write_json
 from stacklab.policy import Interpreter, PolicyError, validate
-
 
 
 def main():
@@ -51,15 +51,25 @@ def main():
         if args.code is None:
             from stacklab.llm.agent import Agent
             from stacklab.llm.runtime import LocalModel
+            from stacklab.cli.presentation import Presenter
             if not args.instruction:
                 raise ValueError('Feedback evaluation needs --instruction')
             with LocalModel(args.model, threads=args.threads) as client:
+                display = Presenter(stats_stream=sys.stdout)
                 agent = Agent(robot, client, max_rounds=max(1, args.feedback_rounds), max_tokens=args.max_tokens,
                               thinking=args.thinking, seed=args.seed, generation_timeout=args.generation_timeout,
                               thinking_budget=args.thinking_budget,
                               execution_timeout=args.execution_timeout,
-                              on_event=lambda kind, data: print(kind, str(data)[:500], flush=True) if kind != 'token' else None)
+                              on_event=display.event)
+
+                def tick():
+                    display.drain()
+                    agent.idle()
+
+                agent.tick = tick
                 report = agent.run_task(args.instruction, args.result.parent/'episode', goal=goal)
+                display.drain()
+                display.end_speed_line()
                 result.update(report, stage='feedback_evaluated' if args.feedback_rounds else 'evaluated',
                               mode='closed_loop_feedback' if args.feedback_rounds else 'open_loop')
         else:

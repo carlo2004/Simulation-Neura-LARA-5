@@ -1,0 +1,547 @@
+{
+  "archive": "raw-evidence.zip",
+  "archive_bytes": 286851,
+  "archive_sha256": "af7c6a7856f8a11ef6563acd202a4571beec5ab7cae7cc5cbb2b5f1256bcd53b",
+  "files": [
+    {
+      "path": "dory4b/move-right/episode/final_physics.json",
+      "bytes": 1896,
+      "sha256": "cdcd0b3c1b16341dc748e457a1740e739cacc033c143b52d9aa70312b3b0b328"
+    },
+    {
+      "path": "dory4b/move-right/episode/initial_physics.json",
+      "bytes": 1576,
+      "sha256": "e2d35543cc821b1ad96b8dd05564df76c2a1eb390be32dfc7ce137617ab347ea"
+    },
+    {
+      "path": "dory4b/move-right/episode/result.json",
+      "bytes": 12998,
+      "sha256": "6f3068e1bb3e2c233e54c1660aa498f9be19bcea7cf54986ecb5f91d606d7003"
+    },
+    {
+      "path": "dory4b/move-right/episode/round_01/feedback.json",
+      "bytes": 1321,
+      "sha256": "959cd09dfdb1177594644b064171d0a3c7a250cfabe579c6db2adcefa8acbf12"
+    },
+    {
+      "path": "dory4b/move-right/episode/round_01/generated.py",
+      "bytes": 21,
+      "sha256": "97263cfe054c27bf19882004bc91128b6fe5383c45f7e453b61d23d30ed9bf27"
+    },
+    {
+      "path": "dory4b/move-right/episode/round_01/generation.json",
+      "bytes": 3461,
+      "sha256": "dbd9f2cb97e12e92cfa00224d154807a1e3715e6b76621573b82e3637ba214e2"
+    },
+    {
+      "path": "dory4b/move-right/episode/round_01/inference.log",
+      "bytes": 3917,
+      "sha256": "359988cc0a4f48a5b7ac349b105c1d3cfab1de97a51d36e1fff5938019a723f8"
+    },
+    {
+      "path": "dory4b/move-right/episode/round_01/request.json",
+      "bytes": 4387,
+      "sha256": "8c79ad3638fc4417997c35d1af0007c667d7373bccedea48af6342039b7f238b"
+    },
+    {
+      "path": "dory4b/move-right/episode/round_01/response.json",
+      "bytes": 1761,
+      "sha256": "cfa95d8ac7bdd88428a0a54a823cd45e281d01ecc9ebdcb6789933a9498c174d"
+    },
+    {
+      "path": "dory4b/move-right/episode/round_01/stream.jsonl",
+      "bytes": 203901,
+      "sha256": "80bac612fa1c2dfe88fba44179947b11c23b2abfaa4871bf3a881e7a947818c1"
+    },
+    {
+      "path": "dory4b/move-right/episode/scene.json",
+      "bytes": 217,
+      "sha256": "288736b2cce5a7e56667ef29b4217cd3da458cc650ebf052645970c109fce394"
+    },
+    {
+      "path": "dory4b/move-right/episode/task.json",
+      "bytes": 5322,
+      "sha256": "b006bd5119194a25bd79df2de1def8fe145a68b0d3dc0534a45470f2ad6a36a4"
+    },
+    {
+      "path": "dory4b/move-right/episode/trajectory.jsonl",
+      "bytes": 4306,
+      "sha256": "06712c1157e827ad1f037aa2ccbd0abad5c7a1fbc1c6f492e7b3251fa0f710c0"
+    },
+    {
+      "path": "dory4b/move-right/execution.json",
+      "bytes": 13048,
+      "sha256": "30bdb4ab341bc229ac38c660b9f95cdecfa9fe19f0c3c78da6b27e65cbe03c61"
+    },
+    {
+      "path": "dory4b/move-right/result.json",
+      "bytes": 14191,
+      "sha256": "1c8a6249abeafb35066cffae80e9418118b2beb84e4c9daed6e9d71cb23bfc6a"
+    },
+    {
+      "path": "dory4b/move-right/scene.json",
+      "bytes": 217,
+      "sha256": "288736b2cce5a7e56667ef29b4217cd3da458cc650ebf052645970c109fce394"
+    },
+    {
+      "path": "dory4b/move-right/simulation.log",
+      "bytes": 5076,
+      "sha256": "89766f0383cedcfaa7f479f31ac9dde9031ce3ac8e385946aa86b0e9f3ca328c"
+    },
+    {
+      "path": "dory4b/summary.json",
+      "bytes": 19742,
+      "sha256": "f22aa53ac68becea1122521cf90633f79889dd3d770fa64aff04677f2fc0cf0e"
+    },
+    {
+      "path": "granite8b/move-right/episode/final_physics.json",
+      "bytes": 1896,
+      "sha256": "cdcd0b3c1b16341dc748e457a1740e739cacc033c143b52d9aa70312b3b0b328"
+    },
+    {
+      "path": "granite8b/move-right/episode/initial_physics.json",
+      "bytes": 1576,
+      "sha256": "e2d35543cc821b1ad96b8dd05564df76c2a1eb390be32dfc7ce137617ab347ea"
+    },
+    {
+      "path": "granite8b/move-right/episode/result.json",
+      "bytes": 10920,
+      "sha256": "305217760d10f171b1c469a79e7a93d61906d488ff4ac4205ffa98a348cd8a56"
+    },
+    {
+      "path": "granite8b/move-right/episode/round_01/feedback.json",
+      "bytes": 1321,
+      "sha256": "959cd09dfdb1177594644b064171d0a3c7a250cfabe579c6db2adcefa8acbf12"
+    },
+    {
+      "path": "granite8b/move-right/episode/round_01/generated.py",
+      "bytes": 21,
+      "sha256": "da6ed597489d2e36ce236c823779b7a0ed3c265090ee60a2bbea144977df5d4b"
+    },
+    {
+      "path": "granite8b/move-right/episode/round_01/generation.json",
+      "bytes": 2332,
+      "sha256": "b36c4d9b00e1896b7deb003e7dc845436dcb364f1346ddb7ed79afb205296a35"
+    },
+    {
+      "path": "granite8b/move-right/episode/round_01/inference.log",
+      "bytes": 3303,
+      "sha256": "708706fd1d0e0af945e789d70f833f9cdb781da48f70223f6bcadb757dc45ae1"
+    },
+    {
+      "path": "granite8b/move-right/episode/round_01/request.json",
+      "bytes": 4387,
+      "sha256": "8c79ad3638fc4417997c35d1af0007c667d7373bccedea48af6342039b7f238b"
+    },
+    {
+      "path": "granite8b/move-right/episode/round_01/response.json",
+      "bytes": 1759,
+      "sha256": "d3d30289c2c5eff33a3455ef32331aca2866ee8a94097b5171ba597e04a17f30"
+    },
+    {
+      "path": "granite8b/move-right/episode/round_01/stream.jsonl",
+      "bytes": 198127,
+      "sha256": "1fa26a0a30d2bcc222ebbb143a75666c4547265814dd181df4613565dab8f287"
+    },
+    {
+      "path": "granite8b/move-right/episode/scene.json",
+      "bytes": 217,
+      "sha256": "288736b2cce5a7e56667ef29b4217cd3da458cc650ebf052645970c109fce394"
+    },
+    {
+      "path": "granite8b/move-right/episode/task.json",
+      "bytes": 4592,
+      "sha256": "1631364eeae64f3c8c3c6e1b4412256409750f26ce5aad8c9f9d986c1fc12970"
+    },
+    {
+      "path": "granite8b/move-right/episode/trajectory.jsonl",
+      "bytes": 3367,
+      "sha256": "6232365ad04d3fd40bd504aecddf9115b427cc92526d639a9d9dec91c83543d5"
+    },
+    {
+      "path": "granite8b/move-right/execution.json",
+      "bytes": 10970,
+      "sha256": "906773b7ac4e15b05f392b7a3c0db6f805747bb3ece457129f22ac998e7a5991"
+    },
+    {
+      "path": "granite8b/move-right/result.json",
+      "bytes": 11991,
+      "sha256": "5b943570b64e6b891a57174c5d4f4b29815d5ebfe480b885dcca72360b6be128"
+    },
+    {
+      "path": "granite8b/move-right/scene.json",
+      "bytes": 217,
+      "sha256": "288736b2cce5a7e56667ef29b4217cd3da458cc650ebf052645970c109fce394"
+    },
+    {
+      "path": "granite8b/move-right/simulation.log",
+      "bytes": 6091,
+      "sha256": "4cd15b1eb5c5d8fd466ed5760e59e76d8d97c973357527a6dfd6a3b3f18de5ae"
+    },
+    {
+      "path": "granite8b/summary.json",
+      "bytes": 16568,
+      "sha256": "df3db9845a6f609ac197e9bed0ea521363cfd4eee1e76336039e7e271106c30f"
+    },
+    {
+      "path": "lfm2.6b-free/move-right/episode/final_physics.json",
+      "bytes": 1572,
+      "sha256": "8a48b9d57b86c92495b648bc68af35a6d54f3890ab7af65020de45ff335cf5fd"
+    },
+    {
+      "path": "lfm2.6b-free/move-right/episode/initial_physics.json",
+      "bytes": 1576,
+      "sha256": "e2d35543cc821b1ad96b8dd05564df76c2a1eb390be32dfc7ce137617ab347ea"
+    },
+    {
+      "path": "lfm2.6b-free/move-right/episode/result.json",
+      "bytes": 14974,
+      "sha256": "a179f156e9ce0555687d7ca8bd9333e9aceec43f0b2eacf64f23f833f7974db5"
+    },
+    {
+      "path": "lfm2.6b-free/move-right/episode/round_01/feedback.json",
+      "bytes": 1270,
+      "sha256": "bac0b32e5a0b29060db467a8e4533f07eecbc2a5040410b3032b14a973f288cf"
+    },
+    {
+      "path": "lfm2.6b-free/move-right/episode/round_01/generation.json",
+      "bytes": 2321,
+      "sha256": "bdc7d6929b95bcdc90a52244c8e98d19447a6c8f02ce0e02bd2377a1100f605e"
+    },
+    {
+      "path": "lfm2.6b-free/move-right/episode/round_01/inference.log",
+      "bytes": 6063,
+      "sha256": "8e635b83042d1ecc3de737019031564cf27c8f377ae6dd3651ee8f5c0231664f"
+    },
+    {
+      "path": "lfm2.6b-free/move-right/episode/round_01/request.json",
+      "bytes": 4358,
+      "sha256": "74cbe688e78c4b4afa887d89891e879ee9401e7df790456c5f2af198eb1bf36d"
+    },
+    {
+      "path": "lfm2.6b-free/move-right/episode/round_01/response.json",
+      "bytes": 1506,
+      "sha256": "9d3095e3c22179f55d1b21771ae23b85052a340b983aee2d1d8627db81618a58"
+    },
+    {
+      "path": "lfm2.6b-free/move-right/episode/round_01/stream.jsonl",
+      "bytes": 178994,
+      "sha256": "31e19c00fbaea9c29c81e6b37a14542f0184fddcf6d3908df0c6098b29044321"
+    },
+    {
+      "path": "lfm2.6b-free/move-right/episode/round_02/feedback.json",
+      "bytes": 1303,
+      "sha256": "2b8e9eb5cd0b6040a9731ac8d350c51e02279b2c2c4cd1b039db8c1846edeec0"
+    },
+    {
+      "path": "lfm2.6b-free/move-right/episode/round_02/generation.json",
+      "bytes": 2314,
+      "sha256": "736411be2e81acb350b0c43e83cc547c2c2a75ba54f5766a9f33adfbbe1e7ea4"
+    },
+    {
+      "path": "lfm2.6b-free/move-right/episode/round_02/request.json",
+      "bytes": 5448,
+      "sha256": "1f7dea51fd6dbd05a071b58b5c09dcdb564b913b705b9a63a272657ced2ec2e5"
+    },
+    {
+      "path": "lfm2.6b-free/move-right/episode/round_02/response.json",
+      "bytes": 5592,
+      "sha256": "df4dc975015012bfd05c8d182131e24e0aa016106338aff6833cfb05ba690f95"
+    },
+    {
+      "path": "lfm2.6b-free/move-right/episode/round_02/stream.jsonl",
+      "bytes": 833073,
+      "sha256": "8f84f4f109b066f75bbaf84dc107d1b77373765830d49c1090c0080c12f1fc97"
+    },
+    {
+      "path": "lfm2.6b-free/move-right/episode/scene.json",
+      "bytes": 217,
+      "sha256": "288736b2cce5a7e56667ef29b4217cd3da458cc650ebf052645970c109fce394"
+    },
+    {
+      "path": "lfm2.6b-free/move-right/episode/task.json",
+      "bytes": 4416,
+      "sha256": "1e78e3f0cf95a16ca214b2cf8322db303de509c8df71331601dc1c06edeea9ea"
+    },
+    {
+      "path": "lfm2.6b-free/move-right/episode/trajectory.jsonl",
+      "bytes": 10520,
+      "sha256": "c62428b0c31e655aac1c82df78a319ce3b7b1c584b6af9e65a3da266bf1979e8"
+    },
+    {
+      "path": "lfm2.6b-free/move-right/execution.json",
+      "bytes": 15024,
+      "sha256": "a431cb4af6ea293f9bd588eefef3d43da4a7733fc2e1d620701d7461aa0f8d43"
+    },
+    {
+      "path": "lfm2.6b-free/move-right/result.json",
+      "bytes": 16266,
+      "sha256": "199fd46235693bbeaf9af0027afd673ac64bed539f84a9828dc5ab747eb1b3c2"
+    },
+    {
+      "path": "lfm2.6b-free/move-right/scene.json",
+      "bytes": 217,
+      "sha256": "288736b2cce5a7e56667ef29b4217cd3da458cc650ebf052645970c109fce394"
+    },
+    {
+      "path": "lfm2.6b-free/move-right/simulation.log",
+      "bytes": 9111,
+      "sha256": "f32c5be6090bebd1f2210396db394271c88c1aa1beb4cc5c3ab99c4cf13cf544"
+    },
+    {
+      "path": "lfm2.6b-free/summary.json",
+      "bytes": 21107,
+      "sha256": "5751f8db609febf325c2d322bf65f2817d50a011c8186563e773905b0ac94c1d"
+    },
+    {
+      "path": "lfm2.6b-json/move-right/episode/final_physics.json",
+      "bytes": 1902,
+      "sha256": "7cff082b358ca3637100601a7883cb3cb5b3cf0b04cff724fe7add28843932da"
+    },
+    {
+      "path": "lfm2.6b-json/move-right/episode/initial_physics.json",
+      "bytes": 1576,
+      "sha256": "e2d35543cc821b1ad96b8dd05564df76c2a1eb390be32dfc7ce137617ab347ea"
+    },
+    {
+      "path": "lfm2.6b-json/move-right/episode/result.json",
+      "bytes": 11598,
+      "sha256": "6023b4ad1c1f4614edce0c1cadb71e2bc60809d2914dffb3343a7b49415f5403"
+    },
+    {
+      "path": "lfm2.6b-json/move-right/episode/round_01/feedback.json",
+      "bytes": 1369,
+      "sha256": "5f370e4604f2b6318304ac89630caba872041f27c8fdd44de5f1aa7c63d89536"
+    },
+    {
+      "path": "lfm2.6b-json/move-right/episode/round_01/generated.py",
+      "bytes": 35,
+      "sha256": "843410a4d0cf90e5877fcdca0076682f7af1c4b60ba7267c651dbb6cdb3a16ec"
+    },
+    {
+      "path": "lfm2.6b-json/move-right/episode/round_01/generation.json",
+      "bytes": 2467,
+      "sha256": "44afe4467ac117af9767495027bf5eca61ac01dd0094ee84e122877115039c36"
+    },
+    {
+      "path": "lfm2.6b-json/move-right/episode/round_01/inference.log",
+      "bytes": 2562,
+      "sha256": "f026769e55ae6b501290c933761bd631a7625ccf8ca3906dcd659da6a785220b"
+    },
+    {
+      "path": "lfm2.6b-json/move-right/episode/round_01/request.json",
+      "bytes": 4875,
+      "sha256": "0e7b0a20c4d5cd1f098e64328193d768ab1ba517a2b50b76242417405279630d"
+    },
+    {
+      "path": "lfm2.6b-json/move-right/episode/round_01/response.json",
+      "bytes": 1592,
+      "sha256": "37f672fbf07d38b9e27949ef7664b3b99966eb3b76adf4a7fc16c23c06f8d0fb"
+    },
+    {
+      "path": "lfm2.6b-json/move-right/episode/round_01/stream.jsonl",
+      "bytes": 203005,
+      "sha256": "8dd8554ef193fc198d46c8a43f4ba44caf2e02b9729f093b58c919ac9e60bfc7"
+    },
+    {
+      "path": "lfm2.6b-json/move-right/episode/scene.json",
+      "bytes": 217,
+      "sha256": "288736b2cce5a7e56667ef29b4217cd3da458cc650ebf052645970c109fce394"
+    },
+    {
+      "path": "lfm2.6b-json/move-right/episode/task.json",
+      "bytes": 4985,
+      "sha256": "4300400e1a29b4850c515d1f69515a4607259fa8a7c8b6f9bfc80b07a4b3849c"
+    },
+    {
+      "path": "lfm2.6b-json/move-right/episode/trajectory.jsonl",
+      "bytes": 3518,
+      "sha256": "6fe61fdaeab0520803931963fac1b0a813b9af5af65112aa5e333d200f0044ef"
+    },
+    {
+      "path": "lfm2.6b-json/move-right/execution.json",
+      "bytes": 11648,
+      "sha256": "765db2290038642398971acba875abb6d2a1751c1f19451f74fb094ea4ea3128"
+    },
+    {
+      "path": "lfm2.6b-json/move-right/result.json",
+      "bytes": 12727,
+      "sha256": "df16abd4bd8a1161467a1b26c3a7ab6667e4ca9ac86fd8b2f221e6b0183df9e0"
+    },
+    {
+      "path": "lfm2.6b-json/move-right/scene.json",
+      "bytes": 217,
+      "sha256": "288736b2cce5a7e56667ef29b4217cd3da458cc650ebf052645970c109fce394"
+    },
+    {
+      "path": "lfm2.6b-json/move-right/simulation.log",
+      "bytes": 2599,
+      "sha256": "b6e78088a0f32a69ff36c0ad8a764fd2eed2f2f327b68b2d62cd311d4edf60ea"
+    },
+    {
+      "path": "lfm2.6b-json/summary.json",
+      "bytes": 17813,
+      "sha256": "30e949c723c5dfaa13d86bedce7b902ce536f73cbad974eeae008ff0f2a71576"
+    },
+    {
+      "path": "lfm2.6b-live/session.json",
+      "bytes": 161,
+      "sha256": "59d4ba9231fe801bd0a3b9c2c7cedf012ac384d15a496af3643334ea9568252a"
+    },
+    {
+      "path": "lfm2.6b-live/task_001/final_physics.json",
+      "bytes": 2116,
+      "sha256": "01530851f227b3456f02df7218f61d1a1f02db3590a45ed8e92f7873e75243b3"
+    },
+    {
+      "path": "lfm2.6b-live/task_001/initial_physics.json",
+      "bytes": 1802,
+      "sha256": "9003ad9f9370075dbad7962ac5c98bd6eb13926259510399680b98d4493daa63"
+    },
+    {
+      "path": "lfm2.6b-live/task_001/result.json",
+      "bytes": 27499,
+      "sha256": "83634c0063bb568495bd4a6577560fcbf83369ccb2e0b828bc987dd74a583a12"
+    },
+    {
+      "path": "lfm2.6b-live/task_001/round_01/feedback.json",
+      "bytes": 1424,
+      "sha256": "0d2ed27b5b756c65da7c077c7fe665c156ea910739c583285fb9562ece2a2aeb"
+    },
+    {
+      "path": "lfm2.6b-live/task_001/round_01/generated.py",
+      "bytes": 35,
+      "sha256": "843410a4d0cf90e5877fcdca0076682f7af1c4b60ba7267c651dbb6cdb3a16ec"
+    },
+    {
+      "path": "lfm2.6b-live/task_001/round_01/generation.json",
+      "bytes": 2485,
+      "sha256": "a81fcf78e4a80e208632ca4fc7c62fa7002606076064a3b2ee2469ddd3b5fe11"
+    },
+    {
+      "path": "lfm2.6b-live/task_001/round_01/inference.log",
+      "bytes": 6769,
+      "sha256": "4d317a6fcc22db8e8a45481ea2bcfe6756dd6409cdde84d80f8a78b3ee75d51e"
+    },
+    {
+      "path": "lfm2.6b-live/task_001/round_01/request.json",
+      "bytes": 4954,
+      "sha256": "28309a6d77cc40ccf4ae6c35aa8e60e9541db163686b706d309ccc82655a8447"
+    },
+    {
+      "path": "lfm2.6b-live/task_001/round_01/response.json",
+      "bytes": 1598,
+      "sha256": "396a79af078319e34729cc7f4b7235361c911f771bebd386818c40fe493f2bd8"
+    },
+    {
+      "path": "lfm2.6b-live/task_001/round_01/stream.jsonl",
+      "bytes": 196153,
+      "sha256": "3e53c7b5df79258f25c7fb006fa0408de6c3f00d55493fae05e03c8b9335774d"
+    },
+    {
+      "path": "lfm2.6b-live/task_001/round_02/feedback.json",
+      "bytes": 1424,
+      "sha256": "31a8490a3488576d853d4ead4a98f9714158c137341db7fc6e17833fb0bbb26b"
+    },
+    {
+      "path": "lfm2.6b-live/task_001/round_02/generated.py",
+      "bytes": 34,
+      "sha256": "0c0a74dcf96d528a568f7f1482f3a1d2d912c55b7b2c1ee420344854f4908957"
+    },
+    {
+      "path": "lfm2.6b-live/task_001/round_02/generation.json",
+      "bytes": 2440,
+      "sha256": "b592ebdc7668aa73500ef044c2a0400b01c530ce8621b985302b4549cbc481dd"
+    },
+    {
+      "path": "lfm2.6b-live/task_001/round_02/request.json",
+      "bytes": 6125,
+      "sha256": "26abb2f2677e352f8fc5042cc76f6681c70bb7507310396618d8e2e4ccd6da4b"
+    },
+    {
+      "path": "lfm2.6b-live/task_001/round_02/response.json",
+      "bytes": 1582,
+      "sha256": "2db08cd44ccbe76b7313411aacc074b06ed6ca1b383d01b48f50f92f687228a9"
+    },
+    {
+      "path": "lfm2.6b-live/task_001/round_02/stream.jsonl",
+      "bytes": 191734,
+      "sha256": "284e433f10f5bb6999ab22b44dbb15df54cd82047c01e3ddfaed95b01e67bd79"
+    },
+    {
+      "path": "lfm2.6b-live/task_001/round_03/feedback.json",
+      "bytes": 1424,
+      "sha256": "2584fae82d11f4b51dbba270407b87c1e9b5a3240e1ba803f9d520cc1815929a"
+    },
+    {
+      "path": "lfm2.6b-live/task_001/round_03/generated.py",
+      "bytes": 35,
+      "sha256": "0eb49aabae4b3c00caed25ede27f826c1fd9108c536717faba157449cd71f5e9"
+    },
+    {
+      "path": "lfm2.6b-live/task_001/round_03/generation.json",
+      "bytes": 2441,
+      "sha256": "e1b4afc769aefec501dbb7871a858247bb9c426998e853d3c84803d31da2016b"
+    },
+    {
+      "path": "lfm2.6b-live/task_001/round_03/request.json",
+      "bytes": 7287,
+      "sha256": "fd30335154dd3da04d953a52747afe206b9635cbe805dda5e87f645b70dd817e"
+    },
+    {
+      "path": "lfm2.6b-live/task_001/round_03/response.json",
+      "bytes": 1616,
+      "sha256": "87e8ae63d9952dc405b876aec2e3cf9fa2241798b96d261c5dc2714af368f4e8"
+    },
+    {
+      "path": "lfm2.6b-live/task_001/round_03/stream.jsonl",
+      "bytes": 195112,
+      "sha256": "2eab6e497a1b57cbe16683e66335746bcc29990fc0dd2d012267f53290ee31fa"
+    },
+    {
+      "path": "lfm2.6b-live/task_001/round_04/feedback.json",
+      "bytes": 1420,
+      "sha256": "d0a8afdfa9c6b87890992ecbbef79adf0ae45458cce61a12e5292d9be399e96c"
+    },
+    {
+      "path": "lfm2.6b-live/task_001/round_04/generated.py",
+      "bytes": 34,
+      "sha256": "983b506169df0fb5fb0b29fba0542d2c5d782cb49d5dd450e550da79e8712066"
+    },
+    {
+      "path": "lfm2.6b-live/task_001/round_04/generation.json",
+      "bytes": 2452,
+      "sha256": "6cad853502b0b6a0a8946756b27224bc4a1534905f54c06eb9491ad1e4fa8347"
+    },
+    {
+      "path": "lfm2.6b-live/task_001/round_04/request.json",
+      "bytes": 7298,
+      "sha256": "830e81bc0bd0d18401bdc4cf1d1dfb0429dc8873ff510c9f08d97698aebb302f"
+    },
+    {
+      "path": "lfm2.6b-live/task_001/round_04/response.json",
+      "bytes": 1010,
+      "sha256": "1ebcbbf94b5ee52aedf703126b039eded8c626b7507bca302d3519229070e07b"
+    },
+    {
+      "path": "lfm2.6b-live/task_001/round_04/stream.jsonl",
+      "bytes": 80417,
+      "sha256": "093c228fba1fe384d3d8fba7f762f282d0e487c8e03cbe7a106c6b3cf3b72f25"
+    },
+    {
+      "path": "lfm2.6b-live/task_001/scene.json",
+      "bytes": 607,
+      "sha256": "53f407bb70504d4c8b1d4aad96ac483a93194d98406fdf1b29466ca667f476e3"
+    },
+    {
+      "path": "lfm2.6b-live/task_001/task.json",
+      "bytes": 5057,
+      "sha256": "e734bb573e713521dcdb2d76170cf0839bd42c8511dabbf55f292041301b375f"
+    },
+    {
+      "path": "lfm2.6b-live/task_001/trajectory.jsonl",
+      "bytes": 13500,
+      "sha256": "a3b39b3c259dbdfd8fcad7683f153fec3577391036a71afdc5a1a94a56b35ea9"
+    }
+  ]
+}

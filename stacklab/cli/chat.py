@@ -18,6 +18,7 @@ from stacklab.llm.agent import Agent
 from stacklab.evaluation import evaluate, observe
 from stacklab.llm.catalog import lock, model_keys
 from stacklab.llm.runtime import LocalModel
+from stacklab.cli.presentation import Presenter
 
 HELP = '''Freie Sprache: z.B. "Bewege den Greifer 5 cm nach rechts."
 Oder: "Staple Rot auf Blau und bewege den Greifer danach nach oben."
@@ -38,58 +39,6 @@ Programmbloecke verwenden; jeder Block bekommt echte Ausfuehrungsrueckmeldung.
 Waehrend einer Aufgabe sind /stop und /quit direkt verfuegbar.
 '''
 
-
-class Presenter:
-    def __init__(self, stream=False, show_thinking=False):
-        self.events = queue.Queue()
-        self.stream, self.show_thinking = stream, show_thinking
-        self.characters = 0
-        self.last_progress = time.monotonic()
-
-    def event(self, kind, data):
-        if kind == 'token':
-            self.events.put(data)
-        elif kind == 'generating':
-            self.characters = 0
-            print(f'\nModell generiert Block {data["round"]}/{data["maximum"]} ...', flush=True)
-        elif kind == 'program':
-            if self.stream:
-                print()
-            if data['message']:
-                print('Modell: '+data['message'], flush=True)
-            print('Generierter Python-Code:\n'+(data['code'] or '(keine weitere Aktion)'), flush=True)
-        elif kind == 'action':
-            if data['phase'] == 'start':
-                print('  -> robot.'+data['method']+' '+json.dumps(dict(args=data['args'], kwargs=data['kwargs'])), flush=True)
-            elif data.get('error'):
-                print('  FEHLER: '+data['error'], flush=True)
-            elif 'result' in data:
-                print('     Ergebnis: '+json.dumps(data['result']), flush=True)
-        elif kind == 'feedback':
-            print('Feedback: TCP='+str([round(v, 4) for v in data['observation']['tcp_m']])+
-                  ', Fingerkontakt='+str(data['observation']['finger_contact_objects']), flush=True)
-            if data['error']:
-                print('Ausfuehrungsfehler: '+data['error'], flush=True)
-            grading = data['evaluation']
-            for check in grading.get('stack_checks', []):
-                print(f'Physik: {check["source"]} auf {check["target"]}: '
-                      f'{check["stable_checks"]}/20; Greifer frei={check["tool_clear"]}', flush=True)
-            if (grading.get('goal') or {}).get('type') == 'move':
-                print('Zielabweichung: '+str(grading['tcp_error_m'])+' m', flush=True)
-
-    def drain(self):
-        while True:
-            try:
-                data = self.events.get_nowait()
-            except queue.Empty:
-                break
-            self.characters += len(data['text'])
-            if data['kind'] == 'content' and self.stream or data['kind'] == 'reasoning_content' and self.show_thinking:
-                print(data['text'], end='', flush=True)
-        if self.characters and time.monotonic()-self.last_progress > 8:
-            if not self.stream and not self.show_thinking:
-                print(f'  Generierung laeuft ({self.characters} Zeichen empfangen) ...', flush=True)
-            self.last_progress = time.monotonic()
 
 
 def main(argv=None):

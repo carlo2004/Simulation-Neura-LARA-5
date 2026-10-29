@@ -7,7 +7,7 @@ permissions:
 jobs:
   tests:
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 15
+    timeout-minutes: 25
     strategy:
       fail-fast: false
       matrix:
@@ -29,3 +29,14 @@ jobs:
           .venv/bin/python tools/validate.py
           .venv/bin/python tools/validate_objects.py
           .venv/bin/python tools/validate_controls.py
+      - name: Build and launch the pinned Dory CPU runtime
+        if: matrix.os == 'windows-latest' && matrix.python == '3.13'
+        run: >-
+          python -c "import subprocess; from stacklab.llm.catalog import CACHE_ROOT, lock; from stacklab.llm.source_runtime import build_runtime; c=lock('dory4b'); p=build_runtime(c,CACHE_ROOT/'runtime'/c['runtime_version']); subprocess.run([str(p),'--version'],check=True)"
+      - name: Dory build diagnostics on failure
+        if: failure() && matrix.os == 'windows-latest' && matrix.python == '3.13'
+        shell: python
+        run: |
+          from stacklab.llm.catalog import CACHE_ROOT, lock
+          p = CACHE_ROOT/'runtime'/lock('dory4b')['runtime_version']/'build.log'
+          print(p.read_text(encoding='utf-8', errors='replace')[-16000:] if p.is_file() else 'No source-build log')

@@ -6,11 +6,12 @@ from dataclasses import replace
 import json
 import os
 from pathlib import Path
-import subprocess
 import sys
 import time
 from stacklab.config import Config, write_json
 from stacklab.llm.catalog import lock, setup, model_keys
+from stacklab.cli.speed import format_speed
+from stacklab.cli.process import run_logged
 
 CASES = {
     'red-on-blue': ('Staple den roten Würfel auf den blauen Würfel.', 'red', 'blue', 'scenes/default.json', 0),
@@ -63,13 +64,15 @@ def run_case(name, args, directory):
         with (directory/'simulation.log').open('w', encoding='utf-8') as log:
             worker_timeout = ((args.generation_timeout+args.execution_timeout+30)*args.feedback_rounds
                               if args.feedback_rounds else args.generation_timeout+args.execution_timeout+30)
-            process = subprocess.run(command, cwd=ROOT, env=env, stdout=log, stderr=subprocess.STDOUT,
-                                     timeout=worker_timeout)
+            process = run_logged(command, log, cwd=ROOT, env=env, timeout=worker_timeout,
+                                 on_progress=lambda line: print(line, flush=True))
         if not (directory/'execution.json').is_file():
             raise RuntimeError('Simulation worker did not produce a result; see simulation.log')
         execution = json.loads((directory/'execution.json').read_text())
         result.update(success=execution['success'], stage=execution['stage'], execution=execution,
                       worker_returncode=process.returncode)
+        if execution.get('inference_performance', {}).get('measured_rounds'):
+            print('[Inferenz] '+format_speed(execution['inference_performance']), flush=True)
     except Exception as error:
         result['error'] = type(error).__name__+': '+str(error)
     write_json(directory/'result.json', result)
@@ -78,12 +81,12 @@ def run_case(name, args, directory):
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(description='Compare local robot-programming models around 8B')
+    parser = argparse.ArgumentParser(description='Compare local robot-programming models')
     sub = parser.add_subparsers(dest='command', required=True)
     sub.add_parser('models', help='List pinned models and their local download status')
     install = sub.add_parser('setup', help='Download and SHA-256-verify model and CPU runtime')
     install.add_argument('--model', help='Model alias or exact Hugging Face model ID')
-    install.add_argument('--all', action='store_true', help='Install all four pinned models sequentially')
+    install.add_argument('--all', action='store_true', help='Install all catalog models sequentially')
     test = sub.add_parser('test', help='Generate a program and test it in MuJoCo')
     test.add_argument('--case', choices=CASES, default='red-on-blue')
     test.add_argument('--model', help='Model alias or exact Hugging Face model ID; default: qwen9b')
@@ -110,7 +113,9 @@ def main(argv=None):
                 c = lock(name)
                 path = CACHE_ROOT/'models'/c['model_filename']
                 status = 'downloaded' if path.is_file() and path.stat().st_size == c['model_bytes'] else 'not downloaded'
-                print(f'{name:14} {c["total_parameters"]/1e9:.2f}B total | {c["model_bytes"]/1e9:.2f} GB | {status} | {c["model_id"]}')
+                runtime = 'source build' if c.get('runtime_source') else c['runtime_version']
+                print(f'{name:14} {c["total_parameters"]/1e9:.2f}B total | {c["quantization"]} | '
+                      f'{c["model_bytes"]/1e9:.2f} GB | {status} | {runtime} | {c["model_id"]}')
             return 0
         if args.command == 'setup':
             if args.all and args.model:

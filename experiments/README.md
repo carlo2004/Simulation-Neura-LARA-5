@@ -2,9 +2,13 @@
 
 Der [Vorschlag für Ergebnisarchitektur und Vergleichsdesign](../docs/results.md) beschreibt den nächsten Ausbau. Er ist von den hier tatsächlich gemessenen Ergebnissen getrennt.
 
-Hier liegen ausgewählte **tatsächlich ausgeführte** Entwicklungsversuche vom 28.10.2026. Modellcode wurde nicht nachträglich repariert. Test-Fixtures der Software sind getrennt unter `tests/`.
+Hier liegen ausgewählte **tatsächlich ausgeführte** Entwicklungsversuche. Modellcode wurde nicht nachträglich repariert. Test-Fixtures der Software sind getrennt unter `tests/`.
 
-## Ergebnisse
+## Modellsupport und Tokenmessung, 29.10.2026
+
+[Neue Integrationstests](archive/2026-10-29/model-support/README.md): Dory4B, Granite 4.2 8B und LFM2.5-2.6B wurden mit nativen Tokenzählern ausgeführt. Alle drei bestehen einen vorgegebenen Bewegungstest; LFM benötigt eine JSON-Antworthülle. Der vorherige freie Formatfehler und eine unzuverlässig beendete freie LFM-Chatprobe bleiben erhalten. Rohdaten liegen kompakt mit Prüfsummen vor. Dies ist eine Integrationsprüfung, kein standardisierter Modellvergleich.
+
+## Frühere Entwicklungsproben, 28.10.2026
 
 | Versuch | Bedingungen | Beobachtung |
 |---|---|---|

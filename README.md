@@ -37,7 +37,7 @@ Im Chat z. B. `Bewege den Greifer 5 cm nach rechts.` eingeben. Code, Aktionen un
 
 Der Roboter kann über Terminal, Tastatur und Python gesteuert werden. Szenen, Objektpositionen, zusätzliche Würfel und importierte Meshes sind anpassbar. Achsen und Stapelprüfung sind optional einblendbar. Die Physik-Kontrollprogramme stapeln mit echten Kontakten und unabhängigen Stabilitätsprüfungen.
 
-Die Modellanbindung unterstützt Qwen3.5-4B, Qwen3.5-9B, Ministral 3 8B Reasoning und Nemotron 3.5 Bolt. In den bisherigen echten Versuchen gelangen einfache Bewegungen; **zuverlässiges Stapeln durch die unveränderten Modelle ist noch nicht erreicht**. Negative Ergebnisse stehen im [Versuchsindex](experiments/README.md). Softwaretests mit vorgegebenen Antworten sind kein Nachweis für Modellqualität.
+Die Modellanbindung unterstützt Qwen3.5-4B/9B, Ministral 3 8B Reasoning, Nemotron 3.5 Bolt, Nemotron Labs Dory1.0-4B, IBM Granite 4.2 8B und LiquidAI LFM2.5-2.6B. Chat und Benchmark zeigen echte Tokens pro Sekunde, Prompttempo und Ladezeit an. Dory benötigt einen einmaligen separaten Quellbuild; die [Modellanleitung](docs/models.md) erklärt die Voraussetzungen. In den bisherigen echten Versuchen gelangen einfache Bewegungen; **zuverlässiges Stapeln durch die unveränderten Modelle ist noch nicht erreicht**. Negative Ergebnisse stehen im [Versuchsindex](experiments/README.md). Softwaretests mit vorgegebenen Antworten sind kein Nachweis für Modellqualität.
 
 Die Geometrie und Kinematik stammen aus einer RoboDK-Quelldatei. Dynamik, Greifer und Regelung enthalten eigene Annahmen; dies ist eine Forschungsumgebung für die Tischaufgabe, kein validierter digitaler Zwilling. [Herkunft und Lizenzen](assets/sources/NOTICE.md).
 

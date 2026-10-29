@@ -184,6 +184,167 @@
       },
       "preserve_reasoning": false,
       "thinking_budget_tokens": 768
+    },
+    "dory4b": {
+      "model_id": "nvidia/NVIDIA-Nemotron-Labs-Dory1.0-4B-BF16",
+      "original_revision": "48e0c3faac0aaa8b93fc4e68256d7e58b183645e",
+      "training_model_id": "nvidia/NVIDIA-Nemotron-Labs-Dory1.0-4B-BF16",
+      "training_revision": "48e0c3faac0aaa8b93fc4e68256d7e58b183645e",
+      "total_parameters": 3975229440,
+      "quantization": "Q5_K_M",
+      "gguf_repository": "nvidia/NVIDIA-Nemotron-Labs-Dory1.0-4B-GGUF",
+      "gguf_revision": "df53755cb8741843af8e019e088819fbef17e29b",
+      "model_filename": "NVIDIA-Nemotron-Labs-Dory1.0-4B-Q5_K_M.gguf",
+      "model_bytes": 3673288864,
+      "model_sha256": "96080be49ffd67b916018b7bdef8c484762576fb52780e10ab98ac4978a660e0",
+      "model_url": "https://huggingface.co/nvidia/NVIDIA-Nemotron-Labs-Dory1.0-4B-GGUF/resolve/df53755cb8741843af8e019e088819fbef17e29b/NVIDIA-Nemotron-Labs-Dory1.0-4B-Q5_K_M.gguf?download=true",
+      "license": "OpenMDW-1.1",
+      "default_thinking": true,
+      "supports_thinking_toggle": true,
+      "context_tokens": 8192,
+      "profiles": {
+        "thinking": {
+          "temperature": 1.0,
+          "top_p": 0.95,
+          "top_k": 0,
+          "min_p": 0,
+          "presence_penalty": 0,
+          "repeat_penalty": 1
+        },
+        "instruct": {
+          "temperature": 1.0,
+          "top_p": 0.95,
+          "top_k": 0,
+          "min_p": 0,
+          "presence_penalty": 0,
+          "repeat_penalty": 1
+        }
+      },
+      "chat_template_kwargs": {},
+      "preserve_reasoning": false,
+      "thinking_budget_tokens": 768,
+      "runtime_version": "dory-98a74c97ea09-cpu",
+      "runtime_source": {
+        "repository": "https://github.com/brianchmielNV/llama.cpp.git",
+        "revision": "98a74c97ea09ac72f6ceda1559808fc0a2f447ce"
+      },
+      "server_args": [
+        "--flash-attn",
+        "off",
+        "--no-context-shift",
+        "--batch-size",
+        "512",
+        "--ubatch-size",
+        "512",
+        "--cache-type-k",
+        "f16",
+        "--cache-type-v",
+        "f16",
+        "--override-kv",
+        "dory.num_loops=int:2,dory.recurrent_kv_cache_mode=str:per_loop"
+      ],
+      "aliases": [
+        "nvidia/NVIDIA-Nemotron-Labs-Dory1.0-4B-GGUF",
+        "Dory1.0-4B",
+        "Nemotron Labs Dory 1.0 (4B)"
+      ]
+    },
+    "granite8b": {
+      "model_id": "ibm-granite/granite-4.2-8b",
+      "original_revision": "a7042144125ce5ae64f89610e8289647fc000b9a",
+      "training_model_id": "ibm-granite/granite-4.2-8b",
+      "training_revision": "a7042144125ce5ae64f89610e8289647fc000b9a",
+      "total_parameters": 8791592960,
+      "quantization": "Q4_K_M",
+      "gguf_repository": "ibm-granite/granite-4.2-8b-GGUF",
+      "gguf_revision": "93f3f6a8938ee922b784cf4e5b4203cd3428df8f",
+      "model_filename": "granite-4.2-8b-Q4_K_M.gguf",
+      "model_bytes": 5347917952,
+      "model_sha256": "16a9369d0805f80b7377d25d87f937a90c05dc04ad79173a52001e42c9aab311",
+      "model_url": "https://huggingface.co/ibm-granite/granite-4.2-8b-GGUF/resolve/93f3f6a8938ee922b784cf4e5b4203cd3428df8f/granite-4.2-8b-Q4_K_M.gguf?download=true",
+      "license": "Apache-2.0",
+      "default_thinking": true,
+      "supports_thinking_toggle": true,
+      "context_tokens": 8192,
+      "profiles": {
+        "thinking": {
+          "temperature": 1.0,
+          "top_p": 0.95,
+          "top_k": 0,
+          "min_p": 0,
+          "presence_penalty": 0,
+          "repeat_penalty": 1
+        },
+        "instruct": {
+          "temperature": 1.0,
+          "top_p": 0.95,
+          "top_k": 0,
+          "min_p": 0,
+          "presence_penalty": 0,
+          "repeat_penalty": 1
+        }
+      },
+      "chat_template_kwargs": {},
+      "preserve_reasoning": false,
+      "thinking_budget_tokens": 768
+    },
+    "lfm2.6b": {
+      "model_id": "LiquidAI/LFM2.5-2.6B",
+      "original_revision": "b212e75975bbda9676a94d3cb7b2ca25b65fed48",
+      "training_model_id": "LiquidAI/LFM2.5-2.6B",
+      "training_revision": "b212e75975bbda9676a94d3cb7b2ca25b65fed48",
+      "total_parameters": 2697198592,
+      "quantization": "Q4_K_M",
+      "gguf_repository": "LiquidAI/LFM2.5-2.6B-GGUF",
+      "gguf_revision": "e7caca5d835a3901a8e0d63e94009429bafafdfc",
+      "model_filename": "LFM2.5-2.6B-Q4_K_M.gguf",
+      "model_bytes": 1674455040,
+      "model_sha256": "02a8b7e17487d326e46d68ce0ba24211e1b80a14c4cd0597fa73c1cd697f52ed",
+      "model_url": "https://huggingface.co/LiquidAI/LFM2.5-2.6B-GGUF/resolve/e7caca5d835a3901a8e0d63e94009429bafafdfc/LFM2.5-2.6B-Q4_K_M.gguf?download=true",
+      "license": "LFM-1.0",
+      "default_thinking": true,
+      "supports_thinking_toggle": false,
+      "context_tokens": 8192,
+      "profiles": {
+        "thinking": {
+          "temperature": 0.1,
+          "top_p": 1.0,
+          "top_k": 50,
+          "min_p": 0,
+          "presence_penalty": 0,
+          "repeat_penalty": 1.1
+        }
+      },
+      "chat_template_kwargs": {},
+      "preserve_reasoning": false,
+      "thinking_budget_tokens": 768,
+      "thinking_template_key": null,
+      "response_format": {
+        "type": "json_schema",
+        "json_schema": {
+          "name": "robot_program",
+          "strict": true,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "done": {
+                "type": "boolean"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "done"
+            ],
+            "additionalProperties": false
+          }
+        }
+      }
     }
   }
 }

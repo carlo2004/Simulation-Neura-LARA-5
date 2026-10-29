@@ -18,7 +18,13 @@ def lock(model=None):
     if 'models' in registry:
         key = model or registry['default_model']
         if key not in registry['models']:
-            key = next((k for k, v in registry['models'].items() if v['model_id'] == key), None)
+            query = str(key).casefold()
+            matches = [k for k, v in registry['models'].items()
+                       if query in {str(name).casefold() for name in
+                                    (k, v['model_id'], v['model_id'].rsplit('/', 1)[-1], *v.get('aliases', []))}]
+            if len(matches) > 1:
+                raise ValueError('Ambiguous model name; use a catalog alias or full model ID')
+            key = matches[0] if matches else None
         if key is None or key not in registry['models']:
             raise ValueError('Unknown model. Use python -m stacklab models for the available aliases.')
         config = {k: v for k, v in registry.items() if k not in ('models', 'default_model')}
@@ -105,6 +111,15 @@ def platform_key():
 def setup(model=None):
     config = lock(model)
     key = platform_key()
+    if config.get('runtime_source'):
+        from stacklab.llm.source_runtime import build_runtime, cmake_executable, ready_runtime
+        if not ready_runtime(config, CACHE_ROOT/'runtime'/config['runtime_version']):
+            cmake_executable()  # Diagnose missing build tools before a multi-GB download.
+        weights = CACHE_ROOT/'models'/config['model_filename']
+        download(config['model_url'], weights, config['model_sha256'], config['model_bytes'])
+        executable = build_runtime(config, CACHE_ROOT/'runtime'/config['runtime_version'])
+        print('Local model and pinned source runtime verified: '+str(executable), flush=True)
+        return executable
     if key not in config['runtime_assets']:
         raise ValueError('No pinned CPU runtime for '+key)
     weights = CACHE_ROOT/'models'/config['model_filename']
@@ -134,6 +149,12 @@ def setup(model=None):
 def find_executable(model=None):
     config = lock(model)
     directory = CACHE_ROOT/'runtime'/config['runtime_version']
+    if config.get('runtime_source'):
+        from stacklab.llm.source_runtime import ready_runtime
+        executable = ready_runtime(config, directory)
+        if executable:
+            return executable
+        raise ValueError('Pinned source runtime missing or changed. Run python -m stacklab setup --model '+config['model_key'])
     suffix = '.exe' if os.name == 'nt' else ''
     for name in ('llama-server',):
         matches = list(directory.rglob(name+suffix)) if directory.exists() else []

@@ -13,6 +13,7 @@ from stacklab.llm.runtime import GenerationCancelled
 from stacklab.evaluation import evaluate, observe, physics_state
 from stacklab.policy import ExecutionLimits, Interpreter, PolicyCancelled, validate
 from stacklab.llm.responses import parse_reply
+from stacklab.llm.metrics import summarize
 
 def system_prompt():
     return (ROOT/'config/prompts/robot_api.md').read_text(encoding='utf-8')
@@ -83,6 +84,7 @@ class Agent:
                                      seed=seed, thinking=self.thinking, timeout=self.generation_timeout,
                                      thinking_budget=self.thinking_budget,
                                      cancelled=self.cancelled.is_set,
+                                     on_progress=lambda data: self.on_event('inference', data),
                                      on_delta=lambda kind, text: self.on_event('token', dict(kind=kind, text=text)))
                 try:
                     while not future.done():
@@ -139,7 +141,12 @@ class Agent:
                     messages = [system, first, *history[-4:]]
                     item = dict(round=index, stage='generation', actions=[])
                     report['rounds'].append(item)
-                    raw, metadata = self.generate(messages, path, self.seed+index-1)
+                    try:
+                        raw, metadata = self.generate(messages, path, self.seed+index-1)
+                    finally:
+                        partial_metadata = path/'generation.json'
+                        if partial_metadata.is_file():
+                            item['generation'] = json.loads(partial_metadata.read_text(encoding='utf-8'))
                     item['generation'] = metadata
                     assistant = dict(role='assistant', content=raw)
                     if self.client.config.get('preserve_reasoning') and (path/'response.json').is_file():
@@ -219,6 +226,7 @@ class Agent:
             finally:
                 self.robot.command_interrupt = None
                 report.update(wall_seconds=time.monotonic()-started, final_observation=observe(self.robot))
+                report['inference_performance'] = summarize([item.get('generation', {}) for item in report['rounds']])
                 write_json(directory/'final_physics.json', physics_state(self.robot))
                 write_json(directory/'result.json', report)
                 record('task_result', dict(status=report['status'], verified_goal_success=report['success']))

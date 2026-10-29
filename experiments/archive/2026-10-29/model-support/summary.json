@@ -1,0 +1,225 @@
+{
+  "scope": "Development integration checks, not a held-out model-quality or normalized speed benchmark.",
+  "date": "2026-10-29",
+  "records": [
+    {
+      "label": "dory4b",
+      "model": "nvidia/NVIDIA-Nemotron-Labs-Dory1.0-4B-BF16",
+      "model_sha256": "96080be49ffd67b916018b7bdef8c484762576fb52780e10ab98ac4978a660e0",
+      "runtime_version": "dory-98a74c97ea09-cpu",
+      "quantization": "Q5_K_M",
+      "mode": "independently_graded_motion",
+      "constrained_decoding": false,
+      "status": "verified_success",
+      "goal_success": true,
+      "observed_tcp_delta_m": [
+        0.049999818520438,
+        -3.986869820393757e-09,
+        -1.9589902605643417e-07
+      ],
+      "rounds": 1,
+      "model_declared_done": [
+        true
+      ],
+      "performance": {
+        "schema_version": 2,
+        "measured_rounds": 1,
+        "total_rounds": 1,
+        "counted_rounds": 1,
+        "output_tokens": 318,
+        "native_decode_tokens": 317,
+        "decode_seconds": 47.656929,
+        "decode_tokens_per_second": 6.651708506018086,
+        "model_load_seconds": 5.54331371599983,
+        "request_seconds": 83.02166378499987,
+        "total_seconds": 88.5666837509998,
+        "partial_rounds": 0,
+        "partial": false
+      },
+      "software": {
+        "version": "3.1.0",
+        "python": "3.12.14",
+        "platform": "Linux-6.18.55-x86_64-with-glibc2.39",
+        "recorded_at_utc": "2026-10-29T08:09:29.036222+00:00",
+        "git_commit": "683dbf06d6468fcc1e88076bde813c2e9303afae",
+        "tracked_changes": true
+      }
+    },
+    {
+      "label": "granite8b",
+      "model": "ibm-granite/granite-4.2-8b",
+      "model_sha256": "16a9369d0805f80b7377d25d87f937a90c05dc04ad79173a52001e42c9aab311",
+      "runtime_version": "b11951",
+      "quantization": "Q4_K_M",
+      "mode": "independently_graded_motion",
+      "constrained_decoding": false,
+      "status": "verified_success",
+      "goal_success": true,
+      "observed_tcp_delta_m": [
+        0.049999818520438,
+        -3.986869820393757e-09,
+        -1.9589902605643417e-07
+      ],
+      "rounds": 1,
+      "model_declared_done": [
+        true
+      ],
+      "performance": {
+        "schema_version": 2,
+        "measured_rounds": 1,
+        "total_rounds": 1,
+        "counted_rounds": 1,
+        "output_tokens": 322,
+        "native_decode_tokens": 321,
+        "decode_seconds": 61.169322,
+        "decode_tokens_per_second": 5.247728591793122,
+        "model_load_seconds": 14.696411877000173,
+        "request_seconds": 97.25645467399954,
+        "total_seconds": 111.95371242599958,
+        "partial_rounds": 0,
+        "partial": false
+      },
+      "software": {
+        "version": "3.1.0",
+        "python": "3.12.14",
+        "platform": "Linux-6.18.55-x86_64-with-glibc2.39",
+        "recorded_at_utc": "2026-10-29T08:03:34.479650+00:00",
+        "git_commit": "683dbf06d6468fcc1e88076bde813c2e9303afae",
+        "tracked_changes": true
+      }
+    },
+    {
+      "label": "lfm2.6b-free",
+      "model": "LiquidAI/LFM2.5-2.6B",
+      "model_sha256": "02a8b7e17487d326e46d68ce0ba24211e1b80a14c4cd0597fa73c1cd697f52ed",
+      "runtime_version": "b11951",
+      "quantization": "Q4_K_M",
+      "mode": "independently_graded_motion",
+      "constrained_decoding": false,
+      "status": "budget_exhausted",
+      "goal_success": false,
+      "observed_tcp_delta_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rounds": 2,
+      "model_declared_done": [
+        false,
+        false
+      ],
+      "performance": {
+        "schema_version": 2,
+        "measured_rounds": 2,
+        "total_rounds": 2,
+        "counted_rounds": 2,
+        "output_tokens": 1625,
+        "native_decode_tokens": 1623,
+        "decode_seconds": 89.07542500000001,
+        "decode_tokens_per_second": 18.22051368264591,
+        "model_load_seconds": 3.802238259999285,
+        "request_seconds": 102.86928284700025,
+        "total_seconds": 106.6723069840009,
+        "partial_rounds": 0,
+        "partial": false
+      },
+      "software": {
+        "version": "3.1.0",
+        "python": "3.12.14",
+        "platform": "Linux-6.18.55-x86_64-with-glibc2.39",
+        "recorded_at_utc": "2026-10-29T08:01:08.392361+00:00",
+        "git_commit": "683dbf06d6468fcc1e88076bde813c2e9303afae",
+        "tracked_changes": true
+      }
+    },
+    {
+      "label": "lfm2.6b-json",
+      "model": "LiquidAI/LFM2.5-2.6B",
+      "model_sha256": "02a8b7e17487d326e46d68ce0ba24211e1b80a14c4cd0597fa73c1cd697f52ed",
+      "runtime_version": "b11951",
+      "quantization": "Q4_K_M",
+      "mode": "independently_graded_motion",
+      "constrained_decoding": true,
+      "status": "verified_success",
+      "goal_success": true,
+      "observed_tcp_delta_m": [
+        0.04999981852043861,
+        -3.9867705664553554e-09,
+        -1.958990096251334e-07
+      ],
+      "rounds": 1,
+      "model_declared_done": [
+        false
+      ],
+      "performance": {
+        "schema_version": 2,
+        "measured_rounds": 1,
+        "total_rounds": 1,
+        "counted_rounds": 1,
+        "output_tokens": 325,
+        "native_decode_tokens": 324,
+        "decode_seconds": 15.218515,
+        "decode_tokens_per_second": 21.28985646759884,
+        "model_load_seconds": 6.543052861000433,
+        "request_seconds": 24.202440992999982,
+        "total_seconds": 30.746663378999983,
+        "partial_rounds": 0,
+        "partial": false
+      },
+      "software": {
+        "version": "3.1.0",
+        "python": "3.12.14",
+        "platform": "Linux-6.18.55-x86_64-with-glibc2.39",
+        "recorded_at_utc": "2026-10-29T08:14:04.947820+00:00",
+        "git_commit": "683dbf06d6468fcc1e88076bde813c2e9303afae",
+        "tracked_changes": true
+      }
+    },
+    {
+      "label": "lfm2.6b-live",
+      "model": "LiquidAI/LFM2.5-2.6B",
+      "model_sha256": "02a8b7e17487d326e46d68ce0ba24211e1b80a14c4cd0597fa73c1cd697f52ed",
+      "runtime_version": "b11951",
+      "quantization": "Q4_K_M",
+      "mode": "free_live",
+      "constrained_decoding": true,
+      "status": "budget_exhausted",
+      "goal_success": null,
+      "observed_tcp_delta_m": [
+        0.19999890453952518,
+        -1.707648031590292e-07,
+        -2.625390251476123e-06
+      ],
+      "rounds": 4,
+      "model_declared_done": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "performance": {
+        "schema_version": 2,
+        "measured_rounds": 4,
+        "total_rounds": 4,
+        "counted_rounds": 4,
+        "output_tokens": 1059,
+        "native_decode_tokens": 1055,
+        "decode_seconds": 57.699844999999996,
+        "decode_tokens_per_second": 18.284277886708363,
+        "model_load_seconds": 4.535940865999692,
+        "request_seconds": 86.85792699500053,
+        "total_seconds": 91.39563376700153,
+        "partial_rounds": 0,
+        "partial": false
+      },
+      "software": {
+        "version": "3.1.0",
+        "python": "3.12.14",
+        "platform": "Linux-6.18.55-x86_64-with-glibc2.39",
+        "recorded_at_utc": "2026-10-29T08:20:52.843082+00:00",
+        "git_commit": "683dbf06d6468fcc1e88076bde813c2e9303afae",
+        "tracked_changes": true
+      }
+    }
+  ]
+}

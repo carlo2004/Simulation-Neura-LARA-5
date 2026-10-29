@@ -8,6 +8,7 @@ import time
 import urllib.request
 from pathlib import Path
 from stacklab.llm.catalog import find_executable, lock, runtime_env
+from stacklab.llm.metrics import GenerationMetrics
 
 
 class GenerationCancelled(RuntimeError):
@@ -45,6 +46,11 @@ class LocalModel:
         command = [str(exe), '--model', str(weights), '--host', '127.0.0.1', '--port', str(port),
                    '--ctx-size', str(config.get('context_tokens', 4096)), '--threads', str(self.threads),
                    '--gpu-layers', '0', '--parallel', '1', '--jinja', '--reasoning', 'auto']
+        extra = config.get('server_args', [])
+        reserved = {'--host', '--port', '--model', '-m', '--gpu-layers', '-ngl'}
+        if not isinstance(extra, list) or any(not isinstance(arg, str) or arg.split('=')[0] in reserved for arg in extra):
+            raise ValueError('server_args must be strings and must preserve the private model/CPU/loopback configuration')
+        command += extra
         self.log = (output/'inference.log').open('w', encoding='utf-8')
         started = time.monotonic()
         self.process = subprocess.Popen(command, cwd=exe.parent, env=runtime_env(exe), stdout=self.log, stderr=self.log)
@@ -68,7 +74,7 @@ class LocalModel:
             raise
 
     def complete(self, messages, output, *, max_tokens=2048, seed=42, thinking=None,
-                 timeout=600, on_delta=None, cancelled=None, thinking_budget=None):
+                 timeout=600, on_delta=None, cancelled=None, thinking_budget=None, on_progress=None):
         config = self.config
         if type(max_tokens) is not int or not 0 < max_tokens < config.get('context_tokens', 4096):
             raise ValueError('max-tokens must be positive and smaller than the model context')
@@ -85,10 +91,15 @@ class LocalModel:
         if prefix:
             messages[0]['content'] = (ROOT/prefix).read_text(encoding='utf-8')+'\n\n'+messages[0]['content']
         canonical = json.dumps(messages, ensure_ascii=False, sort_keys=True)
-        template = dict(config.get('chat_template_kwargs', {}), enable_thinking=thinking)
+        template = dict(config.get('chat_template_kwargs', {}))
+        thinking_key = config.get('thinking_template_key', 'enable_thinking')
+        if thinking_key:
+            template[thinking_key] = thinking
         payload = dict(model='local', messages=messages, max_tokens=max_tokens, **sampling,
                        seed=seed, chat_template_kwargs=template, stream=True,
-                       stream_options={'include_usage': True})
+                       stream_options={'include_usage': True}, timings_per_token=True)
+        if config.get('response_format'):
+            payload['response_format'] = config['response_format']
         if thinking:
             budget = config.get('thinking_budget_tokens', -1) if thinking_budget is None else thinking_budget
             if budget < -1 or budget >= max_tokens:
@@ -103,16 +114,41 @@ class LocalModel:
                         context_tokens=config.get('context_tokens', 4096), max_output_tokens=max_tokens,
                         prompt_sha256=hashlib.sha256(canonical.encode()).hexdigest(), device='CPU',
                         inference='Local subprocess; temporary loopback HTTP; no hosted API',
-                        prompt_format='GGUF native chat template / Jinja', constrained_decoding=False)
+                        prompt_format='GGUF native chat template / Jinja',
+                        constrained_decoding=bool(config.get('response_format')))
         metadata['reasoning_budget_tokens'] = payload.get('reasoning_budget_tokens', -1)
+        metadata['server_args'] = config.get('server_args', [])
+        metadata['runtime_source'] = config.get('runtime_source')
         started = time.monotonic()
+        metrics = GenerationMetrics()
+        last_progress = float('-inf')
+        last_phase = None
+
+        def progress(force=False, finished=False):
+            nonlocal last_progress, last_phase
+            now = time.monotonic()
+            value = metrics.snapshot(finished=finished, partial=finished and finish != 'stop')
+            if force or value['phase'] != last_phase or now-last_progress >= 1:
+                if on_progress:
+                    on_progress(value)
+                last_progress = now
+                last_phase = value['phase']
+
         content, reasoning = [], []
         reply = dict(choices=[], usage=None)
         finish = None
         try:
+            progress(force=True)
             warm = self.process is not None and self.process.poll() is None
             self.start(output, timeout=min(120, timeout), cancelled=cancelled)
             metadata['model_load_seconds'] = 0. if warm else self.load_seconds
+            installation = CACHE_ROOT/'runtime'/config['runtime_version']/'installed.json'
+            try:
+                metadata['runtime_installation'] = json.loads(installation.read_text(encoding='utf-8'))
+            except (OSError, ValueError):
+                metadata['runtime_installation'] = None
+            metrics.ready(metadata['model_load_seconds'])
+            progress(force=True)
             request = urllib.request.Request(self.address+'/v1/chat/completions',
                         data=json.dumps(payload).encode('utf-8'), headers={'Content-Type': 'application/json'})
             remaining = max(1, timeout-(time.monotonic()-started))
@@ -131,6 +167,8 @@ class LocalModel:
                     chunk = json.loads(data)
                     events.write(json.dumps(chunk, ensure_ascii=False)+'\n')
                     events.flush()
+                    metrics.update(chunk)
+                    progress()
                     if chunk.get('error'):
                         raise RuntimeError(str(chunk['error']))
                     if chunk.get('usage'):
@@ -155,11 +193,15 @@ class LocalModel:
             metadata['error'] = type(error).__name__+': '+str(error)
             raise error
         finally:
+            # Preserve timing and partial-token evidence on cancellation/truncation as well.
+            metadata.update(finish_reason=finish, usage=reply.get('usage'), timings=reply.get('timings'))
+            metadata['performance'] = metrics.snapshot(finished=True, partial=finish != 'stop')
             raw, thoughts = ''.join(content), ''.join(reasoning)
             reply['choices'] = [dict(finish_reason=finish, message=dict(role='assistant', content=raw, reasoning_content=thoughts))]
             (output/'response.json').write_text(json.dumps(reply, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
             metadata['generation_seconds'] = time.monotonic()-started
             (output/'generation.json').write_text(json.dumps(metadata, indent=2)+'\n')
+            progress(force=True, finished=True)
         return raw, metadata
 
     def cancel(self):
