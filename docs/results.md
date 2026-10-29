@@ -1,6 +1,6 @@
 # Ergebnisse und Vergleichsdesign
 
-**Status: Architekturvorschlag vom 28.10.2026.** Diese Datei beschreibt den nächsten Ausbau. Der neue Recorder, die unten beschriebenen Dateiformate und ein automatischer Mehrfachlauf sind noch nicht implementiert. Referenz für den geprüften bisherigen Code: [9a31361](https://github.com/carlo2004/Simulation-Neura-LARA-5/tree/9a313616c48c7d55fa33a604b77553d4aeaf232d).
+**Status: teilweise umgesetzt, 29.10.2026.** Der [Experiment-Runner](experiments.md) implementiert eingefrorene Entwicklungspläne, modellunabhängige Fall-IDs, Episoden-/Bedingungs-IDs, getrennte Seeds, mehrere Modelle/Blockbudgets, Wiederaufnahme offener Pläne und CSV-/JSON-/Markdown-Auswertungen. Er verwendet die bestehenden Rohprotokolle; ein gemeinsamer neuer Event-Recorder und Trainingsdatenexport sind weiterhin Vorschläge. Die folgenden Abschnitte unterscheiden heutigen Stand und Zielarchitektur. Frühere Referenz: [9a31361](https://github.com/carlo2004/Simulation-Neura-LARA-5/tree/9a313616c48c7d55fa33a604b77553d4aeaf232d).
 
 ## Forschungsfrage und Umfang
 
@@ -14,7 +14,7 @@ Für den ersten Vergleich ein Modell auswählen, die Roboter-API einfrieren und 
 
 Agent und Runtime speichern bereits tatsächliche Requests, Responses, Code, Feedback, Physikzustände und Ergebnisberichte. Der unabhängige Evaluator prüft echte Kontakte und Stabilität. Modellmeldungen ersetzen keine Prüfung. Freie Chat-Anweisungen ohne vorgegebenes Ziel haben `success: null`.
 
-Es fehlen ein gemeinsames versioniertes Ergebnisformat, eine feste Identität pro Testfall und Episode, getrennte Zufallsseeds, eine reproduzierbare Mehrfachauswertung sowie ein definierter Trainingsdatenexport. Das bisherige `trajectory.jsonl` enthält Agentenereignisse; es ist keine durchgehend abgetastete Gelenk- oder Kontakttrajektorie.
+Der Experiment-Runner ergänzt ein versioniertes Plan-/Berichtsformat, feste Fall-/Episodenidentitäten, getrennte Zufallsseeds und reproduzierbare Mehrfachauswertung. Lade-/Tokenmetriken stammen aus der Runtime; Ausführungs- und Prüfzeiten sind zusätzlich pro Runde erfasst. Es fehlen weiterhin ein einheitlicher Event-Recorder über alle Einstiegspunkte und ein definierter Trainingsdatenexport. Das bisherige `trajectory.jsonl` enthält Agentenereignisse; es ist keine durchgehend abgetastete Gelenk- oder Kontakttrajektorie.
 
 Die bisherigen archivierten Proben sind Entwicklungsdaten. Sie werden nicht nachträglich als unberührtes Testset bezeichnet oder mit neuen Protokollen zusammengefasst.
 
@@ -28,7 +28,9 @@ Die bisherigen archivierten Proben sind Entwicklungsdaten. Sie werden nicht nach
 
 Mehrere Korrekturrunden bleiben dieselbe Episode. Ein Reset oder ein erneuter gesampelter Versuch erhält eine neue Episode. 20 Stabilitätsproben sind 20 Messpunkte **innerhalb einer Episode**, keine 20 unabhängigen Versuche. Wiederholungen, Varianten und Zufallsseeds werden explizit gezählt.
 
-## Kleine Speicherarchitektur
+## Zielarchitektur für den gemeinsamen Recorder
+
+Die folgende Vier-Dateien-Struktur ist noch nicht implementiert. Der aktuelle Experiment-Runner legt ein Planmanifest im Experimentordner sowie ein kleines Identitätsmanifest neben die bestehenden Rohdateien jeder Episode. Die tatsächlichen heutigen Pfade stehen in der [Bedienungsanleitung](experiments.md).
 
 | Pfad innerhalb einer Episode | Rolle |
 |---|---|

@@ -1,6 +1,6 @@
 # Versuchsindex
 
-Der [Vorschlag für Ergebnisarchitektur und Vergleichsdesign](../docs/results.md) beschreibt den nächsten Ausbau. Er ist von den hier tatsächlich gemessenen Ergebnissen getrennt.
+Der [Experiment-Runner](../docs/experiments.md) unterstützt eingefrorene Entwicklungsvergleiche und CSV-/JSON-Auswertung. Der [Plan für Ergebnisarchitektur und Vergleichsdesign](../docs/results.md) beschreibt zusätzlich noch offene Ausbauschritte. Beides bleibt von den hier tatsächlich gemessenen Ergebnissen getrennt.
 
 Hier liegen ausgewählte **tatsächlich ausgeführte** Entwicklungsversuche. Modellcode wurde nicht nachträglich repariert. Test-Fixtures der Software sind getrennt unter `tests/`.
 

@@ -124,6 +124,10 @@ class FeedbackTests(unittest.TestCase):
             self.assertFalse(feedback['evaluation']['success'])
             self.assertLess(report['evaluation']['tcp_error_m'], .004)
             self.assertEqual(report['rounds'][0]['actions'][0]['status'], 'error')
+            self.assertEqual(report['rounds'][0]['execution_outcome'], 'execution_error')
+            self.assertEqual(report['rounds'][1]['execution_outcome'], 'executed')
+            self.assertGreater(report['rounds'][1]['execution_seconds'], 0)
+            self.assertAlmostEqual(report['rounds'][1]['evaluation_simulation_seconds'], .2, places=6)
 
     def test_model_done_cannot_override_failed_stack_check(self):
         with tempfile.TemporaryDirectory() as temp, closing(Simulation(Config.load(ROOT/'scenes/default.json'))) as robot:

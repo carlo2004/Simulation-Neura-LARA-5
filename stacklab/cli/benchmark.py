@@ -21,28 +21,42 @@ CASES = {
 }
 
 
-def run_case(name, args, directory):
+def case_definition(name, scene_seed):
     instruction, source, target, filename, jitter = CASES[name]
-    config = replace(Config.load(ROOT/filename), seed=args.seed, random_jitter_m=jitter)
+    config = replace(Config.load(ROOT/filename), seed=scene_seed, random_jitter_m=jitter)
+    return dict(name=name, instruction=instruction, source=source, target=target,
+                scene_seed=scene_seed, config=config.to_dict(), initial_object_positions=config.scene(),
+                goal=dict(type='stack', source=source, target=target) if source else
+                dict(type='move', delta_m=[.05, 0, 0]))
+
+
+def run_case(name, args, directory, *, case=None):
+    scene_seed = getattr(args, 'scene_seed', None)
+    generation_seed = getattr(args, 'generation_seed', None)
+    case = case or case_definition(name, args.seed if scene_seed is None else scene_seed)
+    config = Config(**case['config']).validate()
+    source, target = case['source'], case['target']
+    generation_seed = args.seed if generation_seed is None else generation_seed
     directory.mkdir(parents=True, exist_ok=True)
     write_json(directory/'scene.json', config.to_dict())
-    user = dict(instruction=args.instruction or instruction,
+    user = dict(instruction=args.instruction or case['instruction'],
                 objects=[dict(name=s.name, shape=s.shape, full_size_m=s.dimensions()) for s in config.object_specs()],
                 units='metres', table_z=0, suggested_transport_z=config.hover_z_m)
     result = dict(case=name, instruction=user['instruction'], source=source, target=target,
-                  success=False, stage='generation', seed=args.seed)
+                  success=False, stage='generation', seed=generation_seed,
+                  scene_seed=config.seed, generation_seed=generation_seed)
     print('Generate: '+name, flush=True)
     try:
         result['stage'] = 'execution'
         command = [sys.executable, '-m', 'stacklab.cli.worker', '--config', str(directory/'scene.json'),
                    '--result', str(directory/'execution.json')]
         if source is None:
-            command += ['--move-delta', '.05', '0', '0']
+            command += ['--move-delta', *map(str, case['goal']['delta_m'])]
         else:
             command += ['--source', source, '--target', target]
         command += ['--feedback-rounds', str(args.feedback_rounds), '--model', lock(args.model)['model_key'],
                     '--instruction', user['instruction'], '--max-tokens', str(args.max_tokens),
-                    '--threads', str(args.threads), '--seed', str(args.seed),
+                    '--threads', str(args.threads), '--seed', str(generation_seed),
                     '--generation-timeout', str(args.generation_timeout),
                     '--execution-timeout', str(args.execution_timeout),
                     '--thinking' if args.thinking else '--no-thinking']
@@ -75,6 +89,12 @@ def run_case(name, args, directory):
             print('[Inferenz] '+format_speed(execution['inference_performance']), flush=True)
     except Exception as error:
         result['error'] = type(error).__name__+': '+str(error)
+        # A timed-out worker can still finish writing partial native token counters.
+        if (directory/'execution.json').is_file():
+            try:
+                result['execution'] = json.loads((directory/'execution.json').read_text(encoding='utf-8'))
+            except (OSError, ValueError):
+                pass
     write_json(directory/'result.json', result)
     print(('PASS' if result['success'] else 'FAIL')+' '+name+' ('+result['stage']+')', flush=True)
     return result

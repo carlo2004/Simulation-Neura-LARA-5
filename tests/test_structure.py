@@ -20,7 +20,8 @@ class StructureTests(unittest.TestCase):
     def test_package_commands_work_outside_the_checkout(self):
         with tempfile.TemporaryDirectory() as temp:
             for args, expected in [(["models"], "qwen9b"), (["chat", "--help"], "--max-rounds"),
-                                   (["console", "--help"], "--config"), (["--version"], __version__)]:
+                                   (["console", "--help"], "--config"), (["experiment", "--help"], "plan"),
+                                   (["--version"], __version__)]:
                 result = subprocess.run([sys.executable, "-m", "stacklab", *args], cwd=temp,
                                         text=True, capture_output=True, timeout=30)
                 self.assertEqual(result.returncode, 0, result.stderr)

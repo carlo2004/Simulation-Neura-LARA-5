@@ -139,7 +139,7 @@ class Agent:
                     self.on_event('generating', dict(round=index, maximum=self.max_rounds))
                     # Retain the task plus the latest two feedback exchanges, not unbounded chat.
                     messages = [system, first, *history[-4:]]
-                    item = dict(round=index, stage='generation', actions=[])
+                    item = dict(round=index, stage='generation', actions=[], execution_outcome='not_generated')
                     report['rounds'].append(item)
                     try:
                         raw, metadata = self.generate(messages, path, self.seed+index-1)
@@ -148,6 +148,7 @@ class Agent:
                         if partial_metadata.is_file():
                             item['generation'] = json.loads(partial_metadata.read_text(encoding='utf-8'))
                     item['generation'] = metadata
+                    item['execution_outcome'] = 'not_executed'
                     assistant = dict(role='assistant', content=raw)
                     if self.client.config.get('preserve_reasoning') and (path/'response.json').is_file():
                         response = json.loads((path/'response.json').read_text(encoding='utf-8'))
@@ -157,12 +158,17 @@ class Agent:
                     reply = None
                     runner = None
                     error = None
+                    phase = 'parsing'
+                    execution_started = time.monotonic()
+                    execution_simulation_started = float(self.robot.data.time)
                     try:
                         reply = parse_reply(raw, self.policy_limits)
                         (path/'generated.py').write_text(reply['code'].rstrip()+'\n', encoding='utf-8')
                         self.on_event('program', dict(round=index, **reply))
                         if reply['code'].strip():
+                            phase = 'validation'
                             validate(reply['code'], self.policy_limits)
+                            phase = 'execution'
                             deadline = time.monotonic()+self.execution_timeout
 
                             def interrupt():
@@ -174,15 +180,23 @@ class Agent:
                             runner = Interpreter(self.robot, limits=self.policy_limits, should_stop=self.cancelled.is_set,
                                                  on_action=lambda phase, action: self.on_event('action', dict(phase=phase, **action)))
                             item['stage'] = 'execution'
+                            item['execution_outcome'] = 'executing'
                             runner.run(reply['code'])
+                            item['execution_outcome'] = 'executed'
                         elif not reply['done']:
                             raise ValueError('An empty program must set done=true')
+                        else:
+                            item['execution_outcome'] = 'no_program'
                     except PolicyCancelled:
+                        item['execution_outcome'] = 'cancelled'
                         raise
                     except Exception as failure:
                         error = type(failure).__name__+': '+str(failure)
+                        item['execution_outcome'] = phase+'_error'
                         hold(self.robot)
                     finally:
+                        item['execution_seconds'] = time.monotonic()-execution_started
+                        item['execution_simulation_seconds'] = float(self.robot.data.time)-execution_simulation_started
                         self.robot.command_interrupt = None
                         if runner is not None:
                             item['actions'] = runner.actions
@@ -190,9 +204,13 @@ class Agent:
                         raise PolicyCancelled('Task cancelled')
                     self.robot.step(.2)
                     self.robot.command_interrupt = self.check_stop
+                    evaluation_started = time.monotonic()
+                    evaluation_simulation_started = float(self.robot.data.time)
                     try:
                         grading = evaluate(self.robot, goal)
                     finally:
+                        item['evaluation_seconds'] = time.monotonic()-evaluation_started
+                        item['evaluation_simulation_seconds'] = float(self.robot.data.time)-evaluation_simulation_started
                         self.robot.command_interrupt = None
                     feedback = dict(error=error, observation=observe(self.robot), evaluation=grading,
                                     actions=item['actions'], local_variables_reset=True,
