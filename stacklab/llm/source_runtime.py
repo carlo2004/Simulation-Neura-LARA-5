@@ -15,8 +15,15 @@ BUILD_FLAGS = ['-DCMAKE_BUILD_TYPE=Release', '-DGGML_NATIVE=OFF', '-DGGML_CUDA=O
 
 def build_flags(config):
     if config.get('device') == 'cuda':
-        return [flag.replace('GGML_CUDA=OFF', 'GGML_CUDA=ON') for flag in BUILD_FLAGS]+[
+        flags = [flag.replace('GGML_CUDA=OFF', 'GGML_CUDA=ON') for flag in BUILD_FLAGS]+[
             '-DCMAKE_CUDA_ARCHITECTURES='+';'.join(map(str, config.get('cuda_architectures', [80, 89])))]
+        args = config.get('server_args', [])
+        flash_off = any(arg == '--flash-attn' and index+1 < len(args) and args[index+1] == 'off'
+                        for index, arg in enumerate(args))
+        # Current profiles use f16 KV caches; omit unused quantized-KV FA variants.
+        flags.append('-DGGML_CUDA_FA=OFF' if flash_off else
+                     '-DGGML_CUDA_FA_QUANTS='+config.get('cuda_flash_attention_quants', 'f16-f16'))
+        return flags
     return BUILD_FLAGS
 
 

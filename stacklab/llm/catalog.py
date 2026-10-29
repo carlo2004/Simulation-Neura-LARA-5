@@ -50,14 +50,16 @@ def lock(model=None, device='cpu'):
             raise ValueError('Pinned CUDA support currently targets Linux x86-64, including Colab L4/A100')
         if config.get('runtime_source'):
             config.update(runtime_version=config['runtime_version']+'-cuda', device='cuda',
-                          cuda_architectures=spec['source_cuda_architectures'], cuda_runtime_kind='source')
+                          cuda_architectures=spec['source_cuda_architectures'], cuda_runtime_kind='source',
+                          cuda_flash_attention_quants=spec['source_flash_attention_quants'])
         else:
             if config['runtime_version'] != spec['base_runtime_version']:
                 raise ValueError('No pinned CUDA recipe for '+config['runtime_version'])
             if mode == 'source' or mode == 'auto' and old_glibc:
                 config.update(runtime_version=config['runtime_version']+'-cuda-source', device='cuda',
                               runtime_source=dict(repository=spec['source_repository'], revision=spec['source_revision']),
-                              cuda_architectures=spec['source_cuda_architectures'], cuda_runtime_kind='source')
+                              cuda_architectures=spec['source_cuda_architectures'], cuda_runtime_kind='source',
+                              cuda_flash_attention_quants=spec['source_flash_attention_quants'])
             else:
                 config.update(runtime_version=spec['runtime_version'], runtime_assets=spec['runtime_assets'],
                               runtime_dependencies=spec['runtime_dependencies'], device='cuda', cuda_runtime_kind='binary')

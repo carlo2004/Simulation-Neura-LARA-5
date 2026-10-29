@@ -23,5 +23,6 @@
       }
     ]
   },
-  "source_cuda_architectures": [80, 89]
+  "source_cuda_architectures": [80, 89],
+  "source_flash_attention_quants": "f16-f16"
 }

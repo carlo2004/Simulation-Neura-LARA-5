@@ -17,6 +17,8 @@ CUDA nutzt standardmäßig alle verfügbaren Modellschichten auf der GPU. Modell
 
 `CUDA_RUNTIME="auto"` verwendet die geprüften CUDA-12.8-Pakete auf kompatiblen Systemen. Diese Pakete benötigen GLIBC 2.38; bei älterer GLIBC wird derselbe Commit `a71c00f0bb2d60a4a52837d80baa534b651ebd91` aus den Quellen gebaut. `CUDA_RUNTIME="source"` erzwingt einen Quellbuild, etwa um auf beiden Karten dieselbe Variante zu verwenden. Außerhalb des Notebooks steuert `STACKLAB_CUDA_RUNTIME=auto|binary|source` diese Wahl. Die aufgelöste Variante steht in der Modellkonfiguration des Versuchs. Quellbuilds prüfen erforderliche Werkzeuge vor dem Gewichtsdownload, zeigen Fortschritt an und halten auch die NVCC-Version fest. Der erste Build kann mehrere Minuten dauern.
 
+Quellbuilds erzeugen FlashAttention-Kernel für die verwendeten f16-KV-Caches. Bei Dory entfällt deren Build ganz, weil dessen bestehendes Profil FlashAttention ausschaltet. Das ändert weder die GGUF-Quantisierung noch die bisherigen KV-/Thinking-Einstellungen und spart ungenutzte Kernelvarianten beim Einrichten. Für eigene quantisierte KV-Caches muss die Buildkonfiguration entsprechend erweitert werden.
+
 ## L4 und A100 vergleichen
 
 1. Auf L4 ausführen und die ausgegebene Commit-SHA, Modellwahl, Budgets und Seeds festhalten.

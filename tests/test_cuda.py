@@ -33,6 +33,7 @@ class CudaTests(unittest.TestCase):
                 patch.dict(catalog.os.environ, STACKLAB_CUDA_RUNTIME='auto'):
             config=catalog.lock('granite8b',device='cuda')
         self.assertEqual(config['cuda_runtime_kind'],'source')
+        self.assertIn('-DGGML_CUDA_FA_QUANTS=f16-f16',source_runtime.build_flags(config))
         self.assertEqual(config['runtime_source']['revision'],'a71c00f0bb2d60a4a52837d80baa534b651ebd91')
         self.assertEqual(config['model_sha256'],catalog.lock('granite8b')['model_sha256'])
         with patch.object(catalog, 'platform_key', return_value='linux-x86_64'), \
@@ -46,6 +47,7 @@ class CudaTests(unittest.TestCase):
         self.assertNotEqual(cuda['runtime_version'], cpu['runtime_version'])
         self.assertIn('-DGGML_CUDA=ON', source_runtime.build_flags(cuda))
         self.assertIn('-DCMAKE_CUDA_ARCHITECTURES=80;89', source_runtime.build_flags(cuda))
+        self.assertIn('-DGGML_CUDA_FA=OFF', source_runtime.build_flags(cuda))
         self.assertIn('-DGGML_CUDA=OFF', source_runtime.build_flags(cpu))
 
     def test_inventory_parses_both_devices_and_the_reported_total_memory(self):
