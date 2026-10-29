@@ -13,12 +13,17 @@ jobs:
       matrix:
         model: [granite8b, dory4b]
     container: nvidia/cuda:12.8.1-devel-ubuntu24.04
+    env:
+      # Build-only driver stub on GPU-less CI; Colab uses its actual NVIDIA driver.
+      LD_LIBRARY_PATH: /usr/local/cuda/lib64/stubs:/usr/local/cuda/lib64:/usr/local/nvidia/lib:/usr/local/nvidia/lib64
+      LDFLAGS: -Wl,-rpath-link,/usr/local/cuda/lib64/stubs
     steps:
       - uses: actions/checkout@v7
       - name: Install source-build tools
         run: |
           apt-get update -qq
           apt-get install -y -qq git cmake python3 g++
+          ln -sf libcuda.so /usr/local/cuda/lib64/stubs/libcuda.so.1
       - name: Compile pinned CUDA kernels for A100 and L4
         env:
           STACKLAB_CUDA_RUNTIME: source
