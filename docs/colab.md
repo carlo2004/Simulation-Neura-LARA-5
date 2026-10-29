@@ -8,12 +8,14 @@ Dasselbe Notebook unterstützt beide Karten. In Colab eine GPU-Laufzeit auswähl
 
 - Eine eigene `.venv` mit Python 3.12/3.13 und den bisherigen Simulationspaketen. Bei einem anderen Notebook-Python wird Python 3.12 über `uv` eingerichtet.
 - Dieselben auf Revision und SHA-256 festgelegten GGUF-Gewichte wie im CPU-Modus.
-- Ein separater CUDA-12.8-Runtimecache für Linux x86-64. CPU-Installationen bleiben erhalten. Die sechs Modelle mit Standard-Runtime verwenden weiterhin llama.cpp `b11951`; Dory bleibt auf seinem empfohlenen Quellcommit.
+- Ein separater CUDA-Runtimecache für Linux x86-64. CPU-Installationen bleiben erhalten. Die sechs Modelle mit Standard-Runtime verwenden weiterhin llama.cpp `b11951`; Dory bleibt auf seinem empfohlenen Quellcommit.
 - Tatsächliche NVIDIA-Inventardaten: Name, UUID, gesamter GPU-Speicher in MiB und Treiber. `memory.total` bedeutet nicht freier Speicher.
 - Eine CUDA-Geräteprüfung vor dem Gewichtsdownload und eine Prüfung der echten Offloading-Meldung beim Modellstart. Ein CPU-Fallback geschieht nicht still.
 - Optional ein Video eines separaten Modell-Bewegungsversuchs. OSMesa rendert auf der CPU; die Inferenz verwendet CUDA. Die Hauptvergleichsläufe zeichnen standardmäßig kein Video auf.
 
 CUDA nutzt standardmäßig alle verfügbaren Modellschichten auf der GPU. Modell, Kontext und Puffer müssen in den verfügbaren Speicher passen; Fehler stehen in `inference.log`. Der bezahlte Colab-Tarif allein aktiviert CUDA nicht im Programm. Gerätewahl erfolgt ausdrücklich über `--device cuda`.
+
+`CUDA_RUNTIME="auto"` verwendet die geprüften CUDA-12.8-Pakete auf kompatiblen Systemen. Diese Pakete benötigen GLIBC 2.38; bei älterer GLIBC wird derselbe Commit `a71c00f0bb2d60a4a52837d80baa534b651ebd91` aus den Quellen gebaut. `CUDA_RUNTIME="source"` erzwingt einen Quellbuild, etwa um auf beiden Karten dieselbe Variante zu verwenden. Außerhalb des Notebooks steuert `STACKLAB_CUDA_RUNTIME=auto|binary|source` diese Wahl. Die aufgelöste Variante steht in der Modellkonfiguration des Versuchs. Quellbuilds prüfen erforderliche Werkzeuge vor dem Gewichtsdownload, zeigen Fortschritt an und halten auch die NVCC-Version fest. Der erste Build kann mehrere Minuten dauern.
 
 ## L4 und A100 vergleichen
 
@@ -62,6 +64,6 @@ Dory verwendet auch unter CUDA seinen separaten Quellbuild. Neben Git/CMake/C++ 
 
 ## Prüfstand
 
-Softwaretests prüfen Gerätewahl, unveränderte Gewichte, Paket-/Binärhashes, CUDA- und Offloading-Prüfungen, Quellenbuild-Konfiguration, Notebook-Syntax sowie Sicherungen bei Abbrüchen und Schreibfehlern. Die echte CUDA-Paketinstallation wird zusätzlich ohne GPU gestartet; die CI kompiliert Dorys CUDA-Kernel für beide Zielarchitekturen. Das ersetzt keinen Inferenztest auf einer echten L4/A100: Diesen führt das Notebook auf deiner zugeteilten Karte aus. Hier sind keine solchen GPU-Leistungswerte als vorab gemessen eingetragen.
+Softwaretests prüfen Gerätewahl, unveränderte Gewichte, Paket-/Binärhashes, CUDA- und Offloading-Prüfungen, GLIBC-Auswahl, Quellenbuild-Konfiguration, Notebook-Syntax sowie Sicherungen bei Abbrüchen und Schreibfehlern. Die echte CUDA-Paketinstallation wird zusätzlich ohne GPU gestartet; die CI kompiliert den normalen und Dorys CUDA-Quellpfad für beide Zielarchitekturen und prüft OSMesa-Video. Das ersetzt keinen Inferenztest auf einer echten L4/A100: Diesen führt das Notebook auf deiner zugeteilten Karte aus. Hier sind keine solchen GPU-Leistungswerte als vorab gemessen eingetragen.
 
 Quellen: [Colab-FAQ](https://research.google.com/colaboratory/faq.html), [llama.cpp b11951 und Paketprüfsummen](https://github.com/ggml-org/llama.cpp/releases/tag/b11951), [Dory-Modellkarte](https://huggingface.co/nvidia/NVIDIA-Nemotron-Labs-Dory1.0-4B-GGUF).

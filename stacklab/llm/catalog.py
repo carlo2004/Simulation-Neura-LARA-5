@@ -40,16 +40,27 @@ def lock(model=None, device='cpu'):
         raise ValueError('Model exceeds the configured total-parameter budget')
     if device == 'cuda':
         spec = json.loads((ROOT/'config/cuda.runtime.lock.json').read_text(encoding='utf-8'))
+        mode = os.environ.get('STACKLAB_CUDA_RUNTIME', 'auto')
+        if mode not in ('auto', 'binary', 'source'):
+            raise ValueError('STACKLAB_CUDA_RUNTIME must be auto, binary or source')
+        libc, libc_version = platform.libc_ver()
+        old_glibc = (libc == 'glibc' and libc_version and
+                     tuple(map(int, libc_version.split('.'))) < tuple(map(int, spec['minimum_binary_glibc'].split('.'))))
         if platform_key() not in spec['runtime_assets']:
             raise ValueError('Pinned CUDA support currently targets Linux x86-64, including Colab L4/A100')
         if config.get('runtime_source'):
             config.update(runtime_version=config['runtime_version']+'-cuda', device='cuda',
-                          cuda_architectures=spec['source_cuda_architectures'])
+                          cuda_architectures=spec['source_cuda_architectures'], cuda_runtime_kind='source')
         else:
             if config['runtime_version'] != spec['base_runtime_version']:
                 raise ValueError('No pinned CUDA recipe for '+config['runtime_version'])
-            config.update(runtime_version=spec['runtime_version'], runtime_assets=spec['runtime_assets'],
-                          runtime_dependencies=spec['runtime_dependencies'], device='cuda')
+            if mode == 'source' or mode == 'auto' and old_glibc:
+                config.update(runtime_version=config['runtime_version']+'-cuda-source', device='cuda',
+                              runtime_source=dict(repository=spec['source_repository'], revision=spec['source_revision']),
+                              cuda_architectures=spec['source_cuda_architectures'], cuda_runtime_kind='source')
+            else:
+                config.update(runtime_version=spec['runtime_version'], runtime_assets=spec['runtime_assets'],
+                              runtime_dependencies=spec['runtime_dependencies'], device='cuda', cuda_runtime_kind='binary')
     return config
 
 

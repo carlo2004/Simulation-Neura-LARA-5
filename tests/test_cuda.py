@@ -27,6 +27,19 @@ class CudaTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             catalog.lock('granite8b', device='unknown')
 
+    def test_old_colab_glibc_selects_the_same_pinned_source_version(self):
+        with patch.object(catalog, 'platform_key', return_value='linux-x86_64'), \
+                patch.object(catalog.platform, 'libc_ver', return_value=('glibc','2.35')), \
+                patch.dict(catalog.os.environ, STACKLAB_CUDA_RUNTIME='auto'):
+            config=catalog.lock('granite8b',device='cuda')
+        self.assertEqual(config['cuda_runtime_kind'],'source')
+        self.assertEqual(config['runtime_source']['revision'],'a71c00f0bb2d60a4a52837d80baa534b651ebd91')
+        self.assertEqual(config['model_sha256'],catalog.lock('granite8b')['model_sha256'])
+        with patch.object(catalog, 'platform_key', return_value='linux-x86_64'), \
+                patch.object(catalog.platform, 'libc_ver', return_value=('glibc','2.39')), \
+                patch.dict(catalog.os.environ, STACKLAB_CUDA_RUNTIME='source'):
+            self.assertEqual(catalog.lock('granite8b',device='cuda')['cuda_runtime_kind'],'source')
+
     def test_dory_build_targets_a100_and_l4_without_changing_cpu_flags(self):
         cuda, cpu = self.cuda_config('dory4b'), catalog.lock('dory4b')
         self.assertEqual(cuda['runtime_source'], cpu['runtime_source'])

@@ -71,7 +71,19 @@ def build_runtime(config, directory):
     print('Build pinned '+config.get('device', 'cpu').upper()+' runtime: '+revision+'; log: '+str(log_path), flush=True)
     with log_path.open('a', encoding='utf-8') as log:
         def run(args, cwd=directory):
-            subprocess.run(args, cwd=cwd, stdout=log, stderr=subprocess.STDOUT, check=True)
+            if config.get('device') != 'cuda':
+                subprocess.run(args, cwd=cwd, stdout=log, stderr=subprocess.STDOUT, check=True)
+                return
+            with subprocess.Popen(args, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                                  text=True, bufsize=1) as process:
+                for line in process.stdout:
+                    log.write(line)
+                    log.flush()
+                    if line.lstrip().startswith('['):
+                        print(line.rstrip(), flush=True)
+                code = process.wait()
+                if code:
+                    raise subprocess.CalledProcessError(code, args)
         try:
             if not (source/'.git').is_dir():
                 if source.exists() and any(source.iterdir()):
@@ -108,9 +120,13 @@ def build_runtime(config, directory):
     if not candidates:
         raise RuntimeError('Build produced no llama-server; see '+str(log_path))
     executable = candidates[0].resolve()
+    build_tools = {}
+    if config.get('device') == 'cuda':
+        tool = subprocess.run(['nvcc', '--version'], capture_output=True, text=True, timeout=15, check=True)
+        build_tools['nvcc_version'] = tool.stdout+tool.stderr
     temporary = marker.with_suffix('.tmp')
     temporary.write_text(json.dumps(dict(source=identity, executable=str(executable.relative_to(directory.resolve())),
-                                         executable_sha256=sha256(executable)),
+                                         executable_sha256=sha256(executable), build_tools=build_tools),
                                     indent=2)+'\n', encoding='utf-8')
     temporary.replace(marker)
     return executable

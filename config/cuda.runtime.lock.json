@@ -2,6 +2,9 @@
   "format_version": 1,
   "base_runtime_version": "b11951",
   "runtime_version": "b11951-cuda12.8",
+  "minimum_binary_glibc": "2.38",
+  "source_repository": "https://github.com/ggml-org/llama.cpp.git",
+  "source_revision": "a71c00f0bb2d60a4a52837d80baa534b651ebd91",
   "runtime_assets": {
     "linux-x86_64": {
       "filename": "llama-b11951-bin-ubuntu-cuda-12.8-x64.tar.gz",

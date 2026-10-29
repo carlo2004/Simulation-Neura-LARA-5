@@ -8,6 +8,10 @@ jobs:
   cuda-source-build:
     runs-on: ubuntu-latest
     timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        model: [granite8b, dory4b]
     container: nvidia/cuda:12.8.1-devel-ubuntu24.04
     steps:
       - uses: actions/checkout@v7
@@ -15,21 +19,29 @@ jobs:
         run: |
           apt-get update -qq
           apt-get install -y -qq git cmake python3 g++
-      - name: Compile pinned Dory CUDA kernels for A100 and L4
+      - name: Compile pinned CUDA kernels for A100 and L4
+        env:
+          STACKLAB_CUDA_RUNTIME: source
+          STACKLAB_CI_MODEL: ${{ matrix.model }}
         run: |
           python3 - <<'PY'
+          import os
           from stacklab.llm.catalog import CACHE_ROOT, lock
           from stacklab.llm.source_runtime import build_runtime
-          config = lock('dory4b', device='cuda')
+          config = lock(os.environ['STACKLAB_CI_MODEL'], device='cuda')
           print(build_runtime(config, CACHE_ROOT/'runtime'/config['runtime_version']))
           print('CUDA compilation checked; this runner has no GPU for inference.')
           PY
       - name: CUDA build diagnostics on failure
         if: failure()
+        env:
+          STACKLAB_CUDA_RUNTIME: source
+          STACKLAB_CI_MODEL: ${{ matrix.model }}
         run: |
           python3 - <<'PY'
+          import os
           from stacklab.llm.catalog import CACHE_ROOT, lock
-          config=lock('dory4b', device='cuda')
+          config=lock(os.environ['STACKLAB_CI_MODEL'], device='cuda')
           log=CACHE_ROOT/'runtime'/config['runtime_version']/'build.log'
           print(log.read_text(encoding='utf-8', errors='replace')[-24000:] if log.is_file() else 'No CUDA build log')
           PY
@@ -76,7 +88,24 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq libosmesa6
-          .venv/bin/python -m stacklab demo --video --output runs/ci-colab-render
+          .venv/bin/python - <<'PY'
+          from pathlib import Path
+          import subprocess, sys
+          import imageio.v2 as imageio
+          output=Path('runs/ci-colab-render').resolve()
+          output.mkdir(parents=True,exist_ok=True)
+          code=output/'control.py'
+          code.write_text('robot.jog("x", 0.05)\n')
+          video=output/'simulation.mp4'
+          subprocess.run([sys.executable,'-m','stacklab.cli.worker','--config','scenes/default.json',
+                          '--code',str(code),'--result',str(output/'result.json'),
+                          '--move-delta','.05','0','0','--video',str(video)],check=True)
+          reader=imageio.get_reader(video)
+          frame=reader.get_data(0)
+          reader.close()
+          assert frame.shape == (720,960,3) and frame.std() > 1
+          print('Actual movement, video encoding and a nonempty OSMesa frame verified.')
+          PY
       - name: Build and launch the pinned Dory CPU runtime
         if: matrix.os == 'windows-latest' && matrix.python == '3.13'
         run: >-
