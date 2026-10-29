@@ -95,6 +95,8 @@ Benötigt werden Git, CMake und ein C++-Compiler. CMake kann in dieselbe Python-
 
 Unter Windows werden C++ Build Tools benötigt, unter macOS die Command Line Tools, unter Linux ein C++-Compiler und ein Buildwerkzeug. Der einmalige Build verwendet einen eigenen Cacheordner; Diagnoseausgaben liegen dort in `build.log`. Ein unveränderter fertiger Build wird wiederverwendet und benötigt beim normalen Start keinen Compiler. Source-Commit, Buildoptionen und Binärhash werden protokolliert. CUDA wird für diesen CPU-Pfad nicht benötigt.
 
+Der verwaltete Git-Quellcache aktiviert lange Dateipfade lokal und behält die gespeicherten Dateibytes ohne automatische Zeilenumwandlung. Bei sehr tiefen Projektverzeichnissen kann `STACKLAB_CACHE_DIR` zusätzlich auf einen kurzen Pfad zeigen.
+
 Dory läuft standardmäßig mit zwei rekurrenten Loops. Diese Einstellung steht mit den übrigen Serverargumenten im Katalog und im Generierungsprotokoll. Mehr Loops ändern den Rechenaufwand pro Token und müssen bei Vergleichen berücksichtigt werden. Gewichte sind Q5_K_M; Granite und LFM verwenden Q4_K_M. Qwens bisherige Quantisierung bleibt unverändert.
 
 Quellen: [NVIDIA Dory GGUF](https://huggingface.co/nvidia/NVIDIA-Nemotron-Labs-Dory1.0-4B-GGUF), [IBM Granite GGUF](https://huggingface.co/ibm-granite/granite-4.2-8b-GGUF), [LiquidAI LFM GGUF](https://huggingface.co/LiquidAI/LFM2.5-2.6B-GGUF), [llama.cpp-Server und `timings_per_token`](https://github.com/ggml-org/llama.cpp/blob/b11951/tools/server/README.md).

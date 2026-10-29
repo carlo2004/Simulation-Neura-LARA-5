@@ -70,6 +70,7 @@ def build_runtime(config, directory):
                 source.mkdir(exist_ok=True)
                 run(['git', 'init', str(source)])
                 run(['git', '-C', str(source), 'config', 'core.autocrlf', 'false'])
+                run(['git', '-C', str(source), 'config', 'core.longpaths', 'true'])
                 # Keep the pinned blob bytes even with Windows/global line-ending filters.
                 attributes = source/'.git/info/attributes'
                 attributes.parent.mkdir(parents=True, exist_ok=True)

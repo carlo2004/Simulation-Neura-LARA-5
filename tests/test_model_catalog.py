@@ -71,6 +71,10 @@ class CatalogTests(unittest.TestCase):
             content=b'first\r\nsecond\r\n'
             (origin/'sample.txt').write_bytes(content)
             git('add', 'sample.txt')
+            # Commit a path exceeding Win32 MAX_PATH without requiring Python to create it.
+            long_name='nested/'+('long_component_name/'*12)+'sample.txt'
+            blob=git('hash-object', '-w', 'sample.txt')
+            git('update-index', '--add', '--cacheinfo', '100644,'+blob+','+long_name)
             git('-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid',
                 '-c', 'commit.gpgsign=false', 'commit', '-m', 'fixture')
             config=dict(runtime_source=dict(repository=str(origin), revision=git('rev-parse', 'HEAD')))
@@ -91,6 +95,8 @@ class CatalogTests(unittest.TestCase):
                  patch.object(source_runtime.subprocess, 'run', side_effect=run):
                 source_runtime.build_runtime(config, directory)
             self.assertEqual((directory/'source/sample.txt').read_bytes(), content)
+            actual=subprocess.check_output(['git', '-C', str(directory/'source'), 'hash-object', long_name], text=True).strip()
+            self.assertEqual(actual, blob)
 
 
 if __name__ == '__main__':
