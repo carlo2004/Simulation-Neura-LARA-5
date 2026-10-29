@@ -91,6 +91,14 @@ class MetricsTests(unittest.TestCase):
         self.assertAlmostEqual(summarize([dict(performance=legacy)])['decode_tokens_per_second'],
                                timing['predicted_per_second'])
 
+    def test_first_token_times_keep_their_counts_when_combining_episode_summaries(self):
+        first = summarize([dict(performance=dict(time_to_first_token_seconds=1)),
+                           dict(performance=dict(time_to_first_token_seconds=2))])
+        second = summarize([dict(performance=dict(time_to_first_token_seconds=9))])
+        combined = summarize([dict(performance=first), dict(performance=second)])
+        self.assertEqual(combined['first_token_measurements'], 3)
+        self.assertEqual(combined['first_token_seconds_mean'], 4)
+
     def test_terminal_shows_speed_without_showing_response_or_reasoning(self):
         target = io.StringIO()
         display = Presenter(stats_stream=target)
@@ -183,6 +191,7 @@ class MetricsTests(unittest.TestCase):
         data = ('data: '+json.dumps(chunk)+'\n\ndata: [DONE]\n\n').encode()
         with tempfile.TemporaryDirectory() as temp:
             client = LocalModel('lfm2.6b')
+            client.cache_prompt = False
             client.address = 'http://127.0.0.1:12345'
             with patch.object(client, 'start'), patch.object(client.opener, 'open', return_value=io.BytesIO(data)) as opened:
                 _, metadata = client.complete([dict(role='system', content='fixture'), dict(role='user', content='fixture')], temp)
@@ -190,6 +199,8 @@ class MetricsTests(unittest.TestCase):
             schema = request['response_format']['json_schema']['schema']
             self.assertEqual(schema['properties']['code'], {'type': 'string'})
             self.assertEqual(set(schema['required']), {'code', 'done'})
+            self.assertIs(request['cache_prompt'], False)
+            self.assertIs(metadata['prompt_cache_enabled'], False)
             self.assertTrue(metadata['constrained_decoding'])
             self.assertNotIn('enable_thinking', request['chat_template_kwargs'])
 

@@ -126,6 +126,13 @@ class RemoteTests(unittest.TestCase):
         self.assertTrue((local/'stream.jsonl').read_text(encoding='utf-8'))
         self.assertTrue((local/'server-generation.json').is_file())
         self.assertIn('Controlled generation failure', json.loads((local/'generation.json').read_text(encoding='utf-8'))['error'])
+        self.assertEqual(self.model.cancel_count, 0)
+
+    def test_model_switch_is_disabled_on_the_normal_chat_server(self):
+        from stacklab.llm.remote import RemoteControl
+        with self.assertRaisesRegex(RuntimeError, 'switching is disabled'):
+            RemoteControl(self.url).select('granite8b')
+        self.assertEqual(self.model.config['model_key'], 'lfm2.6b')
 
     def test_cancellation_stops_the_request_and_another_prompt_can_run(self):
         errors = []

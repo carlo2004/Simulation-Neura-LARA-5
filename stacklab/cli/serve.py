@@ -18,19 +18,24 @@ def main(argv=None):
     parser.add_argument('--threads', type=int, default=min(8, os.cpu_count() or 1))
     parser.add_argument('--port', type=int, default=8765, help='Loopback port forwarded by SSH')
     parser.add_argument('--load-timeout', type=int, default=180)
+    parser.add_argument('--allow-model-switch', action='store_true', help='Allow benchmark-controlled catalog model changes')
+    parser.add_argument('--install-missing', action='store_true', help='Verify/install each selected catalog model before loading')
     parser.add_argument('--output', type=Path)
     args = parser.parse_args(argv)
     client = None
     try:
         if not 0 < args.port < 65536 or args.load_timeout <= 0:
             raise ValueError('Use a valid port and positive load timeout')
+        if args.install_missing and not args.allow_model_switch:
+            raise ValueError('--install-missing requires --allow-model-switch')
         output = (args.output or RUNS_ROOT/('serve_'+time.strftime('%Y%m%d_%H%M%S'))).resolve()
         if output.exists() and any(output.iterdir()):
             raise ValueError('Choose a new output directory')
         output.mkdir(parents=True, exist_ok=True)
         client = LocalModel(args.model, threads=args.threads, device=args.device)
         # Reserve the requested port before loading a potentially large model.
-        with InferenceServer(client, output, args.port) as server:
+        with InferenceServer(client, output, args.port, allow_model_switch=args.allow_model_switch,
+                             install_missing=args.install_missing, load_timeout=args.load_timeout) as server:
             print('Loading '+client.config['model_id']+' on '+args.device+'; logs: '+str(output), flush=True)
             client.start(output/'runtime', timeout=args.load_timeout)
             server.info['hardware'] = client.hardware
@@ -45,7 +50,9 @@ def main(argv=None):
         print('Server error: '+str(error), file=sys.stderr)
         return 1
     finally:
-        if client:
+        if 'server' in locals():
+            server.client.close()
+        elif client:
             client.close()
 
 

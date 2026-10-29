@@ -124,6 +124,14 @@ class ExperimentTests(unittest.TestCase):
         row = exp.write_report(self.directory)['episodes'][0]
         self.assertNotEqual(row['status'], 'success')
 
+    def test_transport_timeout_is_not_claimed_as_a_model_or_physics_failure(self):
+        plan = self.plan()
+        self.result(plan['episodes'][0], status='error', success=False, error='TimeoutError: connection limit',
+                    generation=dict(transport_complete=False, performance=dict(request_seconds=60)))
+        group = exp.write_report(self.directory)['groups'][0]
+        self.assertEqual(group['infrastructure_error'], 1)
+        self.assertEqual(group['scored'], 0)
+
     def test_partial_worker_metrics_survive_a_missing_parent_result(self):
         plan = self.plan()
         episode = plan['episodes'][0]

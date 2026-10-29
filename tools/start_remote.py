@@ -22,6 +22,7 @@ def main(argv=None):
     parser.add_argument('--threads', type=int, default=2)
     parser.add_argument('--port', type=int, default=8765)
     parser.add_argument('--cuda-runtime', choices=['auto', 'binary', 'source'], default='auto')
+    parser.add_argument('--benchmark', action='store_true', help='Allow automatic catalog model changes and verified installs')
     args = parser.parse_args(argv)
     try:
         if args.threads < 1 or not 0 < args.port < 65536:
@@ -39,7 +40,7 @@ def main(argv=None):
         if args.device == 'cuda':
             recipe = "import json,sys; from stacklab.llm.catalog import lock; print(json.dumps(lock(sys.argv[1],device='cuda')))"
             config = json.loads(subprocess.check_output([python, '-c', recipe, args.model], cwd=ROOT, env=env, text=True))
-            if config.get('cuda_runtime_kind') == 'source':
+            if config.get('cuda_runtime_kind') == 'source' or args.benchmark:
                 if not (python.parent/'cmake').is_file() and not shutil.which('cmake'):
                     run([python, '-m', 'pip', 'install', 'cmake'], env)
                 if not shutil.which('g++') or not shutil.which('make'):
@@ -55,7 +56,8 @@ def main(argv=None):
         run([python, '-m', 'stacklab', 'setup', '--model', args.model, '--device', args.device], env)
         run([python, '-m', 'stacklab', 'doctor', '--model', args.model, '--device', args.device], env)
         run([python, '-m', 'stacklab', 'serve', '--model', args.model, '--device', args.device,
-             '--threads', args.threads, '--port', args.port], env)
+             '--threads', args.threads, '--port', args.port,
+             *(['--allow-model-switch', '--install-missing'] if args.benchmark else [])], env)
         return 0
     except KeyboardInterrupt:
         return 130

@@ -18,6 +18,9 @@ CASES = {
     'blue-on-red': ('Staple den blauen Würfel auf den roten Würfel.', 'blue', 'red', 'scenes/default.json', .015),
     'green-on-blue': ('Staple den grünen Würfel auf den blauen Würfel.', 'green', 'blue', 'scenes/three_cubes.json', .015),
     'move-right': ('Bewege den Greifer um 5 cm nach rechts, ohne die Höhe zu verändern.', None, None, 'scenes/default.json', 0),
+    'move-forward': ('Bewege den Greifer um 5 cm nach vorne, ohne die Höhe zu verändern.', None, None, 'scenes/default.json', 0),
+    'move-up': ('Bewege den Greifer um 5 cm nach oben.', None, None, 'scenes/default.json', 0),
+    'red-on-blue-jitter': ('Staple den roten Würfel auf den blauen Würfel.', 'red', 'blue', 'scenes/default.json', .015),
 }
 
 
@@ -27,7 +30,8 @@ def case_definition(name, scene_seed):
     return dict(name=name, instruction=instruction, source=source, target=target,
                 scene_seed=scene_seed, config=config.to_dict(), initial_object_positions=config.scene(),
                 goal=dict(type='stack', source=source, target=target) if source else
-                dict(type='move', delta_m=[.05, 0, 0]))
+                dict(type='move', delta_m={'move-right': [.05, 0, 0], 'move-forward': [0, .05, 0],
+                                         'move-up': [0, 0, .05]}[name]))
 
 
 def run_case(name, args, directory, *, case=None):
@@ -61,6 +65,10 @@ def run_case(name, args, directory, *, case=None):
                     '--generation-timeout', str(args.generation_timeout),
                     '--execution-timeout', str(args.execution_timeout),
                     '--thinking' if args.thinking else '--no-thinking']
+        if getattr(args, 'server_url', None):
+            command += ['--server-url', args.server_url, '--expected-server-id', args.expected_server_id]
+        if getattr(args, 'batch', False):
+            command += ['--result-hold-seconds', '0']
         if args.thinking_budget is not None:
             command += ['--thinking-budget', str(args.thinking_budget)]
         if args.gui:
@@ -85,7 +93,7 @@ def run_case(name, args, directory, *, case=None):
                                  on_progress=lambda line: print(line, flush=True))
         if not (directory/'execution.json').is_file():
             raise RuntimeError('Simulation worker did not produce a result; see simulation.log')
-        execution = json.loads((directory/'execution.json').read_text())
+        execution = json.loads((directory/'execution.json').read_text(encoding='utf-8'))
         result.update(success=execution['success'], stage=execution['stage'], execution=execution,
                       worker_returncode=process.returncode)
         if execution.get('inference_performance', {}).get('measured_rounds'):
@@ -118,7 +126,7 @@ def main(argv=None):
     test.add_argument('--video', action='store_true', help='Record actual simulated execution to simulation.mp4')
     test.add_argument('--feedback-rounds', type=int, default=0,
                       help='0: one-block baseline; positive N: up to N blocks using real simulation feedback')
-    test.add_argument('--suite', action='store_true', help='Run four development cases')
+    test.add_argument('--suite', action='store_true', help='Run all development cases')
     test.add_argument('--instruction', help='Override wording; expected source/target remain those of --case')
     test.add_argument('--gui', action='store_true', help='Show the generated program acting in the native viewer')
     test.add_argument('--axes', action='store_true', help='Optional coordinate overlay')

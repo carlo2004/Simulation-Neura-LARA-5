@@ -3,25 +3,81 @@ import json
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 import threading
+import time
 from uuid import uuid4
 
 from stacklab.llm.remote import PROTOCOL
 from stacklab.llm.runtime import GenerationCancelled
 from stacklab.provenance import software_provenance
+from stacklab.paths import ROOT
+
+
+def server_source_hashes():
+    from stacklab.llm.catalog import sha256
+    paths = [*(ROOT/'stacklab').rglob('*.py'), *(ROOT/'config').rglob('*')]
+    return {p.relative_to(ROOT).as_posix(): sha256(p) for p in sorted(paths) if p.is_file()}
 
 
 class InferenceServer(ThreadingHTTPServer):
-    def __init__(self, client, output, port=8765):
+    def __init__(self, client, output, port=8765, *, allow_model_switch=False,
+                 install_missing=False, load_timeout=180):
         self.client = client
         self.output = Path(output)
         self.output.mkdir(parents=True, exist_ok=True)
         self.info = dict(protocol=PROTOCOL, server_id=uuid4().hex, config=client.config,
                          software=software_provenance(), hardware=client.hardware,
                          threads=client.threads)
+        self.info['source_hashes'] = server_source_hashes()
+        self.device = getattr(client, 'device', 'cpu')
+        self.install_missing = install_missing
+        self.load_timeout = load_timeout
+        self.info['capabilities'] = dict(model_switch=allow_model_switch, install_missing=install_missing)
+        if allow_model_switch:
+            from stacklab.llm.catalog import lock, model_keys
+            self.info['model_catalog'] = {key: lock(key, device=self.device) for key in model_keys()}
+            self.client.cache_prompt = False
+            self.info['prompt_cache'] = False
+        self.info['device'] = self.device
         self.generation_lock = threading.Lock()
         self.state_lock = threading.Lock()
         self.active = None
         super().__init__(('127.0.0.1', port), InferenceHandler)
+
+    def select_model(self, model):
+        """Caller holds generation_lock. Paths and commands never come from HTTP."""
+        from stacklab.config import write_json
+        from stacklab.llm.catalog import setup
+        from stacklab.llm.runtime import LocalModel
+        if model not in self.info.get('model_catalog', {}):
+            raise ValueError('Choose an exact model alias from the server catalog')
+        started = time.monotonic()
+        self.client.close()  # Free VRAM before installing/loading the next model.
+        self.info.update(server_id=uuid4().hex, ready=False)
+        path = self.output/('model-'+model+'-'+self.info['server_id'])
+        path.mkdir()
+        result = dict(model=model, setup_seconds=0., load_seconds=None, error=None)
+        try:
+            self.client = LocalModel(model, threads=self.info['threads'], device=self.device)
+            self.client.cache_prompt = False
+            self.info.update(config=self.client.config, hardware=None)
+            if self.install_missing:
+                setup(model, device=self.device)
+            result['setup_seconds'] = time.monotonic()-started
+            load_started = time.monotonic()
+            self.client.start(path/'runtime', timeout=self.load_timeout)
+            result['load_seconds'] = time.monotonic()-load_started
+            self.info.update(hardware=self.client.hardware, ready=True)
+        except Exception as error:
+            result['error'] = type(error).__name__+': '+str(error)
+            self.client.close()
+        result['wall_seconds'] = time.monotonic()-started
+        log = path/'runtime/inference.log'
+        if log.is_file():
+            result['startup_log'] = log.read_text(encoding='utf-8', errors='replace')[:1024*1024]
+            result['startup_log_truncated'] = log.stat().st_size > 1024*1024
+        result['info'] = dict(self.info)
+        write_json(path/'switch.json', result)
+        return result
 
 
 class InferenceHandler(BaseHTTPRequestHandler):
@@ -65,8 +121,29 @@ class InferenceHandler(BaseHTTPRequestHandler):
                         self.server.client.cancel()
                 self.reply(200, dict(cancelled=matched))
                 return
+            if self.path == '/select-model':
+                if not self.server.info['capabilities']['model_switch']:
+                    self.reply(403, dict(error='Model switching is disabled; start serve with --allow-model-switch'))
+                    return
+                model = data.get('model')
+                if not isinstance(model, str) or model not in self.server.info.get('model_catalog', {}):
+                    raise ValueError('Choose an exact model alias from the server catalog')
+                if not self.server.generation_lock.acquire(blocking=False):
+                    self.reply(409, dict(error='Model is busy; switching cannot interrupt another request'))
+                    return
+                try:
+                    if data['server_id'] != self.server.info['server_id']:
+                        self.reply(409, dict(error='Server changed during model selection; reconnect'))
+                        return
+                    self.reply(200, self.server.select_model(model))
+                finally:
+                    self.server.generation_lock.release()
+                return
             if self.path != '/generate':
                 self.reply(404, dict(error='Unknown endpoint'))
+                return
+            if self.server.info.get('ready') is False:
+                self.reply(503, dict(error='No model is ready; select a working model first'))
                 return
             messages, options = data.get('messages'), data.get('options')
             if not isinstance(messages, list) or not messages or not all(
@@ -78,6 +155,10 @@ class InferenceHandler(BaseHTTPRequestHandler):
                 raise ValueError('Unexpected generation options')
             if not self.server.generation_lock.acquire(blocking=False):
                 self.reply(409, dict(error='Model is busy with another request; try again when it finishes'))
+                return
+            if data['server_id'] != self.server.info['server_id']:
+                self.server.generation_lock.release()
+                self.reply(409, dict(error='Server changed before generation; reconnect'))
                 return
         except (ValueError, TypeError) as error:
             self.reply(400, dict(error=str(error)))

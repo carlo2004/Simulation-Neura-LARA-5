@@ -70,4 +70,9 @@ Die Geometrie und Kinematik stammen aus einer RoboDK-Quelldatei. Dynamik, Greife
 
 Für wiederholbare Entwicklungspiloten gibt es `stacklab experiment plan`, `run` und `report`: dieselben Startfälle über mehrere Modelle und Blockbudgets, getrennte Szenen-/Generierungsseeds und automatisch JSON, CSV und Markdown. [Vergleich Schritt für Schritt](docs/experiments.md).
 
+**Alle Modelle auf L4 und A100 vergleichen:** Der [automatische Remote-Pilot](docs/remote-benchmark.md)
+führt standardmäßig zehn Episoden pro Modell und GPU aus, mit lokaler Simulation,
+automatischem Modellwechsel auf Colab, Videos, Rohdaten und vorläufiger Rangliste.
+GitHub Releases können die vollständigen Archive samt Prüfsummen übernehmen.
+
 Modellgewichte liegen standardmäßig im lokalen Cache. Mit `STACKLAB_CACHE_DIR` kann ein anderer Datenträger gewählt werden; `STACKLAB_RUN_DIR` steuert den Ergebnisordner. Das Projekt wird aus diesem Checkout mit editierbarer Installation betrieben.

@@ -113,6 +113,8 @@ class LocalModel:
         payload = dict(model='local', messages=messages, max_tokens=max_tokens, **sampling,
                        seed=seed, chat_template_kwargs=template, stream=True,
                        stream_options={'include_usage': True}, timings_per_token=True)
+        if hasattr(self, 'cache_prompt'):
+            payload['cache_prompt'] = self.cache_prompt
         if config.get('response_format'):
             payload['response_format'] = config['response_format']
         if thinking:
@@ -133,6 +135,7 @@ class LocalModel:
                         constrained_decoding=bool(config.get('response_format')))
         metadata['reasoning_budget_tokens'] = payload.get('reasoning_budget_tokens', -1)
         metadata['server_args'] = config.get('server_args', [])
+        metadata['prompt_cache_enabled'] = getattr(self, 'cache_prompt', True)
         metadata['runtime_source'] = config.get('runtime_source')
         started = time.monotonic()
         metrics = GenerationMetrics()

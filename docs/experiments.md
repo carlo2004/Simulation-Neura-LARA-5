@@ -1,5 +1,9 @@
 # Modelle mit denselben Aufgaben vergleichen
 
+Für den automatischen Vergleich **aller Modelle auf Colab mit lokaler Simulation**
+gibt es den [Remote-Piloten für L4 und A100](remote-benchmark.md), einschließlich
+Modellwechsel, Videoaufzeichnung, Rangliste und GitHub-Release-Upload.
+
 Der `experiment`-Befehl plant mehrere Episoden vorab, führt sie nacheinander ohne Fenster aus und erzeugt eine lesbare Auswertung. Er benutzt dieselbe Inferenz, Python-API und unabhängige Physikprüfung wie `benchmark`. Neue Dienste oder zusätzliche Python-Pakete sind nicht nötig.
 
 Dies ist ein **Entwicklungspilot**. Er richtet noch kein unberührtes Testset und keine Trainingspipeline ein. Insbesondere ist ein erfolgreiches Bewegungsprogramm kein Beleg für zuverlässiges Stapeln.

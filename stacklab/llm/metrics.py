@@ -87,6 +87,10 @@ def summarize(generations):
     loads = [m['model_load_seconds'] for m in metrics if m.get('model_load_seconds') is not None]
     requests = [m['request_seconds'] for m in metrics if m.get('request_seconds') is not None]
     totals = [m['total_seconds'] for m in metrics if m.get('total_seconds') is not None]
+    first_sum = sum(m['time_to_first_token_seconds'] if m.get('time_to_first_token_seconds') is not None
+                    else m.get('first_token_seconds_sum', 0) for m in metrics)
+    first_count = sum(1 if m.get('time_to_first_token_seconds') is not None
+                      else m.get('first_token_measurements', 0) for m in metrics)
     return dict(schema_version=2, measured_rounds=len(metrics), total_rounds=len(generations), counted_rounds=len(counted),
                 output_tokens=sum(m['output_tokens'] for m in counted) if counted else None,
                 native_decode_tokens=native_tokens if native else None,
@@ -95,5 +99,7 @@ def summarize(generations):
                 model_load_seconds=sum(loads) if loads else None,
                 request_seconds=sum(requests) if requests else None,
                 total_seconds=sum(totals) if totals else None,
+                first_token_seconds_sum=first_sum, first_token_measurements=first_count,
+                first_token_seconds_mean=first_sum/first_count if first_count else None,
                 partial_rounds=sum(bool(m.get('partial')) for m in metrics),
                 partial=len(metrics) != len(generations) or any(m.get('partial') for m in metrics))

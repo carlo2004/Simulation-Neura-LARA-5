@@ -2,6 +2,7 @@
 import argparse
 from pathlib import Path
 import time
+import math
 import sys
 from stacklab.evaluation import tool_clear, evaluate
 from stacklab.config import Config, write_json
@@ -16,11 +17,14 @@ def main():
     p.add_argument('--source')
     p.add_argument('--target')
     p.add_argument('--gui', action='store_true')
+    p.add_argument('--result-hold-seconds', type=float, default=10)
     p.add_argument('--axes', action='store_true')
     p.add_argument('--stackviz', action='store_true')
     p.add_argument('--move-delta', type=float, nargs=3)
     p.add_argument('--feedback-rounds', type=int, default=0)
     p.add_argument('--model')
+    p.add_argument('--server-url')
+    p.add_argument('--expected-server-id')
     p.add_argument('--device', choices=['cpu', 'cuda'], default='cpu')
     p.add_argument('--video', type=Path)
     p.add_argument('--instruction')
@@ -37,6 +41,8 @@ def main():
     interpreter = None
     started = time.monotonic()
     try:
+        if not math.isfinite(args.result_hold_seconds) or args.result_hold_seconds < 0:
+            raise ValueError('result-hold-seconds must be finite and nonnegative')
         if args.code is not None:
             code = args.code.read_text(encoding='utf-8')
             validate(code)
@@ -53,10 +59,16 @@ def main():
         if args.code is None:
             from stacklab.llm.agent import Agent
             from stacklab.llm.runtime import LocalModel
+            from stacklab.llm.remote import RemoteModel
+            from contextlib import closing
             from stacklab.cli.presentation import Presenter
             if not args.instruction:
                 raise ValueError('Feedback evaluation needs --instruction')
-            with LocalModel(args.model, threads=args.threads, device=args.device) as client:
+            client = RemoteModel(args.server_url, args.model) if args.server_url else LocalModel(
+                args.model, threads=args.threads, device=args.device)
+            if args.expected_server_id and client.info['server_id'] != args.expected_server_id:
+                raise ValueError('Remote server changed after model selection; episode was not run')
+            with closing(client):
                 display = Presenter(stats_stream=sys.stdout)
                 agent = Agent(robot, client, max_rounds=max(1, args.feedback_rounds), max_tokens=args.max_tokens,
                               thinking=args.thinking, seed=args.seed, generation_timeout=args.generation_timeout,
@@ -99,10 +111,10 @@ def main():
                               diagnostics=robot.stack_diagnostics(args.source, args.target),
                               final_positions={n: robot.position(n).tolist() for n in robot.object_names},
                               simulation_seconds=float(robot.data.time))
-        if args.gui:
-            print('Test complete; showing the result for ten simulation seconds.', flush=True)
+        if args.gui and args.result_hold_seconds:
+            print('Test complete; showing the result for '+str(args.result_hold_seconds)+' simulation seconds.', flush=True)
             try:
-                robot.step(10)
+                robot.step(args.result_hold_seconds)
             except KeyboardInterrupt:
                 pass
     except PolicyError as error:

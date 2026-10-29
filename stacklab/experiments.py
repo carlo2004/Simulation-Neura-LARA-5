@@ -18,6 +18,7 @@ from stacklab.paths import ROOT
 from stacklab.policy import ExecutionLimits
 from stacklab.provenance import software_provenance
 from stacklab.llm.hardware import gpu_inventory
+from stacklab.llm.remote import RemoteControl, RemoteModel
 
 SCHEMA = 1
 
@@ -29,6 +30,15 @@ def digest(value):
 
 def utc_now():
     return datetime.now(timezone.utc).isoformat()
+
+
+def remote_identity(info):
+    """Stable across deliberate model changes; actual GPU UUID remains required."""
+    return dict(device=info.get('device', 'cpu'), threads=info['threads'],
+                gpus=(info.get('hardware') or {}).get('gpus', []),
+                software={k: v for k, v in info['software'].items() if k != 'recorded_at_utc'},
+                source_hashes=info.get('source_hashes'),
+                model_catalog=info.get('model_catalog'), prompt_cache=info.get('prompt_cache'))
 
 
 def environment():
@@ -48,7 +58,8 @@ def source_hashes():
 
 def create_plan(directory, *, models, cases, scene_seeds, generation_seeds, blocks,
                 max_tokens=2048, threads=8, thinking=None, thinking_budget=None,
-                generation_timeout=600, execution_timeout=180, device='cpu', video=False):
+                generation_timeout=600, execution_timeout=180, device='cpu', video=False,
+                server_url=None, paired_seeds=False, gui=False):
     directory = Path(directory).resolve()
     if directory.exists() and any(directory.iterdir()):
         raise ValueError('Choose a new empty experiment directory; existing evidence is preserved')
@@ -64,6 +75,18 @@ def create_plan(directory, *, models, cases, scene_seeds, generation_seeds, bloc
         raise ValueError('Token, thread and time budgets must be positive integers')
     if max(generation_seeds)+max(blocks)-1 > 2**31-1:
         raise ValueError('Generation seeds plus round offsets exceed the supported range')
+    if paired_seeds and len(scene_seeds) != len(generation_seeds):
+        raise ValueError('Paired scene and generation seeds must have equal lengths')
+    remote = None
+    if server_url:
+        info = RemoteControl(server_url).info()
+        if not info.get('capabilities', {}).get('model_switch'):
+            raise ValueError('Remote experiments need serve --allow-model-switch')
+        if info.get('prompt_cache') is not False:
+            raise ValueError('Benchmark server must explicitly disable prompt caching')
+        remote = dict(url=server_url, identity=remote_identity(info))
+        device = info.get('device', 'cpu')
+        threads = info['threads']
     definitions = []
     for name in cases:
         for seed in scene_seeds:
@@ -75,7 +98,11 @@ def create_plan(directory, *, models, cases, scene_seeds, generation_seeds, bloc
     conditions = []
     aliases = set()
     for model in models:
-        config = lock(model, device=device)
+        if remote:
+            key = lock(model)['model_key']
+            config = remote['identity']['model_catalog'][key]
+        else:
+            config = lock(model, device=device)
         key = config['model_key']
         if key in aliases:
             raise ValueError('Duplicate model: '+key)
@@ -89,7 +116,7 @@ def create_plan(directory, *, models, cases, scene_seeds, generation_seeds, bloc
         if enabled and (budget < -1 or budget >= max_tokens):
             raise ValueError('Thinking budget must be -1 or smaller than max-tokens')
         for count in blocks:
-            condition = dict(model=key, model_config=config, device=device, video=video, blocks=count, max_tokens=max_tokens,
+            condition = dict(model=key, model_config=config, device=device, video=video, gui=gui, blocks=count, max_tokens=max_tokens,
                              threads=threads, thinking=enabled, thinking_budget=budget if enabled else None,
                              generation_timeout=generation_timeout, execution_timeout=execution_timeout)
             condition['condition_id'] = 'condition-'+digest(condition)[:16]
@@ -97,7 +124,8 @@ def create_plan(directory, *, models, cases, scene_seeds, generation_seeds, bloc
     episodes = []
     # Interleave conditions per case/seed. Each worker starts a fresh model process and scene.
     for case in definitions:
-        for seed in generation_seeds:
+        seeds = [generation_seeds[scene_seeds.index(case['scene_seed'])]] if paired_seeds else generation_seeds
+        for seed in seeds:
             for condition in conditions:
                 item = dict(case_id=case['case_id'], condition_id=condition['condition_id'], generation_seed=seed)
                 item['episode_id'] = 'episode-'+digest(item)[:16]
@@ -109,6 +137,25 @@ def create_plan(directory, *, models, cases, scene_seeds, generation_seeds, bloc
                 episodes=episodes, physics_during_inference='paused', model_memory='reset per episode',
                 loading='fresh runtime process per episode; OS file cache is not cleared',
                 seed_schedule='generation_seed + round_index - 1')
+    if remote:
+        plan.update(remote=remote, loading='One verified remote model load and one unscored warm-up attempt per model group',
+                    model_memory='Fresh messages and local scene per episode; server prompt cache disabled',
+                    note='Development pilot; fixed paired cases. Observed model ranking is provisional, not a held-out result.')
+    plan['paired_seeds'] = paired_seeds
+    plan['comparison_sha256'] = digest(dict(source_hashes=plan['source_hashes'],
+        policy_limits=plan['policy_limits'], cases=definitions, episodes=[
+            dict(case_id=e['case_id'], generation_seed=e['generation_seed'], model=c['model'],
+                 model_config=c['model_config'],
+                 blocks=c['blocks'], max_tokens=c['max_tokens'], thinking=c['thinking'],
+                 thinking_budget=c['thinking_budget'], model_sha256=c['model_config']['model_sha256'],
+                 profiles=c['model_config']['profiles'], server_args=c['model_config'].get('server_args'),
+                 response_format=c['model_config'].get('response_format'),
+                 gui=c.get('gui', False), video=c.get('video', False), threads=c['threads'],
+                 generation_timeout=c['generation_timeout'], execution_timeout=c['execution_timeout'])
+            for e in episodes for c in conditions if c['condition_id'] == e['condition_id']],
+        server_software=({k: remote['identity']['software'].get(k) for k in
+                          ('version', 'git_commit', 'tracked_changes')} if remote else None),
+        server_source_hashes=remote['identity']['source_hashes'] if remote else None))
     write_json(directory/'manifest.json', dict(plan, plan_sha256=digest(plan)))
     return load_plan(directory)
 
@@ -128,6 +175,11 @@ def verify_environment(plan):
         raise ValueError('Code, prompts, robot geometry or policy limits changed; create a new plan')
     if environment() != plan['environment']:
         raise ValueError('Hardware or package versions changed; create a new plan')
+    if plan.get('remote'):
+        actual = remote_identity(RemoteControl(plan['remote']['url']).info())
+        if actual != plan['remote']['identity']:
+            raise ValueError('Remote GPU, software, model catalog or server settings changed; create a new plan')
+        return {'remote': plan['remote']['identity']}
     checked = set()
     installations = {}
     for condition in plan['conditions']:
@@ -162,24 +214,84 @@ def run_plan(directory, backup_dir=None):
         write_json(runtime_record, installations)
     cases = {c['case_id']: c for c in plan['cases']}
     conditions = {c['condition_id']: c for c in plan['conditions']}
+    episodes = plan['episodes']
+    remote = plan.get('remote')
+    if remote:
+        # Keep one model in VRAM for its trials instead of reloading for every prompt.
+        episodes = sorted(episodes, key=lambda e: list(conditions).index(e['condition_id']))
+    selected = None
+    server_id = None
     finished = False
     try:
-        for index, episode in enumerate(plan['episodes'], 1):
+        for index, episode in enumerate(episodes, 1):
             path = directory/episode['episode_id']
             if path.exists():
                 # An interrupted attempt is evidence too. Never re-run or overwrite it implicitly.
                 print(f'Skip existing attempt {episode["episode_id"]}', flush=True)
                 continue
             case, condition = cases[episode['case_id']], conditions[episode['condition_id']]
+            if remote and selected != condition['condition_id']:
+                import time
+                setup_path = directory/'model-setups'/(condition['condition_id']+'-'+utc_now().replace(':', '-'))
+                setup_path.mkdir(parents=True)
+                print('Select remote model: '+condition['model']+'; initial download/build can take several minutes.', flush=True)
+                try:
+                    switch = RemoteControl(remote['url']).select(condition['model'])
+                    write_json(setup_path/'switch.json', switch)
+                    if switch.get('error'):
+                        raise RuntimeError(switch['error'])
+                    info = switch['info']
+                    if (remote_identity(info) != remote['identity'] or
+                            info['config'] != condition['model_config']):
+                        raise RuntimeError('Remote model or environment changed while selecting the model')
+                    server_id = info['server_id']
+                    warm_started = time.monotonic()
+                    client = None
+                    try:
+                        client = RemoteModel(remote['url'], condition['model'])
+                        client.complete([dict(role='system', content='Return a short JSON object.'),
+                                         dict(role='user', content='Return {"code":"","done":true}.')],
+                                        setup_path/'warmup', max_tokens=64, seed=0,
+                                        thinking=condition['thinking'], thinking_budget=-1, timeout=120)
+                        warm_error = None
+                    except Exception as error:
+                        warm_error = type(error).__name__+': '+str(error)
+                    finally:
+                        if client is not None:
+                            client.close()
+                    write_json(setup_path/'warmup-result.json', dict(unscored=True, error=warm_error,
+                               wall_seconds=time.monotonic()-warm_started))
+                except (RuntimeError, ValueError, OSError) as error:
+                    # Record all planned failures for this model; do not invent scores.
+                    write_json(setup_path/'error.json', dict(error=str(error)))
+                    for failed in episodes:
+                        if failed['condition_id'] != condition['condition_id']:
+                            continue
+                        failed_path = directory/failed['episode_id']
+                        if failed_path.exists():
+                            continue
+                        failed_path.mkdir()
+                        write_json(failed_path/'manifest.json', dict(schema_version=SCHEMA, **failed,
+                                   plan_sha256=plan['plan_sha256'], started_at_utc=utc_now()))
+                        write_json(failed_path/'result.json', dict(error='Remote setup: '+str(error),
+                                   execution=dict(status='error', success=False, rounds=[])))
+                    write_report(directory)
+                    if backup_dir is not None:
+                        from stacklab.backup import backup_experiment
+                        backup_experiment(directory, backup_dir)
+                    continue
+                selected = condition['condition_id']
             path.mkdir()
             write_json(path/'manifest.json', dict(schema_version=SCHEMA, **episode,
                        plan_sha256=plan['plan_sha256'], started_at_utc=utc_now()))
             args = SimpleNamespace(**{k: v for k, v in condition.items()
-                                     if k not in ('condition_id', 'model_config', 'blocks')},
+                                     if k not in ('condition_id', 'model_config', 'blocks', 'gui')},
                                    seed=episode['generation_seed'], generation_seed=episode['generation_seed'],
                                    scene_seed=case['scene_seed'],
                                    feedback_rounds=0 if condition['blocks'] == 1 else condition['blocks'],
-                                   instruction=None, gui=False, axes=False, stackviz=False)
+                                   instruction=None, gui=condition.get('gui', False), axes=False, stackviz=False,
+                                   batch=True,
+                                   server_url=remote['url'] if remote else None, expected_server_id=server_id)
             print(f'[{index}/{len(plan["episodes"])}] {condition["model"]} / {case["name"]} / '
                   f'{condition["blocks"]} blocks / scene {case["scene_seed"]} / generation {args.seed}', flush=True)
             run_case(case['name'], args, path, case=case)
@@ -240,7 +352,9 @@ def episode_result(directory, episode, condition, case, plan_sha256):
             generation = turns[-1].get('generation', {})
             timeout = str(execution.get('error', '')).startswith(('TimeoutError:', 'TimeoutError('))
             # Output truncation and an exhausted active request budget are model/resource failures.
-            if (generation.get('finish_reason') == 'length'
+            if generation.get('transport_complete') is False:
+                row['status'] = 'infrastructure_error'
+            elif (generation.get('finish_reason') == 'length'
                     or timeout and generation.get('performance', {}).get('request_seconds') is not None):
                 row.update(status='model_failure', goal_success=False)
             else:
@@ -271,9 +385,10 @@ def write_report(directory):
     rows = [episode_result(directory, e, conditions[e['condition_id']], cases[e['case_id']], plan['plan_sha256'])
             for e in plan['episodes']]
     for row in rows:
-        row['gpu_names'] = '; '.join(g['name'] for g in plan['environment'].get('gpus', []))
-        row['gpu_memory_total_mib'] = '; '.join(str(g['memory_total_mib']) for g in plan['environment'].get('gpus', []))
-        row['gpu_driver_versions'] = '; '.join(g['driver_version'] for g in plan['environment'].get('gpus', []))
+        gpus = plan.get('remote', {}).get('identity', plan['environment']).get('gpus', [])
+        row['gpu_names'] = '; '.join(g['name'] for g in gpus)
+        row['gpu_memory_total_mib'] = '; '.join(str(g['memory_total_mib']) for g in gpus)
+        row['gpu_driver_versions'] = '; '.join(g['driver_version'] for g in gpus)
     groups = []
     for condition in plan['conditions']:
         for name in dict.fromkeys(c['name'] for c in plan['cases']):
@@ -281,10 +396,12 @@ def write_report(directory):
             counts = {status: sum(r['status'] == status for r in selected) for status in
                       ('success', 'model_failure', 'infrastructure_error', 'cancelled', 'pending', 'incomplete')}
             scored = counts['success']+counts['model_failure']
+            from stacklab.comparison import wilson
             groups.append(dict(condition_id=condition['condition_id'], model=condition['model'],
                                blocks=condition['blocks'], case=name, planned=len(selected),
                                attempted=len(selected)-counts['pending'], scored=scored, **counts,
                                success_rate_scored=counts['success']/scored if scored else None,
+                               success_interval_scored_95=wilson(counts['success'], scored),
                                performance=aggregate_performance(selected)))
     report = dict(schema_version=SCHEMA, plan_sha256=plan['plan_sha256'], split=plan['split'],
                   generated_at_utc=utc_now(), planned=len(rows),
@@ -307,7 +424,7 @@ def write_report(directory):
             flattened['execution_outcomes'] = json.dumps(row['execution_outcomes'])
             writer.writerow(flattened)
     temporary.replace(directory/'results.csv')
-    gpu_names = ', '.join(g['name'] for g in plan['environment'].get('gpus', [])) or 'keine NVIDIA-GPU erfasst'
+    gpu_names = ', '.join(g['name'] for g in gpus) or 'keine NVIDIA-GPU erfasst'
     text = ['# Entwicklungsvergleich', '', plan['note'], '', 'Hardware: '+gpu_names, '',
             '| Modell | Blöcke | Aufgabe | Erfolg / bewertet / geplant | Technikfehler | Abbruch | Offen | Ausgabe Token/s |',
             '|---|---:|---|---:|---:|---:|---:|---:|']
@@ -326,4 +443,6 @@ def write_report(directory):
     temporary = directory/'report.md.tmp'
     temporary.write_text('\n'.join(text), encoding='utf-8')
     temporary.replace(directory/'report.md')
+    from stacklab.comparison import write_ranking
+    write_ranking(directory, report, plan)
     return report

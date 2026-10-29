@@ -45,6 +45,8 @@ class RemoteModel:
                 or not isinstance(self.info.get('software'), dict)):
             raise ValueError('Endpoint is not a compatible Stack Lab inference server')
         self.config = self.info['config']
+        if self.info.get('ready') is False:
+            raise RuntimeError('No model is ready on the inference server')
         self.model = self.config['model_key']
         if model is not None:
             from stacklab.llm.catalog import lock
@@ -153,7 +155,8 @@ class RemoteModel:
             elif self._cancelled.is_set() or cancelled and cancelled():
                 failure = GenerationCancelled('Generation cancelled')
             error = failure
-            self.cancel()
+            if final is None:
+                self.cancel()
             raise failure
         finally:
             timer.cancel()
@@ -216,3 +219,24 @@ class RemoteModel:
     def close(self):
         # Closing a GUI session cancels its request, never the shared server.
         self.cancel()
+
+
+class RemoteControl:
+    """Control a benchmark-enabled server without retaining stale model identity."""
+    def __init__(self, url):
+        self.host, self.port = endpoint(url)
+        self.address = url.rstrip('/')
+
+    _json = RemoteModel._json
+
+    def info(self):
+        value = self._json('GET', '/info')
+        if value.get('protocol') != PROTOCOL or not isinstance(value.get('config'), dict):
+            raise ValueError('Endpoint is not a compatible Stack Lab server')
+        return value
+
+    def select(self, model, timeout=3600):
+        info = self.info()
+        return self._json('POST', '/select-model',
+                          dict(server_id=info['server_id'], request_id=uuid4().hex, model=model),
+                          timeout=timeout)

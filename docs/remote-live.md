@@ -1,5 +1,9 @@
 # Live-Simulation lokal, Modell auf Colab
 
+Für automatische Versuchsreihen über alle Modelle siehe den
+[Remote-Benchmark für L4 und A100](remote-benchmark.md). Der folgende Ablauf bleibt
+der normale Live-Chat mit einem fest gewählten Modell.
+
 Das 3D-Fenster, MuJoCo, Roboterprogramme und die Auswertung laufen auf deinem Rechner. Ein dauerhafter Modellserver auf Colab liefert Antworten über einen SSH-Portforward. Du kannst im lokalen Terminal Sprache eingeben, Code und Tokens/s verfolgen und während der Ausführung den Arm sehen. Nach jedem Programmblock erhält das Modell den tatsächlichen Zustand und die Ausführungsrückmeldung. Während der Generierung pausiert die Physik; das Fenster bleibt bedienbar. Die Bewegung beginnt nach einem vollständigen, geprüften Programmblock.
 
 Die Modellgewichte werden auf Colab benötigt. Auf deinem Rechner genügt die normale Simulationsinstallation; ein lokaler Modelldownload und eine lokale NVIDIA-GPU sind für diesen Modus nicht nötig. Der Server hält ein Modell über mehrere Prompts geladen.
@@ -201,7 +205,11 @@ Native Tokens/s messen die Generierung auf dem Server; `transport.client_round_t
 
 Bei Verbindungsverlust wird ein unvollständiger Programmblock nicht ausgeführt. Teilantworten und Fehlermetadaten bleiben lokal erhalten. Eine neue Verbindung setzt keine unterbrochene Bewegung automatisch fort. Nach einem Server-Neustart verlangt der Client einen neuen Chat, damit ein Modellwechsel nicht unbemerkt geschieht. Ein Client-Abbruch beendet die eigene Anfrage; andere Anfragen werden dadurch nicht abgebrochen.
 
-Die Remote-Anbindung gilt zunächst für `chat`; die eingefrorenen Batch-Versuche bleiben im [Colab-Notebook](colab.md). Für Seminarvergleiche Modellrevision, Quantisierung, Prompt, Seeds, Budgets und Hardware aus den Protokollen festhalten. Diese Änderung führt kein Fine-Tuning ein.
+Neben `chat` unterstützt der [Remote-Pilot](remote-benchmark.md) automatische lokale
+Versuchsreihen mit Modellwechsel auf Colab. Das [Colab-Notebook](colab.md) führt
+Simulation und Modelle dagegen gemeinsam auf Colab aus. Für Seminarvergleiche
+Modellrevision, Quantisierung, Prompt, Seeds, Budgets und Hardware festhalten.
+Diese Abläufe führen kein Fine-Tuning ein.
 
 ## Beenden
 
