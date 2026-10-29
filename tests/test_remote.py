@@ -97,11 +97,11 @@ class RemoteTests(unittest.TestCase):
         local = self.root/'local'
         native = next((self.root/'server').iterdir())
         for name in ('request.json', 'response.json'):
-            self.assertEqual(json.loads((local/name).read_text()), json.loads((native/name).read_text()))
+            self.assertEqual(json.loads((local/name).read_text(encoding='utf-8')), json.loads((native/name).read_text(encoding='utf-8')))
         self.assertEqual((local/'stream.jsonl').read_bytes(), (native/'stream.jsonl').read_bytes())
         self.assertEqual(''.join(deltas), raw)
         self.assertEqual(progress[-1]['decode_tokens_per_second'], 12.5)
-        self.assertEqual(metadata, json.loads((local/'generation.json').read_text()))
+        self.assertEqual(metadata, json.loads((local/'generation.json').read_text(encoding='utf-8')))
         self.assertEqual(metadata['transport']['server_id'], self.server.info['server_id'])
         self.assertEqual(self.model.calls[0]['options']['seed'], 109)
         self.assertIs(self.model.calls[0]['options']['thinking'], False)
@@ -123,9 +123,9 @@ class RemoteTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'Controlled generation failure'):
             self.generate('fail')
         local = self.root/'local'
-        self.assertTrue((local/'stream.jsonl').read_text())
+        self.assertTrue((local/'stream.jsonl').read_text(encoding='utf-8'))
         self.assertTrue((local/'server-generation.json').is_file())
-        self.assertIn('Controlled generation failure', json.loads((local/'generation.json').read_text())['error'])
+        self.assertIn('Controlled generation failure', json.loads((local/'generation.json').read_text(encoding='utf-8'))['error'])
 
     def test_cancellation_stops_the_request_and_another_prompt_can_run(self):
         errors = []
@@ -170,7 +170,7 @@ class RemoteTests(unittest.TestCase):
     def test_timeout_stops_remote_work_and_keeps_partial_metadata(self):
         with self.assertRaises(TimeoutError):
             self.generate('block', timeout=.25)
-        metadata = json.loads((self.root/'local/generation.json').read_text())
+        metadata = json.loads((self.root/'local/generation.json').read_text(encoding='utf-8'))
         self.assertTrue(metadata['performance']['partial'])
         self.assertIsNone(metadata['finish_reason'])
 
@@ -183,9 +183,9 @@ class RemoteTests(unittest.TestCase):
             handler.wfile.flush()
         with patch.object(InferenceHandler, 'do_POST', disconnect), self.assertRaisesRegex(RuntimeError, 'ended before'):
             self.generate()
-        partial = json.loads((self.root/'local/response.json').read_text())
+        partial = json.loads((self.root/'local/response.json').read_text(encoding='utf-8'))
         self.assertEqual(partial['choices'][0]['message']['content'], 'robot.jog(')
-        metadata = json.loads((self.root/'local/generation.json').read_text())
+        metadata = json.loads((self.root/'local/generation.json').read_text(encoding='utf-8'))
         self.assertIsNone(metadata['finish_reason'])
         self.assertTrue(metadata['performance']['partial'])
 
@@ -206,7 +206,7 @@ class RemoteTests(unittest.TestCase):
             '--server-url', self.url, '--prompt', 'Bewege nach rechts.', '--output', str(output)],
             cwd=ROOT, capture_output=True, text=True, timeout=30)
         self.assertEqual(result.returncode, 0, result.stdout+result.stderr)
-        task = json.loads((output/'task_001/result.json').read_text())
+        task = json.loads((output/'task_001/result.json').read_text(encoding='utf-8'))
         before = task['initial_observation']['tcp_m']
         after = task['final_observation']['tcp_m']
         self.assertAlmostEqual(after[0]-before[0], .05, delta=.001)
