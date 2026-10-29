@@ -17,6 +17,12 @@ Für ein **lokales Live-Fenster während der LLM-Interaktion** gibt es den [Remo
 
 CUDA nutzt standardmäßig alle verfügbaren Modellschichten auf der GPU. Modell, Kontext und Puffer müssen in den verfügbaren Speicher passen; Fehler stehen in `inference.log`. Der bezahlte Colab-Tarif allein aktiviert CUDA nicht im Programm. Gerätewahl erfolgt ausdrücklich über `--device cuda`.
 
+Ab Version 3.4.1 findet der Launcher auch Colabs Treiberpfad `/usr/lib64-nvidia`
+und die CUDA-Runtime-/cuBLAS-Bibliotheken aus NVIDIA-Python-Paketen. Er lädt das
+CUDA-Backend der ausgewählten Runtime ausdrücklich und verwendet `-lv 5`, damit
+die unabhängige Layer-Offload-Prüfung die entsprechende Meldung lesen kann.
+[Details und `virtualenv`-Ausweichweg bei fehlendem `ensurepip`](remote-live.md#colab-cuda-bibliotheken-und-gpu-nachweis).
+
 `CUDA_RUNTIME="auto"` verwendet die geprüften CUDA-12.8-Pakete auf kompatiblen Systemen. Diese Pakete benötigen GLIBC 2.38; bei älterer GLIBC wird derselbe Commit `a71c00f0bb2d60a4a52837d80baa534b651ebd91` aus den Quellen gebaut. `CUDA_RUNTIME="source"` erzwingt einen Quellbuild, etwa um auf beiden Karten dieselbe Variante zu verwenden. Außerhalb des Notebooks steuert `STACKLAB_CUDA_RUNTIME=auto|binary|source` diese Wahl. Die aufgelöste Variante steht in der Modellkonfiguration des Versuchs. Quellbuilds prüfen erforderliche Werkzeuge vor dem Gewichtsdownload, zeigen Fortschritt an und halten auch die NVCC-Version fest. Der erste Build kann mehrere Minuten dauern.
 
 Quellbuilds erzeugen FlashAttention-Kernel für die verwendeten f16-KV-Caches. Bei Dory entfällt deren Build ganz, weil dessen bestehendes Profil FlashAttention ausschaltet. Das ändert weder die GGUF-Quantisierung noch die bisherigen KV-/Thinking-Einstellungen und spart ungenutzte Kernelvarianten beim Einrichten. Für eigene quantisierte KV-Caches muss die Buildkonfiguration entsprechend erweitert werden.

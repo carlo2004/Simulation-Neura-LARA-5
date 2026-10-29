@@ -117,17 +117,22 @@ Linux/macOS:
 
 ```bash
 .venv/bin/python -m stacklab doctor --server-url http://127.0.0.1:8765
-.venv/bin/python -m stacklab chat --server-url http://127.0.0.1:8765 --axes --stackviz red blue --stream
+.venv/bin/python -m stacklab chat --server-url http://127.0.0.1:8765 --stream
 ```
 
 Windows PowerShell:
 
 ```powershell
 .\.venv\Scripts\python.exe -m stacklab doctor --server-url http://127.0.0.1:8765
-.\.venv\Scripts\python.exe -m stacklab chat --server-url http://127.0.0.1:8765 --axes --stackviz red blue --stream
+.\.venv\Scripts\python.exe -m stacklab chat --server-url http://127.0.0.1:8765 --stream
 ```
 
 Bei WSL ist dieser Ablauf auf die Weiterleitung von Windows-`localhost` zum WSL-Port angewiesen. Wenn `doctor` dort keine Verbindung bekommt, zuerst denselben Aufruf in WSL prüfen. Der Server und sein Protokoll müssen dafür nicht geändert oder öffentlich freigegeben werden; die WSL-Netzwerkeinstellungen sind dann der nächste Prüfpunkt.
+
+Die Startbefehle lassen die zusätzlichen Overlays aus, um den lokalen Viewer zu entlasten.
+Bei Bedarf im Chat `/axes on` oder `/stackviz red blue` eingeben; mit `/axes off`
+und `/stackviz off` wieder ausblenden. Die physische Prüfung funktioniert auch ohne
+sichtbare Overlays. [Performance-Einstellungen](settings.md#performance-und-empfohlener-start).
 
 Im geöffneten Live-Chat:
 
@@ -146,6 +151,41 @@ Staple den roten Würfel auf den blauen Würfel.
 Ohne vorgegebenes unabhängiges Ziel bleibt eine freie Modell-Fertigmeldung unbewertet (`success: null`). `/check red blue` zeigt die echte physische Stapelprüfung. Erfolgreiche Verbindung bedeutet keine Garantie, dass ein unverändertes Modell jede Stapelaufgabe löst.
 
 Ein Server hält genau ein Modell. Zum Wechseln den Server mit Strg+C beenden, den Starthelfer mit einem anderen Modell erneut ausführen und den lokalen Chat neu starten. `/model` erklärt diese Grenze im Remote-Modus. `--model` am lokalen Chat ist optional; falls angegeben, muss die Modell-Prüfsumme zum Server passen. `--device` und `--threads` werden für Remote-Inferenz am Server gewählt.
+
+## Colab: CUDA-Bibliotheken und GPU-Nachweis
+
+Ab Version 3.4.1 ergänzt der Launcher die Laufzeitpfade für den Colab-Treiber
+(`/usr/lib64-nvidia`) sowie für die CUDA-Runtime und cuBLAS aus NVIDIA-Python-Paketen.
+Dabei werden sowohl die aktive Umgebung als auch die üblichen Paketordner des
+Colab-Basis-Python berücksichtigt. Die Bibliotheken der gewählten, festgelegten
+llama.cpp-Runtime haben Vorrang. `GGML_BACKEND_PATH` zeigt ausdrücklich auf deren
+`libggml-cuda.so`; die Umgebung des Terminals wird dabei nicht global verändert.
+Fehlende Bibliotheken werden durch die Pfadsuche nicht automatisch installiert.
+
+Bei `--device cuda` startet der Server mit `-lv 5`, damit die Layer-Offload-Meldung
+in `inference.log` sichtbar bleibt, zum Beispiel:
+
+```text
+load_tensors: offloaded 41/41 layers to GPU
+```
+
+Die Zahlen hängen vom Modell ab. Eine erkannte GPU oder ein gesunder HTTP-Endpunkt
+genügt nicht: Der Launcher verlangt weiterhin eine positive Layer-Offload-Meldung
+und speichert die tatsächlichen Zähler mit der GPU-Inventur in `device.json`.
+Diese ausführlichen Logs ändern weder das Ausgabebudget noch die Modellprompts.
+
+Falls Colabs `python -m venv` wegen fehlendem `ensurepip` scheitert, lässt sich die
+Projektumgebung vor dem erneuten Start des Helfers mit `virtualenv` anlegen.
+Diese Befehle mit demselben Python 3.12/3.13 ausführen, den das Setup verwendet:
+
+```bash
+python -m pip install virtualenv
+python -m virtualenv .venv
+python tools/start_remote.py --model granite8b --device cuda --threads 2
+```
+
+Eine bereits vorhandene Umgebung beibehalten. `virtualenv` ist hier ein
+Einrichtungsschritt für die Colab-Laufzeit und keine neue Projektabhängigkeit.
 
 ## Protokolle und Wiederaufnahme
 

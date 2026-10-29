@@ -23,13 +23,18 @@ Beispiele für Linux; unter Windows den Interpreter aus der Tabelle einsetzen:
 
 ```bash
 .venv/bin/python -m stacklab demo --gui
-.venv/bin/python -m stacklab console --axes
+.venv/bin/python -m stacklab console
 .venv/bin/python -m stacklab models
 .venv/bin/python -m stacklab setup --model qwen9b
-.venv/bin/python -m stacklab chat --model qwen9b --no-thinking --axes
+.venv/bin/python -m stacklab chat --model qwen9b --no-thinking
 ```
 
 Im Chat z. B. `Bewege den Greifer 5 cm nach rechts.` eingeben. Code, Aktionen und echte Zustandsrückmeldungen werden angezeigt. `/stop` unterbricht die Aufgabe; `/help` zeigt weitere Befehle. Im manuellen Terminal helfen `help`, `objects` und die [Beispiele](examples/).
+
+Für eine flüssige lokale Ansicht starten Achsen, Koordinaten und Stapelrahmen ausgeschaltet.
+Im Chat lassen sie sich bei Bedarf mit `/axes on` und `/stackviz red blue` zuschalten.
+Die Live-Ansicht wird auf die konfigurierten FPS begrenzt, der Overlay-Neuaufbau auf 10 Hz.
+[Performance-Einstellungen und Windows-Startbefehle](docs/settings.md#performance-und-empfohlener-start).
 
 **Nach einem Update aus einem alten Checkout einmal `python bootstrap.py --test` ausführen.** Die bisherigen einzelnen Startskripte wurden durch Paketbefehle ersetzt; siehe [Migration](docs/history/README.md).
 

@@ -8,7 +8,7 @@ Nach erfolgreicher Einrichtung den ausgegebenen Interpreter verwenden. Linux-Bei
 
 ```bash
 .venv/bin/python -m stacklab doctor
-.venv/bin/python -m stacklab console --axes
+.venv/bin/python -m stacklab console
 .venv/bin/python -m stacklab demo --gui
 .venv/bin/python -m stacklab demo --video
 ```
@@ -34,6 +34,10 @@ check red blue
 ```
 
 Die vollständigen Abläufe stehen in [examples](../examples/). Mit `--config scenes/three_cubes.json` eine andere Szene wählen. Die JSON-Dateien enthalten Objektform, Masse, Größe und Startposition; [Einstellungen](settings.md) erklärt ihre Bedeutung. Achsen, Auswertungsboxen und die Einstellungstafel sind optional. Die Einstellungstafel lässt sich einklappen.
+
+Für die flüssigste Ansicht zunächst ohne `--axes` und `--stackviz` starten.
+Die [Performance-Einstellungen](settings.md#performance-und-empfohlener-start) enthalten
+Startbefehle für lokale Modelle und den Colab-Remote-Modus.
 
 Die Konsole enthält manuelle Steuerung und Mesh-Import. Für Physikversuche eignet sich die vorbereitete Ente aus `scenes/duck.json`; fremde Meshes werden als konvexe Kollisionshülle importiert. Hohlräume und Texturen sind dabei keine detaillierte Kollisionsgeometrie.
 

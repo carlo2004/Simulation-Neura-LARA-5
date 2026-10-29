@@ -58,6 +58,10 @@ class LocalModel:
         if not isinstance(extra, list) or any(not isinstance(arg, str) or arg.split('=')[0] in reserved for arg in extra):
             raise ValueError('server_args must be strings and must preserve the private model/device/loopback configuration')
         command += extra
+        if self.device == 'cuda':
+            # Offload diagnostics can be hidden at the default log level.
+            # Keep the independent layer check; do not infer offload from /health.
+            command += ['-lv', '5']
         self.log = (output/'inference.log').open('w', encoding='utf-8')
         started = time.monotonic()
         self.process = subprocess.Popen(command, cwd=exe.parent, env=runtime_env(exe), stdout=self.log, stderr=self.log)

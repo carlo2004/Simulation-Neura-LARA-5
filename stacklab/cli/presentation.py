@@ -87,5 +87,8 @@ class Presenter:
                 print(data['text'], end='', flush=True)
         if self.metrics and self.metrics['phase'] != 'finished' and time.monotonic()-self.last_progress >= 1:
             value = dict(self.metrics)
-            value['total_seconds'] += time.monotonic()-self.metrics_received
+            elapsed = value.get('total_seconds')
+            if elapsed is None:
+                elapsed = value.get('request_seconds') or 0
+            value['total_seconds'] = elapsed+time.monotonic()-self.metrics_received
             self.show_speed(value)

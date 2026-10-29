@@ -17,6 +17,61 @@ verwendet. Die Tastaturumschaltung bleibt jederzeit verfügbar, wenn das
 Offizielle Dokumentation der verwendeten Version:
 https://mujoco.readthedocs.io/en/3.3.7/python.html#passive-viewer
 
+## Performance und empfohlener Start
+
+Ab Version 3.4.1 verwenden die normalen Startbeispiele keine zusätzlichen Overlays.
+Achsen/Grid, Koordinaten, Objektlabels und Stapelrahmen sind weiterhin optional.
+Die MuJoCo-Einstellungsleisten starten ebenfalls ausgeblendet; `--show-settings`
+blendet sie beim Start ein. Das ist unabhängig von den eigenen Overlays.
+
+| Einstellung | Standard / Verhalten |
+|---|---|
+| Physikzeitschritt | 0.002 s, unverändert |
+| `fps` in der Szenen-JSON | 30; steuert Videoframes nach Simulationszeit und begrenzt Viewer-Synchronisation nach Echtzeit |
+| Eigene GUI-Overlays | Aus; einschaltbar über `--axes`, `--stackviz` oder Chatbefehle |
+| Overlay-Neuaufbau in der GUI | Höchstens 10 Hz bei regelmäßigen Updates; Ein-/Ausblenden und abgeschlossene Prüfungen werden sofort übernommen |
+| MuJoCo-Einstellungsleisten | Ausgeblendet; `--show-settings` oder Tab / Umschalt+Tab |
+| Tokenanzeige | Weiterhin aktiv; fehlende Zeitwerte führen nicht mehr zu `KeyError: 'total_seconds'` |
+
+Die Begrenzung nach Echtzeit gilt auch während der Inferenz bei pausierter Physik.
+Zwischen Overlay-Updates werden Geometrien und Texte wiederverwendet. Die Physik
+behält ihre Schritte; Videoframes folgen weiterhin der Simulationszeit und werden
+nicht durch die GUI-Drosselung ausgelassen. FPS sind eine Obergrenze für die
+Synchronisation, keine garantierte Bildrate oder garantierte Echtzeitphysik.
+
+Nach `git pull --ff-only` im Projektordner unter Windows zunächst lokal starten:
+
+```powershell
+.\.venv\Scripts\python.exe -m stacklab chat --model qwen4b --threads 2 --stream
+```
+
+`--threads 2` ist hier ein Startwert für CPU-Inferenz auf dem lokalen Rechner,
+keine allgemeine optimale Einstellung. Quantisierung und Modellgeschwindigkeit
+werden durch die GUI-Optimierung nicht verändert. Das Modell muss eingerichtet sein.
+
+Bei bereits laufendem Colab-Modellserver und SSH-Tunnel:
+
+```powershell
+.\.venv\Scripts\python.exe -m stacklab chat --server-url http://127.0.0.1:8765 --stream
+```
+
+Im Remote-Modus werden Modell und Threads am Server gewählt; die lokale Simulation
+braucht keine eigenen Modellgewichte. [Vollständige Einrichtung](remote-live.md).
+
+Optionale Anzeigen lassen sich im Chat gezielt ein- und wieder ausschalten:
+
+```text
+/axes on
+/stackviz red blue
+/axes off
+/stackviz off
+```
+
+Ohne Overlay erfolgt dieselbe unabhängige Physikprüfung, zum Beispiel mit
+`/check red blue`. Die geringere Zeichenlast garantiert noch keine flüssige
+Darstellung auf jeder Hardware; bei weiteren Verzögerungen müssen Viewer und
+Overlay-Berechnung getrennt gemessen werden.
+
 ## Werte im Menü
 
 Die optionalen Koordinaten- und Stapelanzeigen ab Version 2.3 sind eigener

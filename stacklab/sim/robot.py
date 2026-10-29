@@ -78,6 +78,9 @@ class Simulation:
         self.sid = self.model.site('tcp').id
         self.events = []
         self.frames = 0
+        self._last_view_refresh = None
+        self._last_overlay_refresh = None
+        self._overlay_view_state = None
         self.writer = self.renderer = self.viewer = None
         self.camera = mujoco.MjvCamera()
         self.camera.lookat[:] = [.25, 0, .22]
@@ -112,6 +115,8 @@ class Simulation:
             show_right_ui=self.show_settings,
             key_callback=self.manual.on_key,
         )
+        self._last_view_refresh = self._last_overlay_refresh = None
+        self._overlay_view_state = None
         with self.viewer.lock():
             self.viewer.cam.lookat[:] = self.camera.lookat
             self.viewer.cam.distance = self.camera.distance
@@ -128,16 +133,32 @@ class Simulation:
             raise ValueError('Stack visualisation supports cubes/boxes')
         self.overlays.stack_pair = (source, target)
 
-    def refresh_view(self):
-        self.overlays.observe(self)
+    def refresh_view(self, *, force=False):
         if self.viewer:
             if not self.viewer.is_running():
                 raise KeyboardInterrupt
+            now = time.monotonic()
+            state = (self.overlays.axes, self.overlays.stack_pair, self.manual.enabled)
+            changed = state != self._overlay_view_state
+            # Also limit refreshes while inference pauses simulation time.
+            if (not force and not changed and self._last_view_refresh is not None
+                    and now-self._last_view_refresh < 1/self.config.fps):
+                return
+            self.overlays.observe(self)
             self.manual.selected = self.selected_point() if self.manual.enabled else None
-            with self.viewer.lock():
-                self.overlays.draw(self.viewer.user_scn, self, clear=True)
-            self.viewer.set_texts(self.overlays.viewer_texts(self))
+            # Keep the previous rendering geometry/text between 10 Hz updates.
+            # Visibility changes and final check results must appear immediately.
+            if (force or changed or self._last_overlay_refresh is None
+                    or now-self._last_overlay_refresh >= .1):
+                with self.viewer.lock():
+                    self.overlays.draw(self.viewer.user_scn, self, clear=True)
+                self.viewer.set_texts(self.overlays.viewer_texts(self))
+                self._last_overlay_refresh = time.monotonic()
+                self._overlay_view_state = state
             self.viewer.sync()
+            self._last_view_refresh = time.monotonic()
+        else:
+            self.overlays.observe(self)
 
     def selected_point(self):
         """World point from MuJoCo's native left-double-click selection, if usable."""
@@ -194,6 +215,8 @@ class Simulation:
         self.events.clear()
         self.overlays.clear_check()
         self.frames = 0
+        self._last_view_refresh = self._last_overlay_refresh = None
+        self._overlay_view_state = None
         mujoco.mj_forward(self.model, self.data)
         self.step(.5)
 
@@ -228,15 +251,18 @@ class Simulation:
                     for c in self.data.contact)
             if not np.all(np.isfinite(self.data.qpos)):
                 raise RuntimeError('Nonfinite simulation state')
-            if self.data.time*self.config.fps >= self.frames:
-                self.frames += 1
-                self.overlays.observe(self)
+            target_frame = int(self.data.time*self.config.fps)
+            if target_frame > self.frames:
+                self.frames = target_frame
                 if self.renderer:
                     self.last_frame = self.render_frame(self.renderer)
                     self.writer.append_data(self.last_frame)
                 if self.viewer:
+                    started = time.monotonic()
                     self.refresh_view()
-                    time.sleep(1/self.config.fps)
+                    time.sleep(max(0., 1/self.config.fps-(time.monotonic()-started)))
+                elif not self.renderer:
+                    self.overlays.observe(self)
 
     def position(self, name):
         """Ground-truth object centre in world metres; no vision pipeline."""
@@ -421,7 +447,7 @@ class Simulation:
                 self.overlays.samples.append(self.is_stacked(source, target))
         finally:
             self.overlays.checking = False
-            self.refresh_view()
+            self.refresh_view(force=True)
             if self.renderer:
                 # Include the completed result rather than leaving a 19/20 frame.
                 self.last_frame = self.render_frame(self.renderer)

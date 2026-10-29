@@ -5,7 +5,7 @@
 ```bash
 .venv/bin/python -m stacklab models
 .venv/bin/python -m stacklab setup --model qwen9b
-.venv/bin/python -m stacklab chat --model qwen9b --no-thinking --axes
+.venv/bin/python -m stacklab chat --model qwen9b --no-thinking
 ```
 
 Die Modellaliase stehen im [Katalog](../config/models.lock.json). Er pinnt Revisionen, GGUF-Dateien, SHA-256, Runtime und Sampling. Gewichte und CPU-Runtime werden lokal geladen. Das Setup lädt ohne `--all` nur das gewählte Modell; es löscht keine anderen Gewichte.
@@ -70,7 +70,7 @@ Standardmäßig arbeitet die Runtime auf der **CPU**, auch wenn eine GPU im Rech
 ```bash
 .venv/bin/python -m stacklab setup --model granite8b
 .venv/bin/python -m stacklab setup --model lfm2.6b
-.venv/bin/python -m stacklab chat --model granite8b --axes
+.venv/bin/python -m stacklab chat --model granite8b
 ```
 
 Windows verwendet entsprechend `.\\.venv\\Scripts\\python.exe`. Alias, vollständige Modell-ID und eindeutiger Kurzname werden akzeptiert, z. B. `Qwen3.5-9B`.

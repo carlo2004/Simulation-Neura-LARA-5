@@ -124,8 +124,9 @@ class CudaTests(unittest.TestCase):
                 weights.touch()
                 client.config=dict(config, model_bytes=0)
                 def launch(command, **kwargs):
-                    kwargs['stdout'].write('load_tensors: offloaded 33/33 layers to GPU\n')
-                    kwargs['stdout'].flush()
+                    if '-lv' in command and command[command.index('-lv')+1] == '5':
+                        kwargs['stdout'].write('load_tensors: offloaded 41/41 layers to GPU\n')
+                        kwargs['stdout'].flush()
                     return Process()
                 response=io.BytesIO(b'{}')
                 response.status=200
@@ -140,7 +141,56 @@ class CudaTests(unittest.TestCase):
                 command=started.call_args.args[0]
                 self.assertEqual(command[command.index('--gpu-layers')+1], '999' if device=='cuda' else '0')
                 self.assertEqual((path/'device.json').exists(), device=='cuda')
+                if device == 'cuda':
+                    self.assertEqual(json.loads((path/'device.json').read_text())['offloaded_layers'], 41)
+                else:
+                    self.assertNotIn('-lv', command)
                 client.close()
+
+    def test_colab_cuda_wheels_are_found_in_active_and_base_python(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            active = root/'venv/lib/python3.12/site-packages'
+            base = root/'base'
+            system = base/'lib/python3.13/dist-packages'
+            libraries = [active/'nvidia/cuda_runtime/lib', active/'nvidia/cublas/lib',
+                         system/'nvidia/cuda_runtime/lib', system/'nvidia/cublas/lib']
+            for path in libraries:
+                path.mkdir(parents=True)
+            with patch.object(catalog.sys, 'path', [str(active)]), \
+                    patch.object(catalog.sys, 'base_prefix', str(base)):
+                found = catalog._cuda_library_directories()
+            for library in libraries:
+                self.assertIn(library, found)
+            self.assertEqual(len(found), len(set(found)))
+
+    def test_cuda_backend_and_library_paths_are_private_to_the_child_process(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            exe = root/'runtime/bin/llama-server'
+            backend = root/'runtime/lib/libggml-cuda.so'
+            backend.parent.mkdir(parents=True)
+            backend.touch()
+            (root/'runtime/installed.json').write_text('{}')
+            colab = [root/'usr/lib64-nvidia', root/'site-packages/nvidia/cuda_runtime/lib',
+                     root/'site-packages/nvidia/cublas/lib']
+            inherited = str(root/'inherited')
+            with patch.object(catalog.platform, 'system', return_value='Linux'), \
+                    patch.object(catalog, '_cuda_library_directories', return_value=colab), \
+                    patch.dict(catalog.os.environ, LD_LIBRARY_PATH=inherited,
+                               GGML_BACKEND_PATH='unrelated-backend'):
+                env = catalog.runtime_env(exe)
+                self.assertEqual(env['GGML_BACKEND_PATH'], str(backend.resolve()))
+                paths = env['LD_LIBRARY_PATH'].split(catalog.os.pathsep)
+                for path in [exe.parent, backend.parent, *colab, Path(inherited)]:
+                    self.assertIn(str(path), paths)
+                self.assertLess(paths.index(str(backend.parent)), paths.index(str(colab[-1])))
+                self.assertEqual(catalog.os.environ['GGML_BACKEND_PATH'], 'unrelated-backend')
+                self.assertEqual(catalog.os.environ['LD_LIBRARY_PATH'], inherited)
+                backend.unlink()
+                cpu_env = catalog.runtime_env(exe)
+                self.assertNotIn('GGML_BACKEND_PATH', cpu_env)
+                self.assertNotIn(str(colab[0]), cpu_env['LD_LIBRARY_PATH'].split(catalog.os.pathsep))
 
     def test_notebook_code_cells_compile_and_contain_no_fake_measurements(self):
         from stacklab.paths import ROOT

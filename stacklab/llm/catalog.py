@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 import platform
 import shutil
+import sys
 import tarfile
 import urllib.request
 import zipfile
@@ -248,16 +249,37 @@ def find_executable(model=None, device='cpu'):
     raise ValueError('Local runtime missing. Run python -m stacklab setup first.')
 
 
+def _cuda_library_directories():
+    """Driver and pip-installed CUDA libraries, including outside Colab's venv."""
+    directories = [Path('/usr/lib64-nvidia'), Path('/usr/local/cuda/lib64'),
+                   Path('/usr/local/nvidia/lib'), Path('/usr/local/nvidia/lib64')]
+    package_roots = [Path(p) for p in sys.path if p]
+    # Colab can install CUDA wheels into its base Python, while our server uses
+    # a separate Python version/environment. No NVIDIA modules need importing.
+    for root in dict.fromkeys([Path('/usr/local/lib'), Path(sys.base_prefix)/'lib']):
+        for pattern in ('python*/dist-packages', 'python*/site-packages'):
+            package_roots.extend(sorted(root.glob(pattern)))
+    for root in dict.fromkeys(package_roots):
+        for package in ('cuda_runtime', 'cublas'):
+            directories.append(root/'nvidia'/package/'lib')
+    return [p for p in dict.fromkeys(directories) if p.is_dir()]
+
+
 def runtime_env(executable):
+    executable = Path(executable)
     env = os.environ.copy()
     # Also works when /proc/self/exe is unavailable: the cwd is the runtime folder.
     env.pop('GGML_BACKEND_PATH', None)
     if platform.system() == 'Linux':
         root = next((p for p in executable.parents if (p/'installed.json').is_file()), executable.parent)
         directories = [executable.parent, *sorted({p.parent for p in root.rglob('*.so*')})]
-        paths = list(dict.fromkeys(str(p) for p in directories))
-        if env.get('LD_LIBRARY_PATH'):
-            paths.append(env['LD_LIBRARY_PATH'])
-        env['LD_LIBRARY_PATH'] = os.pathsep.join(paths)
+        backends = sorted(root.rglob('libggml-cuda.so'))
+        if backends:
+            # This is a library filename, not a directory. Load only the backend
+            # belonging to the selected pinned runtime, never an inherited one.
+            env['GGML_BACKEND_PATH'] = str(backends[0].resolve())
+            directories.extend(_cuda_library_directories())
+        paths = [str(p) for p in directories]
+        paths.extend(p for p in env.get('LD_LIBRARY_PATH', '').split(os.pathsep) if p)
+        env['LD_LIBRARY_PATH'] = os.pathsep.join(dict.fromkeys(paths))
     return env
-

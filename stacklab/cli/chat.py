@@ -50,8 +50,9 @@ def main(argv=None):
     parser.add_argument('--device', choices=['cpu', 'cuda'], default='cpu')
     parser.add_argument('--headless', action='store_true')
     parser.add_argument('--config', type=Path, default=ROOT/'scenes/three_cubes.json')
-    parser.add_argument('--axes', action='store_true')
-    parser.add_argument('--stackviz', nargs=2, metavar=('SOURCE', 'TARGET'))
+    parser.add_argument('--axes', action='store_true', help='Enable optional coordinate overlays; off by default')
+    parser.add_argument('--stackviz', nargs=2, metavar=('SOURCE', 'TARGET'),
+                        help='Enable the optional stack overlay; off by default')
     parser.add_argument('--show-settings', action='store_true')
     parser.add_argument('--prompt', action='append', help='Run one or more prompts sequentially, then exit')
     parser.add_argument('--goal-stack', nargs=2, help='Trusted independent goal; available with exactly one --prompt')

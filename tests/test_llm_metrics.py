@@ -113,6 +113,23 @@ class MetricsTests(unittest.TestCase):
         self.assertIn('auf erstes Token warten', target.getvalue())
         self.assertIn('2.0 s', target.getvalue())
 
+    def test_progress_without_total_time_keeps_the_chat_alive(self):
+        for extra, expected in [({}, '2.0 s'), ({'request_seconds': 3}, '5.0 s'),
+                                ({'total_seconds': None}, '2.0 s')]:
+            with self.subTest(extra=extra):
+                clock = Clock()
+                target = io.StringIO()
+                with patch('stacklab.cli.presentation.time.monotonic', side_effect=clock):
+                    display = Presenter(stats_stream=target)
+                    display.event('inference', dict(phase='prompt', **extra))
+                    display.drain()
+                    clock.now = 2
+                    display.drain()
+                self.assertIn('auf erstes Token warten', target.getvalue())
+                self.assertIn(expected, target.getvalue())
+                self.assertEqual({k: v for k, v in display.metrics.items()
+                                  if k not in ('event', 'phase')}, extra)
+
     def test_sse_reports_native_progress_and_saves_partial_throughput(self):
         pieces = [dict(choices=[dict(delta=dict(reasoning_content='hidden'), finish_reason=None)],
                        timings=dict(predicted_n=2, predicted_ms=500, prompt_n=40, prompt_ms=100)),
