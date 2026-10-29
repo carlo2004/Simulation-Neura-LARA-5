@@ -84,7 +84,8 @@ class LocalModel:
             raise
 
     def complete(self, messages, output, *, max_tokens=2048, seed=42, thinking=None,
-                 timeout=600, on_delta=None, cancelled=None, thinking_budget=None, on_progress=None):
+                 timeout=600, on_delta=None, cancelled=None, thinking_budget=None, on_progress=None,
+                 on_native=None):
         config = self.config
         if type(max_tokens) is not int or not 0 < max_tokens < config.get('context_tokens', 4096):
             raise ValueError('max-tokens must be positive and smaller than the model context')
@@ -178,6 +179,8 @@ class LocalModel:
                     chunk = json.loads(data)
                     events.write(json.dumps(chunk, ensure_ascii=False)+'\n')
                     events.flush()
+                    if on_native:
+                        on_native(chunk)
                     metrics.update(chunk)
                     progress()
                     if chunk.get('error'):

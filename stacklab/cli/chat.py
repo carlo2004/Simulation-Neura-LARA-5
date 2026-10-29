@@ -1,4 +1,4 @@
-"""Prompt the local model live while the same MuJoCo scene stays open."""
+"""Prompt a local or remote model while the same MuJoCo scene stays open."""
 from stacklab.paths import ROOT
 from stacklab.paths import RUNS_ROOT
 import argparse
@@ -18,6 +18,7 @@ from stacklab.llm.agent import Agent
 from stacklab.evaluation import evaluate, observe
 from stacklab.llm.catalog import lock, model_keys
 from stacklab.llm.runtime import LocalModel
+from stacklab.llm.remote import RemoteModel
 from stacklab.cli.presentation import Presenter
 
 HELP = '''Freie Sprache: z.B. "Bewege den Greifer 5 cm nach rechts."
@@ -34,6 +35,7 @@ Programmbloecke verwenden; jeder Block bekommt echte Ausfuehrungsrueckmeldung.
 /stackviz red blue|off   Pruefrahmen umschalten
 /models                  Modell-Aliasse anzeigen
 /model qwen9b            Bereits heruntergeladenes Modell wechseln
+                        Remote: Modell am Server wechseln und Chat neu starten
 /sim BEFEHL              Vorhandene deterministische Roboterkonsole verwenden
 /help /quit              Hilfe / beenden
 Waehrend einer Aufgabe sind /stop und /quit direkt verfuegbar.
@@ -42,8 +44,9 @@ Waehrend einer Aufgabe sind /stop und /quit direkt verfuegbar.
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(description='Live natural-language control through a local model and execution feedback')
+    parser = argparse.ArgumentParser(description='Live control through a local or remote model and execution feedback')
     parser.add_argument('--model', help='Model alias; default from config/models.lock.json')
+    parser.add_argument('--server-url', help='Remote Stack Lab server through SSH, e.g. http://127.0.0.1:8765')
     parser.add_argument('--device', choices=['cpu', 'cuda'], default='cpu')
     parser.add_argument('--headless', action='store_true')
     parser.add_argument('--config', type=Path, default=ROOT/'scenes/three_cubes.json')
@@ -77,7 +80,13 @@ def main(argv=None):
     busy = threading.Event()
     pending = queue.Queue()
     try:
-        lock(args.model, device=args.device)
+        if args.server_url:
+            if args.device != 'cpu':
+                raise ValueError('--device applies to local inference; choose CUDA on the remote serve command')
+            # Connect before opening the GUI; no local weights or CUDA are required.
+            client = RemoteModel(args.server_url, args.model)
+        else:
+            lock(args.model, device=args.device)
         if min(args.max_rounds, args.max_tokens, args.threads) < 1:
             raise ValueError('rounds, tokens and threads must be positive')
         if min(args.generation_timeout, args.execution_timeout) <= 0:
@@ -92,7 +101,8 @@ def main(argv=None):
         robot = Simulation(replace(Config.load(args.config), seed=args.seed), gui=not args.headless, axes=args.axes,
                            stackviz=args.stackviz, show_settings=args.show_settings)
         controller = Controller(robot)
-        client = LocalModel(args.model, threads=args.threads, device=args.device)
+        if client is None:
+            client = LocalModel(args.model, threads=args.threads, device=args.device)
         display = Presenter(args.stream, args.show_thinking)
 
         def tick():
@@ -111,7 +121,10 @@ def main(argv=None):
                       thinking=args.thinking, seed=args.seed, generation_timeout=args.generation_timeout,
                       thinking_budget=args.thinking_budget,
                       execution_timeout=args.execution_timeout, on_event=display.event, tick=tick)
-        print('Lokales Modell: '+client.config['model_id'], flush=True)
+        print(('Remote-Modell: ' if args.server_url else 'Lokales Modell: ')+client.config['model_id'], flush=True)
+        if args.server_url:
+            print('Verbindung: '+args.server_url+'; Simulation und Roboterprogramme laufen lokal.', flush=True)
+            print('Server-Threads: '+str(client.info['threads'])+'; lokale --threads gelten nur fuer lokale Inferenz.', flush=True)
         print('Code und Aktionen werden angezeigt. /help fuer Hilfe, /stop zum Abbrechen.', flush=True)
         print('Protokolle: '+str(directory), flush=True)
         sequence = 0
@@ -191,6 +204,8 @@ def main(argv=None):
                     for key in model_keys():
                         print(key+'  '+lock(key)['model_id'], flush=True)
                 elif text.startswith('/model '):
+                    if args.server_url:
+                        raise ValueError('Remote-Modell am Server mit serve --model wechseln; danach diesen Chat neu starten.')
                     selected = text.split(maxsplit=1)[1]
                     config = lock(selected, device=args.device)
                     client.close()

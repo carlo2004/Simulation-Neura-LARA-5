@@ -8,6 +8,7 @@ COMMANDS = {
     "demo": ("stacklab.cli.demo", None),
     "console": ("stacklab.cli.console", None),
     "chat": ("stacklab.cli.chat", None),
+    "serve": ("stacklab.cli.serve", None),
     "models": ("stacklab.cli.benchmark", "models"),
     "setup": ("stacklab.cli.benchmark", "setup"),
     "benchmark": ("stacklab.cli.benchmark", "test"),

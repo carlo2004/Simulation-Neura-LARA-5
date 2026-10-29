@@ -1,6 +1,6 @@
 # Struktur und Erweiterung
 
-Eine lokale Anwendung, ein Python-Paket, wenige direkte Schnittstellen. Keine Plugin-Infrastruktur oder zusätzlichen Dienste für die Simulation.
+Eine lokale Simulationsanwendung, ein Python-Paket, wenige direkte Schnittstellen. Die Inferenz kann lokal laufen oder über einen optionalen Modellserver auf einer GPU-Maschine angebunden werden.
 
 ## Zuständigkeiten
 
@@ -10,12 +10,15 @@ Eine lokale Anwendung, ein Python-Paket, wenige direkte Schnittstellen. Keine Pl
 | `config.py`, `scenes/` | Daten einer Szene | Neue Szenendatei oder Objektform |
 | `llm/catalog.py`, `config/models.lock.json` | Reproduzierbare Modell- und Runtime-Auswahl | Katalogeintrag |
 | `llm/runtime.py` | Modell laden, Text streamen, abbrechen | Anderen Inferenz-Client implementieren |
+| `llm/remote.py`, `llm/service.py` | Inferenz über SSH-Portforward, native Evidenz, Abbruch | Andere Compute-Maschine mit demselben Protokoll |
 | `llm/agent.py` | Sprache → Code → Ausführung → Feedback | Kontext- oder Planungsstrategie |
 | `policy.py` | Öffentliche Modellbefehle und Ausführungsbudgets | Fähigkeit an einer Stelle hinzufügen |
 | `evaluation.py` | Ziele aus realem Physikzustand prüfen | Neue unabhängig definierte Metrik |
 | `cli/` | Argumente, Terminaldarstellung, Prozessgrenzen | Neuer Befehl |
 
 Der Agent erhält den Modell-Client als Objekt; er erzeugt keine konkrete Runtime selbst. Ein anderer Client braucht `config`, `complete(messages, output, **options)` und `cancel()`. Damit lassen sich spätere Finetuning-Backends oder Test-Clients anschließen. Es gibt keine abstrakte Basisklasse ohne aktuellen Nutzen.
+
+`RemoteModel` erfüllt dieselbe Schnittstelle. Der optionale Befehl `serve` betreibt genau einen `LocalModel` und nimmt nacheinander Generierungsanfragen entgegen. NDJSON über eine ausschließlich an Loopback gebundene HTTP-Verbindung überträgt Text, Fortschritt und unveränderte native Streamingdaten. Der Client verwendet dieselbe lokale Roboterausführung und Rückmeldeschleife. Ein verbindungsbezogener Serverbezeichner erkennt Neustarts; Anfragen haben eigene IDs für Abbruch und Protokolle. SSH ist der Transport und die Zugangskontrolle, kein Bestandteil der Physik. [Einrichtung und Datenformat](remote-live.md).
 
 Die Simulation kennt keine Modellnamen. Der Evaluator kennt keine Modellantwort. Ein Modell-`done` gilt bei vorgegebenem Ziel erst dann als Erfolg, wenn die unabhängige Prüfung besteht. Freie Live-Anweisungen haben ohne definierte Metrik `success: null`.
 

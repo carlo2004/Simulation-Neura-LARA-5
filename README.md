@@ -41,6 +41,8 @@ Die Modellanbindung unterstützt Qwen3.5-4B/9B, Ministral 3 8B Reasoning, Nemotr
 
 Für Colab Pro mit **L4 oder A100** gibt es ein [startfertiges Notebook](https://colab.research.google.com/github/carlo2004/Simulation-Neura-LARA-5/blob/main/notebooks/colab_gpu.ipynb). `--device cuda` aktiviert die geprüfte CUDA-Runtime unter Linux; CPU bleibt Standard. Das Notebook prüft die GPU-Nutzung, zeigt eine optionale Video-Vorschau und sichert die Versuchsergebnisse nach jeder Episode. [Einrichtung und GPU-Vergleich](docs/colab.md).
 
+**Live zuschauen mit dem Modell auf Colab:** `stacklab serve` hält das Modell auf der GPU geladen; `stacklab chat --server-url http://127.0.0.1:8765 --stream` verbindet den lokalen Simulator über einen SSH-Portforward. Code, native Tokens/s und echte Rückmeldungen bleiben sichtbar. Ein Starthelfer richtet die GPU-Seite ein. [Live-Einrichtung mit Colab und später Compute Engine](docs/remote-live.md).
+
 Die Geometrie und Kinematik stammen aus einer RoboDK-Quelldatei. Dynamik, Greifer und Regelung enthalten eigene Annahmen; dies ist eine Forschungsumgebung für die Tischaufgabe, kein validierter digitaler Zwilling. [Herkunft und Lizenzen](assets/sources/NOTICE.md).
 
 ## Orientierung

@@ -4,6 +4,8 @@
 
 Dasselbe Notebook unterstützt beide Karten. In Colab eine GPU-Laufzeit auswählen, zunächst L4, und die Zellen der Reihe nach ausführen. Es werden nur die ausgewählten Modelle installiert. Die Standardeinstellung ist Granite 8B mit einem Bewegungs- und einem Stapelfall sowie einem beziehungsweise bis zu vier Programmblöcken. Der voreingestellte `REPO_REF` pinnt den Projektcode auf denselben Stand für L4 und A100.
 
+Für ein **lokales Live-Fenster während der LLM-Interaktion** gibt es den [Remote-Modus mit SSH und Modellserver](remote-live.md). Das Notebook auf dieser Seite führt dagegen vollständige Versuche auf Colab aus und zeigt eine Video-Vorschau.
+
 ## Was eingerichtet wird
 
 - Eine eigene `.venv` mit Python 3.12/3.13 und den bisherigen Simulationspaketen. Bei einem anderen Notebook-Python wird Python 3.12 über `uv` eingerichtet.

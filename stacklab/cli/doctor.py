@@ -18,6 +18,7 @@ def main(argv=None):
     parser.add_argument('--json', action='store_true', help='Maschinenlesbarer Bericht')
     parser.add_argument('--device', choices=['cpu', 'cuda'], default='cpu')
     parser.add_argument('--model', help='Model runtime to diagnose when --device cuda is selected')
+    parser.add_argument('--server-url', help='Also check a remote inference server through an SSH loopback forward')
     args = parser.parse_args(argv)
     result = dict(python=platform.python_version(), interpreter=sys.executable,
                   virtualenv=sys.prefix != sys.base_prefix, packages={}, errors=[])
@@ -42,6 +43,13 @@ def main(argv=None):
             result['cuda_backend'] = check_cuda_backend(executable, runtime_env(executable))
         except (ValueError, RuntimeError, OSError) as error:
             result['errors'].append(str(error))
+    if args.server_url:
+        from stacklab.llm.remote import RemoteModel
+        try:
+            remote = RemoteModel(args.server_url, args.model)
+            result['remote_server'] = remote.info
+        except (ValueError, RuntimeError, OSError, KeyError) as error:
+            result['errors'].append('Remote: '+str(error))
     result['success'] = not result['errors']
     if args.json:
         print(json.dumps(result, indent=2))
@@ -53,6 +61,11 @@ def main(argv=None):
             print('OK '+package+' '+version)
         for gpu in result.get('gpus', []):
             print(f'GPU {gpu["name"]}: {gpu["memory_total_mib"]} MiB; Treiber {gpu["driver_version"]}')
+        if 'remote_server' in result:
+            remote = result['remote_server']
+            print('Remote OK: '+remote['config']['model_id']+'; '+args.server_url)
+            for gpu in (remote.get('hardware') or {}).get('gpus', []):
+                print('Remote GPU: '+gpu['name'])
         for error in result['errors']:
             print('FEHLER '+error)
         if not result['success']:
