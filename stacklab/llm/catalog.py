@@ -213,7 +213,8 @@ def find_executable(model=None, device='cpu'):
         executable = ready_runtime(config, directory)
         if executable:
             return executable
-        raise ValueError('Pinned source runtime missing or changed. Run python -m stacklab setup --model '+config['model_key'])
+        raise ValueError('Pinned source runtime missing or changed. Run python -m stacklab setup --model '+
+                         config['model_key']+(' --device cuda' if device == 'cuda' else ''))
     if device == 'cuda':
         marker = directory/'installed.json'
         if marker.is_file():

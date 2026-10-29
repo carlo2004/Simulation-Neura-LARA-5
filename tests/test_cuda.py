@@ -86,7 +86,7 @@ class CudaTests(unittest.TestCase):
                 self.assertEqual(catalog.find_executable('granite8b', device='cuda'), executable)
                 with patch.object(catalog.platform, 'system', return_value='Linux'):
                     env=catalog.runtime_env(executable)
-                self.assertIn(str(root/'cache/runtime'/config['runtime_version']/'cuda/lib'), env['LD_LIBRARY_PATH'])
+                self.assertIn(str((root/'cache/runtime'/config['runtime_version']/'cuda/lib').resolve()), env['LD_LIBRARY_PATH'])
                 executable.write_bytes(b'changed binary')
                 with self.assertRaisesRegex(ValueError, 'missing or changed'):
                     catalog.find_executable('granite8b', device='cuda')

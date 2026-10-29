@@ -67,6 +67,16 @@ jobs:
           subprocess.run([str(executable),'--version'], env=runtime_env(executable), check=True)
           print('Pinned CUDA packages verified and executable launched; no GPU inference claimed.')
           PY
+      - name: Render Colab video through CPU OSMesa
+        if: matrix.os == 'ubuntu-latest' && matrix.python == '3.13'
+        env:
+          MUJOCO_GL: osmesa
+          PYOPENGL_PLATFORM: osmesa
+          OPENBLAS_NUM_THREADS: '1'
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libosmesa6
+          .venv/bin/python -m stacklab demo --video --output runs/ci-colab-render
       - name: Build and launch the pinned Dory CPU runtime
         if: matrix.os == 'windows-latest' && matrix.python == '3.13'
         run: >-
