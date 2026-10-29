@@ -1,0 +1,899 @@
+{
+  "schema_version": 1,
+  "original_run_directory": "runs/2026-10-29-pilot",
+  "plan_sha256": "9aa2c45f11a90244b81ab2ffb7adde8fa6c44d560c55caffe1966ce14e5a28e7",
+  "recorded_software": {
+    "version": "3.2.0",
+    "python": "3.12.14",
+    "platform": "Linux-6.18.55-x86_64-with-glibc2.39",
+    "recorded_at_utc": "2026-10-29T11:54:50.420754+00:00",
+    "git_commit": "b867ad70545541f2662a3386eec29a3fd75dec65",
+    "tracked_changes": true
+  },
+  "implementation_content_commit": "633309281ca2b5006fa21844b174812a16287fe3",
+  "raw_bytes_preserved": true,
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 2703,
+      "sha256": "b7aefe621a2ef323ec0664fbb211015c73c6b8fdf6c17133c67af0a8a027a154"
+    },
+    {
+      "path": "raw-evidence.zip",
+      "bytes": 545066,
+      "sha256": "5969b47fb4e3463f0f2ef6210a52f2c7ec3f80c284d9c739296c1efe623d9cc6"
+    },
+    {
+      "path": "report.md",
+      "bytes": 1190,
+      "sha256": "8d087adb66d8c850fc42a34f581e258ebc594c79d837eb5da0bcd3e4b77bc79f"
+    },
+    {
+      "path": "results.csv",
+      "bytes": 2940,
+      "sha256": "f83f86a2cf2c5ebb3d5d89af5fcfa98599bdc201404f72eed5cbca754fae5144"
+    },
+    {
+      "path": "summary.json",
+      "bytes": 17007,
+      "sha256": "b2716e8b1b2f735335100a0f0a612197cbbd5ab3e148a2f6eab54de2c1e2cee5"
+    }
+  ],
+  "raw_members": [
+    {
+      "path": "episode-03138949c7534979/episode/final_physics.json",
+      "bytes": 1896,
+      "sha256": "cdcd0b3c1b16341dc748e457a1740e739cacc033c143b52d9aa70312b3b0b328"
+    },
+    {
+      "path": "episode-03138949c7534979/episode/initial_physics.json",
+      "bytes": 1576,
+      "sha256": "e2d35543cc821b1ad96b8dd05564df76c2a1eb390be32dfc7ce137617ab347ea"
+    },
+    {
+      "path": "episode-03138949c7534979/episode/result.json",
+      "bytes": 11476,
+      "sha256": "7f403ea67e2e4d53e79aa6529e575a4f52cf8f1c217bfd0099fc1d61ae8d74bd"
+    },
+    {
+      "path": "episode-03138949c7534979/episode/round_01/feedback.json",
+      "bytes": 1321,
+      "sha256": "7383c16a3d20837cac8f8430648766df67ec6b75d08515278da3291e2f06b10c"
+    },
+    {
+      "path": "episode-03138949c7534979/episode/round_01/generated.py",
+      "bytes": 21,
+      "sha256": "da6ed597489d2e36ce236c823779b7a0ed3c265090ee60a2bbea144977df5d4b"
+    },
+    {
+      "path": "episode-03138949c7534979/episode/round_01/generation.json",
+      "bytes": 2531,
+      "sha256": "850bf379466b0fbb92f3c2ebbe0b3d5459bccd930e1c7423ad447d1b5fb892ae"
+    },
+    {
+      "path": "episode-03138949c7534979/episode/round_01/inference.log",
+      "bytes": 3921,
+      "sha256": "6fc353bde55d6c11ca2764e13c8698810be3692a6530aa00e7c0364d0845e322"
+    },
+    {
+      "path": "episode-03138949c7534979/episode/round_01/request.json",
+      "bytes": 4388,
+      "sha256": "0b07e1bc3447513ba4fa8c31be0e89c171714934d39ac99a43ed8d9ad755845c"
+    },
+    {
+      "path": "episode-03138949c7534979/episode/round_01/response.json",
+      "bytes": 2563,
+      "sha256": "5c5b58457f21357cbec2b39107fd39b7ba4f7cf5fa36278f2993b0fff84febe4"
+    },
+    {
+      "path": "episode-03138949c7534979/episode/round_01/stream.jsonl",
+      "bytes": 329469,
+      "sha256": "c02a2d2b6d118fc1a4ca3e041bfc09e33d5140e721ed3fb786bff07fb9f82324"
+    },
+    {
+      "path": "episode-03138949c7534979/episode/scene.json",
+      "bytes": 217,
+      "sha256": "288736b2cce5a7e56667ef29b4217cd3da458cc650ebf052645970c109fce394"
+    },
+    {
+      "path": "episode-03138949c7534979/episode/task.json",
+      "bytes": 4592,
+      "sha256": "ba0a6c754ba4a358b2fd36739d6f443a8fd7e8be165b52193a93df1209b43aac"
+    },
+    {
+      "path": "episode-03138949c7534979/episode/trajectory.jsonl",
+      "bytes": 3441,
+      "sha256": "808e0c442b7c26e26e709b01693a5d45b618acad5a32457dfdae352c37bf6836"
+    },
+    {
+      "path": "episode-03138949c7534979/execution.json",
+      "bytes": 11525,
+      "sha256": "02c43aa90b62a860f7e6471d67457a375c54e7b6d08853081e79779f4f26acc6"
+    },
+    {
+      "path": "episode-03138949c7534979/manifest.json",
+      "bytes": 323,
+      "sha256": "c42176902ada40ee90a13e43d73868ad4617df25676a654165ada9b2eedb362a"
+    },
+    {
+      "path": "episode-03138949c7534979/result.json",
+      "bytes": 12617,
+      "sha256": "98a2ffb92b1a4a762add6685a20a05618fe775f47a4f5570879265f245f1d86f"
+    },
+    {
+      "path": "episode-03138949c7534979/scene.json",
+      "bytes": 217,
+      "sha256": "288736b2cce5a7e56667ef29b4217cd3da458cc650ebf052645970c109fce394"
+    },
+    {
+      "path": "episode-03138949c7534979/simulation.log",
+      "bytes": 8663,
+      "sha256": "f629b2f130795a8f3111789993326dc195c9f6b4d62e34e8673b62004be26e3d"
+    },
+    {
+      "path": "episode-2a05eb408e48d8be/episode/final_physics.json",
+      "bytes": 1902,
+      "sha256": "7cff082b358ca3637100601a7883cb3cb5b3cf0b04cff724fe7add28843932da"
+    },
+    {
+      "path": "episode-2a05eb408e48d8be/episode/initial_physics.json",
+      "bytes": 1576,
+      "sha256": "e2d35543cc821b1ad96b8dd05564df76c2a1eb390be32dfc7ce137617ab347ea"
+    },
+    {
+      "path": "episode-2a05eb408e48d8be/episode/result.json",
+      "bytes": 11962,
+      "sha256": "62da16abdff451b5da39a61ec97252ebe434fb3179bb0c93ee93d5876c5b2aba"
+    },
+    {
+      "path": "episode-2a05eb408e48d8be/episode/round_01/feedback.json",
+      "bytes": 1369,
+      "sha256": "d1883a6c059545e22190c7c92c1cb452eba6f5f94e610c794675577158111b6d"
+    },
+    {
+      "path": "episode-2a05eb408e48d8be/episode/round_01/generated.py",
+      "bytes": 35,
+      "sha256": "843410a4d0cf90e5877fcdca0076682f7af1c4b60ba7267c651dbb6cdb3a16ec"
+    },
+    {
+      "path": "episode-2a05eb408e48d8be/episode/round_01/generation.json",
+      "bytes": 2504,
+      "sha256": "c65fdecb01496435183c2157634f6276d4e7183327440483a8ed24f383fa64ce"
+    },
+    {
+      "path": "episode-2a05eb408e48d8be/episode/round_01/inference.log",
+      "bytes": 2665,
+      "sha256": "2a3a7813a41bc251e56e1f18557db39276c744415e53846d2a51e16dc754d132"
+    },
+    {
+      "path": "episode-2a05eb408e48d8be/episode/round_01/request.json",
+      "bytes": 4876,
+      "sha256": "97453dca57199f82187d65c913ccb074d9a2072999a69173127d89372b55f043"
+    },
+    {
+      "path": "episode-2a05eb408e48d8be/episode/round_01/response.json",
+      "bytes": 1941,
+      "sha256": "1071e96aefaec31d00dc5cfabb1e99b8dbb1bef11b8a393592cfdf4d4629b684"
+    },
+    {
+      "path": "episode-2a05eb408e48d8be/episode/round_01/stream.jsonl",
+      "bytes": 241611,
+      "sha256": "5bfa40acecdfbfbad22cc8203d0736d5c8e0c2a772752ebe529a6b58db6f81c7"
+    },
+    {
+      "path": "episode-2a05eb408e48d8be/episode/scene.json",
+      "bytes": 217,
+      "sha256": "288736b2cce5a7e56667ef29b4217cd3da458cc650ebf052645970c109fce394"
+    },
+    {
+      "path": "episode-2a05eb408e48d8be/episode/task.json",
+      "bytes": 4985,
+      "sha256": "af0529f6a552ce39159e477647177c9a5359b5afcbfe8a284995ac2a571918df"
+    },
+    {
+      "path": "episode-2a05eb408e48d8be/episode/trajectory.jsonl",
+      "bytes": 3559,
+      "sha256": "60830fccab50bf514dcd880700a84a5a5188158424174c7fdc1401bb94f39bd0"
+    },
+    {
+      "path": "episode-2a05eb408e48d8be/execution.json",
+      "bytes": 11992,
+      "sha256": "c577757e937821237631270b1ad3ba29ee0aa5830f80a6ef238eeaa967f1427f"
+    },
+    {
+      "path": "episode-2a05eb408e48d8be/manifest.json",
+      "bytes": 323,
+      "sha256": "53def9e8a32186ba493eb214324a91341f75096bdc08ce709664c93bcd449bfe"
+    },
+    {
+      "path": "episode-2a05eb408e48d8be/result.json",
+      "bytes": 13125,
+      "sha256": "a6a3ef504f0519cc02715c39f9302d6eabd331aeb4a4d08a954a712a7f1c1b38"
+    },
+    {
+      "path": "episode-2a05eb408e48d8be/scene.json",
+      "bytes": 217,
+      "sha256": "288736b2cce5a7e56667ef29b4217cd3da458cc650ebf052645970c109fce394"
+    },
+    {
+      "path": "episode-2a05eb408e48d8be/simulation.log",
+      "bytes": 2654,
+      "sha256": "3681eaae74a511bffe2d62aa230f2c24c6ddb6d50be5ee3cae6cc8ef9d310dc7"
+    },
+    {
+      "path": "episode-3d3e3fa57f40c792/episode/final_physics.json",
+      "bytes": 1917,
+      "sha256": "6cb895d97de160258180b0f2b41171540a1aef82abed03f7bad40aad3f3e5469"
+    },
+    {
+      "path": "episode-3d3e3fa57f40c792/episode/initial_physics.json",
+      "bytes": 1576,
+      "sha256": "e2d35543cc821b1ad96b8dd05564df76c2a1eb390be32dfc7ce137617ab347ea"
+    },
+    {
+      "path": "episode-3d3e3fa57f40c792/episode/result.json",
+      "bytes": 14206,
+      "sha256": "8c986b93989c7fee7bd6c6629b2f6370202de6ef3edd543494b9730c21f1e845"
+    },
+    {
+      "path": "episode-3d3e3fa57f40c792/episode/round_01/feedback.json",
+      "bytes": 2481,
+      "sha256": "bb259ffddb404fd25d67881e6e653130bd9f130e584be3ee962a5ddd24741f76"
+    },
+    {
+      "path": "episode-3d3e3fa57f40c792/episode/round_01/generated.py",
+      "bytes": 242,
+      "sha256": "9b97195e4aad7142a78c8a71c910941b0e9ebd14cbc89035e189df83c45269a0"
+    },
+    {
+      "path": "episode-3d3e3fa57f40c792/episode/round_01/generation.json",
+      "bytes": 2511,
+      "sha256": "11b1e701914085c5d757c3b2a85164cb1a9eda0c32c0f23be488f75a6a003572"
+    },
+    {
+      "path": "episode-3d3e3fa57f40c792/episode/round_01/inference.log",
+      "bytes": 4127,
+      "sha256": "baa4042e1092fb9d764d92bc7d947195923504fc3fe0f350e747e4620e6391ce"
+    },
+    {
+      "path": "episode-3d3e3fa57f40c792/episode/round_01/request.json",
+      "bytes": 4367,
+      "sha256": "1cf88fae500f9352707073d1cc50cfe4e2dc68ea1082ee66a76757f54006df90"
+    },
+    {
+      "path": "episode-3d3e3fa57f40c792/episode/round_01/response.json",
+      "bytes": 2669,
+      "sha256": "68b0665ff6e7e920d6523f773f3be2bf19d76fd557f21e9cc2116296f152ae7f"
+    },
+    {
+      "path": "episode-3d3e3fa57f40c792/episode/round_01/stream.jsonl",
+      "bytes": 384761,
+      "sha256": "881591fb19312888d762a93c67b1050051c2aca233915d1e098d2f4c918d8248"
+    },
+    {
+      "path": "episode-3d3e3fa57f40c792/episode/scene.json",
+      "bytes": 217,
+      "sha256": "288736b2cce5a7e56667ef29b4217cd3da458cc650ebf052645970c109fce394"
+    },
+    {
+      "path": "episode-3d3e3fa57f40c792/episode/task.json",
+      "bytes": 4511,
+      "sha256": "716f7431614a11abd85fcfee7c5efc75477fe03509524e6d1d31746581bfce44"
+    },
+    {
+      "path": "episode-3d3e3fa57f40c792/episode/trajectory.jsonl",
+      "bytes": 4342,
+      "sha256": "24d5d63d22d9de280814da3735744995e9eb36bec11751168c3a3054f7aaab0c"
+    },
+    {
+      "path": "episode-3d3e3fa57f40c792/execution.json",
+      "bytes": 14237,
+      "sha256": "29de4696e753f1ca2d63c7bd1fb45f139faf555dc5fd6736cc36c078bc451ec0"
+    },
+    {
+      "path": "episode-3d3e3fa57f40c792/manifest.json",
+      "bytes": 323,
+      "sha256": "ea9e42c065517d418e6474974b5f7b8a53e1c87e497c4410a48c6057513ec8e8"
+    },
+    {
+      "path": "episode-3d3e3fa57f40c792/result.json",
+      "bytes": 15534,
+      "sha256": "ef37cf6b050ca828c25d67e00257dd580f6a889b3adb53b0c5beb0edcad170b5"
+    },
+    {
+      "path": "episode-3d3e3fa57f40c792/scene.json",
+      "bytes": 217,
+      "sha256": "288736b2cce5a7e56667ef29b4217cd3da458cc650ebf052645970c109fce394"
+    },
+    {
+      "path": "episode-3d3e3fa57f40c792/simulation.log",
+      "bytes": 9547,
+      "sha256": "7e384f50d3217c21fa23f38785278c168881cf6bfdc71c004e0cc947f1fd4cb7"
+    },
+    {
+      "path": "episode-56e759630fdf8410/episode/final_physics.json",
+      "bytes": 1950,
+      "sha256": "247be3762cd6d5a1b0e769975241917a8d86d80ad31c7b9a6194083086195259"
+    },
+    {
+      "path": "episode-56e759630fdf8410/episode/initial_physics.json",
+      "bytes": 1576,
+      "sha256": "e2d35543cc821b1ad96b8dd05564df76c2a1eb390be32dfc7ce137617ab347ea"
+    },
+    {
+      "path": "episode-56e759630fdf8410/episode/result.json",
+      "bytes": 37214,
+      "sha256": "ee3106277b3d013cc45a8d167700ec8617e87d1502dafe7c624675183797a6b1"
+    },
+    {
+      "path": "episode-56e759630fdf8410/episode/round_01/feedback.json",
+      "bytes": 1705,
+      "sha256": "6be07a8fd9deb0e9a26031abf5d410f9d9eb5047e9cb84d80ab595faaf3f5871"
+    },
+    {
+      "path": "episode-56e759630fdf8410/episode/round_01/generated.py",
+      "bytes": 27,
+      "sha256": "39cccd073339331ffc8f245442696a245cbb0f6b30ffb2a9a5caf3c1699b7740"
+    },
+    {
+      "path": "episode-56e759630fdf8410/episode/round_01/generation.json",
+      "bytes": 2520,
+      "sha256": "77c263c4c10a34a9b3e6b3ca00908d827282b6c6b14268f365eb8caaa8182aa2"
+    },
+    {
+      "path": "episode-56e759630fdf8410/episode/round_01/inference.log",
+      "bytes": 15744,
+      "sha256": "df8f463acc186e900a09531e5e8bb369f6c71c8078babf2df7393d7692416a5a"
+    },
+    {
+      "path": "episode-56e759630fdf8410/episode/round_01/request.json",
+      "bytes": 4367,
+      "sha256": "590b7f9e53d7d2c020c64d8695d17c31fb918cb3365e0797cadb615823a5228d"
+    },
+    {
+      "path": "episode-56e759630fdf8410/episode/round_01/response.json",
+      "bytes": 2463,
+      "sha256": "0542e42b86356b23454e8e1242ca9c8b8f066f11450f192180c2eb071aa6b96c"
+    },
+    {
+      "path": "episode-56e759630fdf8410/episode/round_01/stream.jsonl",
+      "bytes": 331740,
+      "sha256": "24868a1c3543747cc3eccceeace41e29889e5b1ab3e1cc8965b392babc47b4d5"
+    },
+    {
+      "path": "episode-56e759630fdf8410/episode/round_02/feedback.json",
+      "bytes": 2496,
+      "sha256": "513879976ada538e3df193613ccf42334827e6b321749c8e22ba1c52cc139747"
+    },
+    {
+      "path": "episode-56e759630fdf8410/episode/round_02/generated.py",
+      "bytes": 199,
+      "sha256": "8c1453cf23ca8316e80693b3a4395c3b6a141eeaeda5f7412f4b51bfc5c4a9aa"
+    },
+    {
+      "path": "episode-56e759630fdf8410/episode/round_02/generation.json",
+      "bytes": 2503,
+      "sha256": "1738e786be98bbefe78c5e8c1ef30118d43d5306760f54697ecc79dbae57725d"
+    },
+    {
+      "path": "episode-56e759630fdf8410/episode/round_02/request.json",
+      "bytes": 5735,
+      "sha256": "b78567522b5d508e60892ab3d3e7c89d43925eb605383395bc34b42bbf0b265d"
+    },
+    {
+      "path": "episode-56e759630fdf8410/episode/round_02/response.json",
+      "bytes": 2823,
+      "sha256": "06d239db79236dd019463cbb57d1c814a1bf297f4820d42a8486fa13e0dbd1fb"
+    },
+    {
+      "path": "episode-56e759630fdf8410/episode/round_02/stream.jsonl",
+      "bytes": 378576,
+      "sha256": "8c99c6f64034a4ce82c1db7b16dd74d75c7b2d1ea3f258dd74a86bdeef32816d"
+    },
+    {
+      "path": "episode-56e759630fdf8410/episode/round_03/feedback.json",
+      "bytes": 2526,
+      "sha256": "9a8a243a099d08bd363286328dab2668d15851a1a43e931432961d73a81985a8"
+    },
+    {
+      "path": "episode-56e759630fdf8410/episode/round_03/generated.py",
+      "bytes": 336,
+      "sha256": "dad8c85266ffa596fc42c2b3e3ccc677c7839787124af436cdd727a520a8f084"
+    },
+    {
+      "path": "episode-56e759630fdf8410/episode/round_03/generation.json",
+      "bytes": 2499,
+      "sha256": "545821ade629268abf3e8b4799c78f0126bef164e4d9f146db36dc29d46694ab"
+    },
+    {
+      "path": "episode-56e759630fdf8410/episode/round_03/request.json",
+      "bytes": 7753,
+      "sha256": "4ebde5f2a275533abdfdbc8443659968c5b15991271e6b9681da1e52328ae39a"
+    },
+    {
+      "path": "episode-56e759630fdf8410/episode/round_03/response.json",
+      "bytes": 2603,
+      "sha256": "74abf3f92e8b8e2d1ae821d653193280baa2b87b06c9fd5806182ab778f5fa04"
+    },
+    {
+      "path": "episode-56e759630fdf8410/episode/round_03/stream.jsonl",
+      "bytes": 407650,
+      "sha256": "e1f593273f6e77f058ca35bde0420791080799f4f09f8669b89e3d8cc78950b3"
+    },
+    {
+      "path": "episode-56e759630fdf8410/episode/round_04/feedback.json",
+      "bytes": 3143,
+      "sha256": "bfb14eb2bb91b3e34befb5cd95608425608ec3b759b15b6da6e9a1396232f7af"
+    },
+    {
+      "path": "episode-56e759630fdf8410/episode/round_04/generated.py",
+      "bytes": 655,
+      "sha256": "132b77071a8872e6781dbffeabf0d17018753783f317df1233a89fafdd19b2ea"
+    },
+    {
+      "path": "episode-56e759630fdf8410/episode/round_04/generation.json",
+      "bytes": 2497,
+      "sha256": "7943c07fffb54b233b7ce4ec5b54899f0813020c2a9fe127115c6e86fed283e3"
+    },
+    {
+      "path": "episode-56e759630fdf8410/episode/round_04/request.json",
+      "bytes": 8567,
+      "sha256": "0874ae24a42e95e1880b708ec43331892e4aed5a412b2373b2202b9bdc716a95"
+    },
+    {
+      "path": "episode-56e759630fdf8410/episode/round_04/response.json",
+      "bytes": 3239,
+      "sha256": "85b673720933342458e5fb51cfe25488bd0e7da2279cf6ca7e64d328314a51b9"
+    },
+    {
+      "path": "episode-56e759630fdf8410/episode/round_04/stream.jsonl",
+      "bytes": 465596,
+      "sha256": "cd60fd5182f24da9ede8ed20707ce467c6f905caf8bcc7da857bcdda1757a1e0"
+    },
+    {
+      "path": "episode-56e759630fdf8410/episode/scene.json",
+      "bytes": 217,
+      "sha256": "288736b2cce5a7e56667ef29b4217cd3da458cc650ebf052645970c109fce394"
+    },
+    {
+      "path": "episode-56e759630fdf8410/episode/task.json",
+      "bytes": 4511,
+      "sha256": "929c4e0d4d89ab024917a0ec616aa6a68d5280e475e64f2ec41741296eeddd75"
+    },
+    {
+      "path": "episode-56e759630fdf8410/episode/trajectory.jsonl",
+      "bytes": 17344,
+      "sha256": "859b031831cd97f3a50b537d6d91b7e6d23392bbf6be6b334ade137a66332d8b"
+    },
+    {
+      "path": "episode-56e759630fdf8410/execution.json",
+      "bytes": 37259,
+      "sha256": "25990b39aab3fc95b67231af0b93de77ba7231077d1e7429615893318901cf4b"
+    },
+    {
+      "path": "episode-56e759630fdf8410/manifest.json",
+      "bytes": 323,
+      "sha256": "7ac193bc5ed2da1211404ff0322ee8dea4cc953ba94657f1a838f5fbefeb5232"
+    },
+    {
+      "path": "episode-56e759630fdf8410/result.json",
+      "bytes": 40151,
+      "sha256": "333fc24e82e2e1037254fbf33e01923dafb96f0008bf50b463bd64776c17a901"
+    },
+    {
+      "path": "episode-56e759630fdf8410/scene.json",
+      "bytes": 217,
+      "sha256": "288736b2cce5a7e56667ef29b4217cd3da458cc650ebf052645970c109fce394"
+    },
+    {
+      "path": "episode-56e759630fdf8410/simulation.log",
+      "bytes": 41103,
+      "sha256": "13beee124cabbe7433ee01f0c46f959ed449af5b56842a3d0d864c058c1cf52d"
+    },
+    {
+      "path": "episode-831769d494cbd4f3/episode/final_physics.json",
+      "bytes": 1571,
+      "sha256": "bf1877028f9c26c2059a6cfc6cea482fa8174bd3574d10ff77ecd788e6a0c1d9"
+    },
+    {
+      "path": "episode-831769d494cbd4f3/episode/initial_physics.json",
+      "bytes": 1576,
+      "sha256": "e2d35543cc821b1ad96b8dd05564df76c2a1eb390be32dfc7ce137617ab347ea"
+    },
+    {
+      "path": "episode-831769d494cbd4f3/episode/result.json",
+      "bytes": 15444,
+      "sha256": "0203ad58edf8aafb62a6ca68bc532955663ebaaeff8bc9d7cad6aea1e8580f9a"
+    },
+    {
+      "path": "episode-831769d494cbd4f3/episode/round_01/feedback.json",
+      "bytes": 1584,
+      "sha256": "640f1027334ba4004ae9bcf544abdfc0d3b7410a0951f757d039458c105b03a6"
+    },
+    {
+      "path": "episode-831769d494cbd4f3/episode/round_01/generated.py",
+      "bytes": 1194,
+      "sha256": "962c389b63a91958679fc43504c13eddf7c71c834cefc7ad1a1869a66fd28ec9"
+    },
+    {
+      "path": "episode-831769d494cbd4f3/episode/round_01/generation.json",
+      "bytes": 2504,
+      "sha256": "e4e2c18979fbbd71c15ae10200cccc7b9ffa2cb9a866cbe563f934746eb53df0"
+    },
+    {
+      "path": "episode-831769d494cbd4f3/episode/round_01/inference.log",
+      "bytes": 6202,
+      "sha256": "967c3f9f82518b7fad71c938e2eb9c6421cadd92bb3dba744508a7cdd2b30380"
+    },
+    {
+      "path": "episode-831769d494cbd4f3/episode/round_01/request.json",
+      "bytes": 4855,
+      "sha256": "7f08b07d370218b31104da12dd5bb3bab1ee8c84cc48ef35733acdbf04d7b81e"
+    },
+    {
+      "path": "episode-831769d494cbd4f3/episode/round_01/response.json",
+      "bytes": 3973,
+      "sha256": "18138a39b8d112a0b5dfa5a8f9a01c94f6341c7c2946706e267b185034d2647c"
+    },
+    {
+      "path": "episode-831769d494cbd4f3/episode/round_01/stream.jsonl",
+      "bytes": 572813,
+      "sha256": "2170218294ae8a0fe5980ce05b2a9c2b60711371a98eb8a5e6f6f042b260ccc3"
+    },
+    {
+      "path": "episode-831769d494cbd4f3/episode/round_02/generation.json",
+      "bytes": 2557,
+      "sha256": "040c4f8890b1210fcc2bb2eb308b1587e259e38316eb96b200f89519f54df7d9"
+    },
+    {
+      "path": "episode-831769d494cbd4f3/episode/round_02/request.json",
+      "bytes": 7487,
+      "sha256": "04e5385907b04ee5288d75bb511704a1aa792630b9e7c596d4988f0db5276ab0"
+    },
+    {
+      "path": "episode-831769d494cbd4f3/episode/round_02/response.json",
+      "bytes": 4137,
+      "sha256": "fe4ed97b961e8c6a8e23adc5d14687ba500c3bbbea5492ce878aef71fa0ee9ca"
+    },
+    {
+      "path": "episode-831769d494cbd4f3/episode/round_02/stream.jsonl",
+      "bytes": 633408,
+      "sha256": "28779287b877535d77097797ca85e3b1aa510502188f86541f2cf578a0eb7dcd"
+    },
+    {
+      "path": "episode-831769d494cbd4f3/episode/scene.json",
+      "bytes": 217,
+      "sha256": "288736b2cce5a7e56667ef29b4217cd3da458cc650ebf052645970c109fce394"
+    },
+    {
+      "path": "episode-831769d494cbd4f3/episode/task.json",
+      "bytes": 4904,
+      "sha256": "8b84a4fb7724653e4242890cb89eb56afa8589b6a2a502d85f899157e79115d7"
+    },
+    {
+      "path": "episode-831769d494cbd4f3/episode/trajectory.jsonl",
+      "bytes": 4895,
+      "sha256": "6107b14b6d8f982f89034dc4be75a4367363d59abdef11c979c964e9b3a14bce"
+    },
+    {
+      "path": "episode-831769d494cbd4f3/execution.json",
+      "bytes": 15494,
+      "sha256": "7ca92b44f0973fad9f72f7ec5c0a6dee1809e68b5f53855099d09f47f4eef238"
+    },
+    {
+      "path": "episode-831769d494cbd4f3/manifest.json",
+      "bytes": 323,
+      "sha256": "21488a4ab6c24b769f2a0bbb6b3f49da3878a8bd7ed28a8ad244c0f7e46ff662"
+    },
+    {
+      "path": "episode-831769d494cbd4f3/result.json",
+      "bytes": 16794,
+      "sha256": "8f034a794ba8dfabf2bdc39624cf2cbb6dfeea8b3a79497933729d0b6681d0a8"
+    },
+    {
+      "path": "episode-831769d494cbd4f3/scene.json",
+      "bytes": 217,
+      "sha256": "288736b2cce5a7e56667ef29b4217cd3da458cc650ebf052645970c109fce394"
+    },
+    {
+      "path": "episode-831769d494cbd4f3/simulation.log",
+      "bytes": 10374,
+      "sha256": "84607d38a90c2d8cac568d24e0b97b01cc41506c1a2ba240418c00d574eaf998"
+    },
+    {
+      "path": "episode-dfbea3f854fe7bc2/episode/final_physics.json",
+      "bytes": 1896,
+      "sha256": "cdcd0b3c1b16341dc748e457a1740e739cacc033c143b52d9aa70312b3b0b328"
+    },
+    {
+      "path": "episode-dfbea3f854fe7bc2/episode/initial_physics.json",
+      "bytes": 1576,
+      "sha256": "e2d35543cc821b1ad96b8dd05564df76c2a1eb390be32dfc7ce137617ab347ea"
+    },
+    {
+      "path": "episode-dfbea3f854fe7bc2/episode/result.json",
+      "bytes": 11474,
+      "sha256": "4428d233f64a3d73b382b69997c202394b48e4ddd3736423fd99f7d95738e5f2"
+    },
+    {
+      "path": "episode-dfbea3f854fe7bc2/episode/round_01/feedback.json",
+      "bytes": 1321,
+      "sha256": "5974a6d9e606858053e0df6751658811c9bcd988a8db2a4fa418bf7abe31add4"
+    },
+    {
+      "path": "episode-dfbea3f854fe7bc2/episode/round_01/generated.py",
+      "bytes": 21,
+      "sha256": "da6ed597489d2e36ce236c823779b7a0ed3c265090ee60a2bbea144977df5d4b"
+    },
+    {
+      "path": "episode-dfbea3f854fe7bc2/episode/round_01/generation.json",
+      "bytes": 2531,
+      "sha256": "0bf8e3cbfd6ed18445a3d4bfeb38e71c49c602df6527f265fa51b31947fd43fd"
+    },
+    {
+      "path": "episode-dfbea3f854fe7bc2/episode/round_01/inference.log",
+      "bytes": 3921,
+      "sha256": "4d49e462ff82c6ec013804efad0745fd4aaaef2426b9ef719705939d078ad583"
+    },
+    {
+      "path": "episode-dfbea3f854fe7bc2/episode/round_01/request.json",
+      "bytes": 4388,
+      "sha256": "8f39eda9d9e93f594307550abc07c1be1085cfefe2231ec000b8196002514b46"
+    },
+    {
+      "path": "episode-dfbea3f854fe7bc2/episode/round_01/response.json",
+      "bytes": 2622,
+      "sha256": "854e9818281baf1043d4b8a29dde179ed07ba92e3c79bca6f2f27093c1ba39d0"
+    },
+    {
+      "path": "episode-dfbea3f854fe7bc2/episode/round_01/stream.jsonl",
+      "bytes": 335807,
+      "sha256": "b99fb0421094b8c5509a059bc82fa5a616e9cb7d0b0d8f55563920d28997529d"
+    },
+    {
+      "path": "episode-dfbea3f854fe7bc2/episode/scene.json",
+      "bytes": 217,
+      "sha256": "288736b2cce5a7e56667ef29b4217cd3da458cc650ebf052645970c109fce394"
+    },
+    {
+      "path": "episode-dfbea3f854fe7bc2/episode/task.json",
+      "bytes": 4592,
+      "sha256": "f38488fa317e2f32a3913110f4cfc00678796ce1adabcad5f3c999d975d9101d"
+    },
+    {
+      "path": "episode-dfbea3f854fe7bc2/episode/trajectory.jsonl",
+      "bytes": 3441,
+      "sha256": "21256c1e61856d4e93b37cc32dbb05c1fc47632085140e692cdbbeb91fafac75"
+    },
+    {
+      "path": "episode-dfbea3f854fe7bc2/execution.json",
+      "bytes": 11504,
+      "sha256": "0e880eb339b9e85b59bc3f37b8993aceebbe411c9c5957d1e6cbe35a6d57a01d"
+    },
+    {
+      "path": "episode-dfbea3f854fe7bc2/manifest.json",
+      "bytes": 323,
+      "sha256": "9f60f6b4ca3d190a7430239ccad57d04fe4a75e95eedde554e8f44d62ffa7526"
+    },
+    {
+      "path": "episode-dfbea3f854fe7bc2/result.json",
+      "bytes": 12587,
+      "sha256": "2d61fe9d6091d8a68f2ef65ef479c64dfc3cf9cac3241263e09886b1a3449b58"
+    },
+    {
+      "path": "episode-dfbea3f854fe7bc2/scene.json",
+      "bytes": 217,
+      "sha256": "288736b2cce5a7e56667ef29b4217cd3da458cc650ebf052645970c109fce394"
+    },
+    {
+      "path": "episode-dfbea3f854fe7bc2/simulation.log",
+      "bytes": 8893,
+      "sha256": "43e182780e025377c4914449309331ae485480199787fa572dbfc835b4ee3af9"
+    },
+    {
+      "path": "episode-e9872d3d3f077e79/episode/final_physics.json",
+      "bytes": 1571,
+      "sha256": "bf1877028f9c26c2059a6cfc6cea482fa8174bd3574d10ff77ecd788e6a0c1d9"
+    },
+    {
+      "path": "episode-e9872d3d3f077e79/episode/initial_physics.json",
+      "bytes": 1576,
+      "sha256": "e2d35543cc821b1ad96b8dd05564df76c2a1eb390be32dfc7ce137617ab347ea"
+    },
+    {
+      "path": "episode-e9872d3d3f077e79/episode/result.json",
+      "bytes": 12220,
+      "sha256": "ae075a6556768a36ad882cf31618230840cdb9295841dd4021cd56c01f84f67d"
+    },
+    {
+      "path": "episode-e9872d3d3f077e79/episode/round_01/feedback.json",
+      "bytes": 1585,
+      "sha256": "ed18a27df7e01eea3135647e3ac8bdb9f1ab8363a10f07f5cf534c08f949fa0b"
+    },
+    {
+      "path": "episode-e9872d3d3f077e79/episode/round_01/generated.py",
+      "bytes": 1223,
+      "sha256": "9fe425264829ff62e6519b9199ba09506ffeba380a834226bbe0e048c1e9b7bb"
+    },
+    {
+      "path": "episode-e9872d3d3f077e79/episode/round_01/generation.json",
+      "bytes": 2510,
+      "sha256": "55c09b3b66b2919d7284c4874f40abb68b234106b8d67a9e1c5e53acbb8c6c23"
+    },
+    {
+      "path": "episode-e9872d3d3f077e79/episode/round_01/inference.log",
+      "bytes": 3489,
+      "sha256": "7aaa29600bb09d358710f8c14f5eb8636deee3131b9e8e9e85901cd8887dd450"
+    },
+    {
+      "path": "episode-e9872d3d3f077e79/episode/round_01/request.json",
+      "bytes": 4855,
+      "sha256": "296384e81148be95db055c3fcc622716e862b465a832fe75651154eb01d54055"
+    },
+    {
+      "path": "episode-e9872d3d3f077e79/episode/round_01/response.json",
+      "bytes": 4045,
+      "sha256": "a4e94fc4dbfd9f79f308d1cfd024b40c6d8c3d111fea2ed6e8364361fa94d822"
+    },
+    {
+      "path": "episode-e9872d3d3f077e79/episode/round_01/stream.jsonl",
+      "bytes": 594034,
+      "sha256": "e60d2878edeea2196a19570f7d7fd64d29f392642779f44ca7decccda35f9788"
+    },
+    {
+      "path": "episode-e9872d3d3f077e79/episode/scene.json",
+      "bytes": 217,
+      "sha256": "288736b2cce5a7e56667ef29b4217cd3da458cc650ebf052645970c109fce394"
+    },
+    {
+      "path": "episode-e9872d3d3f077e79/episode/task.json",
+      "bytes": 4904,
+      "sha256": "caa75b1e8577109e61fbaa0b44f6243a84f60a6f22f834fdc9b793e13c1d5b29"
+    },
+    {
+      "path": "episode-e9872d3d3f077e79/episode/trajectory.jsonl",
+      "bytes": 5008,
+      "sha256": "7f0eb8a63aba192f8bd97b760e10a6bb3ca8b4be430bd3d6f0f9c1972b3b0596"
+    },
+    {
+      "path": "episode-e9872d3d3f077e79/execution.json",
+      "bytes": 12249,
+      "sha256": "0991f38d290c1715267dcd8080e0bf6bb379d4874460dbd24658d8bbdb6cec62"
+    },
+    {
+      "path": "episode-e9872d3d3f077e79/manifest.json",
+      "bytes": 323,
+      "sha256": "620d60b6f2782dea7cc06a45eaf57ddabfd47932aca1e67cf145745719346248"
+    },
+    {
+      "path": "episode-e9872d3d3f077e79/result.json",
+      "bytes": 13368,
+      "sha256": "9b3336b99341ff00973e8effd42d254ecf74fac17179e331335670b05d97fbf3"
+    },
+    {
+      "path": "episode-e9872d3d3f077e79/scene.json",
+      "bytes": 217,
+      "sha256": "288736b2cce5a7e56667ef29b4217cd3da458cc650ebf052645970c109fce394"
+    },
+    {
+      "path": "episode-e9872d3d3f077e79/simulation.log",
+      "bytes": 5717,
+      "sha256": "60700b781cc8b59de26cf27252236042f4831ce3eebb0bdb000c2448daaa5ae3"
+    },
+    {
+      "path": "episode-f336b9c91b962d0a/episode/final_physics.json",
+      "bytes": 1902,
+      "sha256": "7cff082b358ca3637100601a7883cb3cb5b3cf0b04cff724fe7add28843932da"
+    },
+    {
+      "path": "episode-f336b9c91b962d0a/episode/initial_physics.json",
+      "bytes": 1576,
+      "sha256": "e2d35543cc821b1ad96b8dd05564df76c2a1eb390be32dfc7ce137617ab347ea"
+    },
+    {
+      "path": "episode-f336b9c91b962d0a/episode/result.json",
+      "bytes": 11966,
+      "sha256": "b6cef9308c580caebe0b7b4bd3f687d1d6489e555315f12f4b3c68f6ced1185d"
+    },
+    {
+      "path": "episode-f336b9c91b962d0a/episode/round_01/feedback.json",
+      "bytes": 1369,
+      "sha256": "de3dbcb135cf23196e3a7e7ce61d9e5dbe67c24ef08bb9b947f4385395b4d1ba"
+    },
+    {
+      "path": "episode-f336b9c91b962d0a/episode/round_01/generated.py",
+      "bytes": 35,
+      "sha256": "843410a4d0cf90e5877fcdca0076682f7af1c4b60ba7267c651dbb6cdb3a16ec"
+    },
+    {
+      "path": "episode-f336b9c91b962d0a/episode/round_01/generation.json",
+      "bytes": 2512,
+      "sha256": "73914cd2cfcca86d17f5101bd00a9ecd1d1d4c8954610a9173c5b498bbd3229d"
+    },
+    {
+      "path": "episode-f336b9c91b962d0a/episode/round_01/inference.log",
+      "bytes": 2974,
+      "sha256": "2f363cdf66f548804c4f4dcc9224803545ae167cc59addc660f0b81875b95c53"
+    },
+    {
+      "path": "episode-f336b9c91b962d0a/episode/round_01/request.json",
+      "bytes": 4876,
+      "sha256": "046a996e497d81465f41867eb001f145f1eae81611a561ef92538a0aca356078"
+    },
+    {
+      "path": "episode-f336b9c91b962d0a/episode/round_01/response.json",
+      "bytes": 2623,
+      "sha256": "4fc46321e06d66ca53b1d6add70ced9b4d51ea0184aaa1beadcb938b3d228600"
+    },
+    {
+      "path": "episode-f336b9c91b962d0a/episode/round_01/stream.jsonl",
+      "bytes": 359994,
+      "sha256": "3721eee142e1227ff889fb1a9655ca5660ff80aa44327165ad683a3d88446ef2"
+    },
+    {
+      "path": "episode-f336b9c91b962d0a/episode/scene.json",
+      "bytes": 217,
+      "sha256": "288736b2cce5a7e56667ef29b4217cd3da458cc650ebf052645970c109fce394"
+    },
+    {
+      "path": "episode-f336b9c91b962d0a/episode/task.json",
+      "bytes": 4985,
+      "sha256": "7f407bc77de1f565ac052380a05c9d090bd7569e91231532879ff8b9af3e95d6"
+    },
+    {
+      "path": "episode-f336b9c91b962d0a/episode/trajectory.jsonl",
+      "bytes": 3546,
+      "sha256": "02359a03e69d3bdb39d85e3072ea138aa387449823f254f11230ad31ca841448"
+    },
+    {
+      "path": "episode-f336b9c91b962d0a/execution.json",
+      "bytes": 12016,
+      "sha256": "802021a5e283e3c9a18d387ca22e9ca538eaaf1fb1cac6538a47add56642ab74"
+    },
+    {
+      "path": "episode-f336b9c91b962d0a/manifest.json",
+      "bytes": 323,
+      "sha256": "0de0cd07b2c5148ea0e5f99f0640c9bda6d9104f2a99119b42c99b2cdf313f60"
+    },
+    {
+      "path": "episode-f336b9c91b962d0a/result.json",
+      "bytes": 13158,
+      "sha256": "7a7f002b28b26b98e64b1ac65a83ba1fe8d6e6439d1d9171e0aa60bc278ddd94"
+    },
+    {
+      "path": "episode-f336b9c91b962d0a/scene.json",
+      "bytes": 217,
+      "sha256": "288736b2cce5a7e56667ef29b4217cd3da458cc650ebf052645970c109fce394"
+    },
+    {
+      "path": "episode-f336b9c91b962d0a/simulation.log",
+      "bytes": 3330,
+      "sha256": "18f7a6214178db86e6aa0479d1ffea7ba1ac771c6a9cd89a23d6609deb5dc209"
+    },
+    {
+      "path": "manifest.json",
+      "bytes": 24206,
+      "sha256": "33e4735bacd07ae786f5562708d0466b311241c9ce9e08198d83364e33a3c90e"
+    },
+    {
+      "path": "report.md",
+      "bytes": 1190,
+      "sha256": "8d087adb66d8c850fc42a34f581e258ebc594c79d837eb5da0bcd3e4b77bc79f"
+    },
+    {
+      "path": "results.csv",
+      "bytes": 2940,
+      "sha256": "f83f86a2cf2c5ebb3d5d89af5fcfa98599bdc201404f72eed5cbca754fae5144"
+    },
+    {
+      "path": "runtime-verification.json",
+      "bytes": 471,
+      "sha256": "a85092f9e275b12cd785d059f13f8f716c6391f55373439857d3054ba55dbfe2"
+    },
+    {
+      "path": "summary.json",
+      "bytes": 17007,
+      "sha256": "b2716e8b1b2f735335100a0f0a612197cbbd5ab3e148a2f6eab54de2c1e2cee5"
+    }
+  ]
+}

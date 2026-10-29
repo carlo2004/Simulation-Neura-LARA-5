@@ -6,6 +6,8 @@ Hier liegen ausgewählte **tatsächlich ausgeführte** Entwicklungsversuche. Mod
 
 ## Modellsupport und Tokenmessung, 29.10.2026
 
+[Erster eingefrorener Pilot](archive/2026-10-29/experiment-pilot/README.md): Granite8B und LFM2.6B, jeweils Rechtsbewegung und Rot-auf-Blau mit einem beziehungsweise bis zu vier Blöcken. Bewegung 4/4, Stapeln 0/4. Die acht geplanten Episoden sind vollständig erhalten, einschließlich ungültiger Programme und einer am Tokenbudget abgeschnittenen Generierung. Keine Technikfehler oder ausgeschlossenen Versuche. Gleiche Fälle, aber unterschiedliche native Modellprofile; Entwicklungsprobe, kein allgemeines Qualitäts- oder Geschwindigkeitsranking. [Tabelle](archive/2026-10-29/experiment-pilot/report.md) · [CSV](archive/2026-10-29/experiment-pilot/results.csv).
+
 [Neue Integrationstests](archive/2026-10-29/model-support/README.md): Dory4B, Granite 4.2 8B und LFM2.5-2.6B wurden mit nativen Tokenzählern ausgeführt. Alle drei bestehen einen vorgegebenen Bewegungstest; LFM benötigt eine JSON-Antworthülle. Der vorherige freie Formatfehler und eine unzuverlässig beendete freie LFM-Chatprobe bleiben erhalten. Rohdaten liegen kompakt mit Prüfsummen vor. Dies ist eine Integrationsprüfung, kein standardisierter Modellvergleich.
 
 ## Frühere Entwicklungsproben, 28.10.2026

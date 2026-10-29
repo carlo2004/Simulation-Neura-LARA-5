@@ -55,6 +55,8 @@ Die Zusammenfassungen können ohne Modellstart neu erzeugt werden:
 .\.venv\Scripts\python.exe -m stacklab experiment report runs/pilot-01
 ```
 
+Die vollständige Episodenidentität ist `(plan_sha256, episode_id)`. Beim Zusammenführen mehrerer CSV-Dateien das jeweilige Planmanifest mitführen; `episode_id` allein ist kein experimentübergreifender Primärschlüssel. Während eines aktiven `run` die laufend erzeugten Berichte lesen; `report` nach dessen Ende aufrufen, damit nur ein Prozess die Zusammenfassungen schreibt.
+
 Die Tabelle zeigt **Erfolge / bewertete Episoden / geplante Episoden**. Modellfehler, ungültige Programme und aktive Generierungsbudgets zählen als Misserfolg. Ein Modell, das `done=true` meldet, hat damit noch keinen physischen Erfolg. Infrastrukturfehler und Abbrüche werden gesondert ausgewiesen. Offene oder technisch fehlgeschlagene Versuche verschwinden nicht aus dem geplanten Nenner. `goal_success` bleibt bei diesen nicht bewertbaren Episoden leer beziehungsweise `null`.
 
 Tokenraten entstehen aus passenden nativen Decode-Zählern und Decode-Zeiten, nicht aus dem Mittelwert einzelner Raten. Ausgabe umfasst vorhandene Thinking-Tokens. CSV enthält Lade-, Inferenz-, Ausführungs- und Prüfzeiten getrennt, soweit gemessen; fehlende Messwerte bleiben leer. Ein neuer Runtime-Prozess wird pro Episode gestartet, der Dateicache des Betriebssystems aber nicht geleert. Deshalb keine Behauptung einer normierten Kaltstartmessung. Details zur [Tokenmessung](models.md).

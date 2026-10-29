@@ -1,1 +1,3 @@
 * text=auto eol=lf
+# Preserve archived evidence byte-for-byte, including CSV line endings.
+experiments/archive/** -text

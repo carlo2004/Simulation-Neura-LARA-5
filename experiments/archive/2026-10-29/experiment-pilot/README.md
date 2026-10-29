@@ -1,0 +1,13 @@
+# Erster eingefrorener Entwicklungspilot, 29.10.2026
+
+Tatsächlich lokal auf der CPU ausgeführte Modellgenerierungen und MuJoCo-Prüfungen. Keine Antworten aus Test-Fixtures und keine nachträgliche Reparatur von Modellcode. Alle acht geplanten Episoden bleiben erhalten.
+
+Verglichen wurden Granite 4.2 8B und LFM2.5-2.6B mit den bestehenden, unterschiedlichen Modellprofilen: Q4_K_M, native Sampling-/Thinking-Vorlagen, bei LFM die deklarierte JSON-Antworthülle. Szenenseed 42, Generierungsseed 109, maximal 1024 Ausgabetokens und angefordertes Thinking-Budget 512 pro Runde, acht CPU-Threads, 180 s Generierungsbudget und 120 s Ausführungsbudget pro Runde. Aufgaben: 5 cm nach rechts und Rot auf Blau; jeweils ein beziehungsweise bis zu vier Programmblöcke. Jeder Versuch startet eine frische Szene und einen eigenen Runtime-Prozess. Der Betriebssystem-Dateicache wurde nicht geleert.
+
+Die Ergebnisse stehen in [report.md](report.md), jede geplante Episode in [results.csv](results.csv), vollständige Gruppen-/Episodendetails in [summary.json](summary.json). Fehler und Misserfolge sind ausdrücklich Versuchsergebnisse. Ein einzelner Startfall pro Aufgabenfamilie erlaubt keine Aussage über allgemeine Modellqualität, Varianz oder zuverlässiges Stapeln. Es ist kein unberührtes Testset und kein normierter Geschwindigkeitsvergleich. Thinking- und Formatbedingungen unterscheiden sich zwischen den Modellfamilien.
+
+`raw-evidence.zip` enthält alle Originaldateien des Laufs bytegleich, einschließlich Plan, Runtime-Binärhash, Szenen, tatsächlicher Requests/Responses/Streams, unverändert erzeugter Programme, Feedback, initialer/finaler Physikzustände und Worker-Logs. Gewichte und Runtime-Binärdateien sind nicht enthalten. [manifest.json](manifest.json) nennt SHA-256 und Größe jeder Rohdatei sowie der äußeren Archivdateien.
+
+Der Rohplan protokolliert korrekt den Entwicklungscheckout auf `b867ad7` mit lokalen Änderungen. Dessen tatsächliche Python-/Prompt-/Roboterdateien sind über die im Plan gespeicherten Inhaltshashes identifiziert; die versionierten Inhalte entsprechen dem geprüften Implementierungscommit [6333092](https://github.com/carlo2004/Simulation-Neura-LARA-5/commit/633309281ca2b5006fa21844b174812a16287fe3). Der Archivierungsschritt prüfte diese Hashes gegen die tatsächlichen Dateien und den Git-Index. Erzeugte Geometrie ist ebenfalls im Rohplan gehasht und bleibt über die ursprünglichen Assetquellen reproduzierbar. Metadaten wurden nicht rückwirkend als sauberer Checkout umgeschrieben.
+
+Die Identität einer Episode ist die Kombination aus `plan_sha256` und `episode_id`; beim Zusammenführen mehrerer Archive das jeweilige Manifest mitführen.
