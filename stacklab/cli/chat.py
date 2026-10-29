@@ -44,6 +44,7 @@ Waehrend einer Aufgabe sind /stop und /quit direkt verfuegbar.
 def main(argv=None):
     parser = argparse.ArgumentParser(description='Live natural-language control through a local model and execution feedback')
     parser.add_argument('--model', help='Model alias; default from config/models.lock.json')
+    parser.add_argument('--device', choices=['cpu', 'cuda'], default='cpu')
     parser.add_argument('--headless', action='store_true')
     parser.add_argument('--config', type=Path, default=ROOT/'scenes/three_cubes.json')
     parser.add_argument('--axes', action='store_true')
@@ -76,7 +77,7 @@ def main(argv=None):
     busy = threading.Event()
     pending = queue.Queue()
     try:
-        lock(args.model)
+        lock(args.model, device=args.device)
         if min(args.max_rounds, args.max_tokens, args.threads) < 1:
             raise ValueError('rounds, tokens and threads must be positive')
         if min(args.generation_timeout, args.execution_timeout) <= 0:
@@ -91,7 +92,7 @@ def main(argv=None):
         robot = Simulation(replace(Config.load(args.config), seed=args.seed), gui=not args.headless, axes=args.axes,
                            stackviz=args.stackviz, show_settings=args.show_settings)
         controller = Controller(robot)
-        client = LocalModel(args.model, threads=args.threads)
+        client = LocalModel(args.model, threads=args.threads, device=args.device)
         display = Presenter(args.stream, args.show_thinking)
 
         def tick():
@@ -191,9 +192,9 @@ def main(argv=None):
                         print(key+'  '+lock(key)['model_id'], flush=True)
                 elif text.startswith('/model '):
                     selected = text.split(maxsplit=1)[1]
-                    config = lock(selected)
+                    config = lock(selected, device=args.device)
                     client.close()
-                    client = LocalModel(selected, threads=args.threads)
+                    client = LocalModel(selected, threads=args.threads, device=args.device)
                     agent.client = client
                     agent.thinking = args.thinking if config.get('supports_thinking_toggle', True) else True
                     print('Modell gewaehlt: '+client.config['model_id'], flush=True)

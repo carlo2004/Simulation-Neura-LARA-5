@@ -17,6 +17,7 @@ from stacklab.llm.metrics import summarize
 from stacklab.paths import ROOT
 from stacklab.policy import ExecutionLimits
 from stacklab.provenance import software_provenance
+from stacklab.llm.hardware import gpu_inventory
 
 SCHEMA = 1
 
@@ -33,6 +34,7 @@ def utc_now():
 def environment():
     return dict(python=platform.python_version(), platform=platform.platform(), machine=platform.machine(),
                 processor=platform.processor(), logical_cpus=os.cpu_count(),
+                gpus=gpu_inventory(),
                 packages={name: version(name) for name in ('mujoco', 'numpy', 'scipy', 'trimesh')})
 
 
@@ -46,7 +48,7 @@ def source_hashes():
 
 def create_plan(directory, *, models, cases, scene_seeds, generation_seeds, blocks,
                 max_tokens=2048, threads=8, thinking=None, thinking_budget=None,
-                generation_timeout=600, execution_timeout=180):
+                generation_timeout=600, execution_timeout=180, device='cpu', video=False):
     directory = Path(directory).resolve()
     if directory.exists() and any(directory.iterdir()):
         raise ValueError('Choose a new empty experiment directory; existing evidence is preserved')
@@ -73,7 +75,7 @@ def create_plan(directory, *, models, cases, scene_seeds, generation_seeds, bloc
     conditions = []
     aliases = set()
     for model in models:
-        config = lock(model)
+        config = lock(model, device=device)
         key = config['model_key']
         if key in aliases:
             raise ValueError('Duplicate model: '+key)
@@ -87,7 +89,7 @@ def create_plan(directory, *, models, cases, scene_seeds, generation_seeds, bloc
         if enabled and (budget < -1 or budget >= max_tokens):
             raise ValueError('Thinking budget must be -1 or smaller than max-tokens')
         for count in blocks:
-            condition = dict(model=key, model_config=config, blocks=count, max_tokens=max_tokens,
+            condition = dict(model=key, model_config=config, device=device, video=video, blocks=count, max_tokens=max_tokens,
                              threads=threads, thinking=enabled, thinking_budget=budget if enabled else None,
                              generation_timeout=generation_timeout, execution_timeout=execution_timeout)
             condition['condition_id'] = 'condition-'+digest(condition)[:16]
@@ -129,24 +131,26 @@ def verify_environment(plan):
     checked = set()
     installations = {}
     for condition in plan['conditions']:
-        key = condition['model']
-        if key in checked:
+        key, device = condition['model'], condition.get('device', 'cpu')
+        if (key, device) in checked:
             continue
-        checked.add(key)
-        config = lock(key)
+        checked.add((key, device))
+        config = lock(key, device=device)
         if config != condition['model_config']:
             raise ValueError('Model catalog changed for '+key+'; create a new plan')
         weights = CACHE_ROOT/'models'/config['model_filename']
         if (not weights.is_file() or weights.stat().st_size != config['model_bytes']
                 or sha256(weights) != config['model_sha256']):
             raise ValueError('Model missing or checksum mismatch. Run python -m stacklab setup --model '+key)
-        executable = find_executable(key)
-        installations[key] = dict(model_sha256=config['model_sha256'], executable_sha256=sha256(executable),
+        if device == 'cuda':
+            gpu_inventory(required=True)
+        executable = find_executable(key, device=device) if device != 'cpu' else find_executable(key)
+        installations[key+':'+device] = dict(model_sha256=config['model_sha256'], executable_sha256=sha256(executable),
                                   runtime_version=config['runtime_version'])
     return installations
 
 
-def run_plan(directory):
+def run_plan(directory, backup_dir=None):
     directory = Path(directory).resolve()
     plan = load_plan(directory)
     installations = verify_environment(plan)
@@ -158,6 +162,7 @@ def run_plan(directory):
         write_json(runtime_record, installations)
     cases = {c['case_id']: c for c in plan['cases']}
     conditions = {c['condition_id']: c for c in plan['conditions']}
+    finished = False
     try:
         for index, episode in enumerate(plan['episodes'], 1):
             path = directory/episode['episode_id']
@@ -179,15 +184,23 @@ def run_plan(directory):
                   f'{condition["blocks"]} blocks / scene {case["scene_seed"]} / generation {args.seed}', flush=True)
             run_case(case['name'], args, path, case=case)
             write_report(directory)
+            if backup_dir is not None:
+                from stacklab.backup import backup_experiment
+                print('Backup: '+str(backup_experiment(directory, backup_dir)), flush=True)
+        finished = True
     finally:
         # This also exposes pending and interrupted episodes after Ctrl+C.
         report = write_report(directory)
+        if backup_dir is not None and not finished:
+            from stacklab.backup import backup_experiment
+            print('Backup: '+str(backup_experiment(directory, backup_dir)), flush=True)
     return report
 
 
 def episode_result(directory, episode, condition, case, plan_sha256):
     path = Path(directory)/episode['episode_id']
     row = dict(**episode, model=condition['model'], blocks=condition['blocks'], case=case['name'],
+               device=condition.get('device', 'cpu'), plan_sha256=plan_sha256,
                scene_seed=case['scene_seed'], status='pending', goal_success=None,
                model_declared_done=None, error=None, rounds=0, execution_outcomes=[], performance={})
     if not path.exists():
@@ -257,6 +270,10 @@ def write_report(directory):
     cases = {c['case_id']: c for c in plan['cases']}
     rows = [episode_result(directory, e, conditions[e['condition_id']], cases[e['case_id']], plan['plan_sha256'])
             for e in plan['episodes']]
+    for row in rows:
+        row['gpu_names'] = '; '.join(g['name'] for g in plan['environment'].get('gpus', []))
+        row['gpu_memory_total_mib'] = '; '.join(str(g['memory_total_mib']) for g in plan['environment'].get('gpus', []))
+        row['gpu_driver_versions'] = '; '.join(g['driver_version'] for g in plan['environment'].get('gpus', []))
     groups = []
     for condition in plan['conditions']:
         for name in dict.fromkeys(c['name'] for c in plan['cases']):
@@ -274,7 +291,8 @@ def write_report(directory):
                   complete=all(r['status'] not in ('pending', 'incomplete') for r in rows),
                   groups=groups, episodes=rows, note=plan['note'])
     write_json(directory/'summary.json', report)
-    columns = ('episode_id', 'case_id', 'condition_id', 'model', 'blocks', 'case', 'scene_seed',
+    columns = ('plan_sha256', 'episode_id', 'case_id', 'condition_id', 'model', 'device',
+               'gpu_names', 'gpu_memory_total_mib', 'gpu_driver_versions', 'blocks', 'case', 'scene_seed',
                'generation_seed', 'status', 'goal_success', 'model_declared_done', 'rounds', 'wall_seconds',
                'execution_outcomes', 'execution_seconds', 'evaluation_seconds', 'request_seconds', 'total_seconds',
                'output_tokens', 'native_decode_tokens', 'decode_seconds', 'decode_tokens_per_second',
@@ -289,7 +307,8 @@ def write_report(directory):
             flattened['execution_outcomes'] = json.dumps(row['execution_outcomes'])
             writer.writerow(flattened)
     temporary.replace(directory/'results.csv')
-    text = ['# Entwicklungsvergleich', '', plan['note'], '',
+    gpu_names = ', '.join(g['name'] for g in plan['environment'].get('gpus', [])) or 'keine NVIDIA-GPU erfasst'
+    text = ['# Entwicklungsvergleich', '', plan['note'], '', 'Hardware: '+gpu_names, '',
             '| Modell | Blöcke | Aufgabe | Erfolg / bewertet / geplant | Technikfehler | Abbruch | Offen | Ausgabe Token/s |',
             '|---|---:|---|---:|---:|---:|---:|---:|']
     for group in groups:

@@ -21,6 +21,8 @@ def main():
     p.add_argument('--move-delta', type=float, nargs=3)
     p.add_argument('--feedback-rounds', type=int, default=0)
     p.add_argument('--model')
+    p.add_argument('--device', choices=['cpu', 'cuda'], default='cpu')
+    p.add_argument('--video', type=Path)
     p.add_argument('--instruction')
     p.add_argument('--max-tokens', type=int, default=2048)
     p.add_argument('--threads', type=int, default=8)
@@ -41,7 +43,7 @@ def main():
         if bool(args.source or args.target) == bool(args.move_delta):
             raise ValueError('Choose a source/target pair or a movement delta')
         from stacklab.sim.robot import Simulation
-        robot = Simulation(Config.load(args.config), gui=args.gui, axes=args.axes,
+        robot = Simulation(Config.load(args.config), video=args.video, gui=args.gui, axes=args.axes,
                            stackviz=(args.source, args.target) if args.stackviz and args.source else None)
         if args.source:
             robot._pair(args.source, args.target)
@@ -54,7 +56,7 @@ def main():
             from stacklab.cli.presentation import Presenter
             if not args.instruction:
                 raise ValueError('Feedback evaluation needs --instruction')
-            with LocalModel(args.model, threads=args.threads) as client:
+            with LocalModel(args.model, threads=args.threads, device=args.device) as client:
                 display = Presenter(stats_stream=sys.stdout)
                 agent = Agent(robot, client, max_rounds=max(1, args.feedback_rounds), max_tokens=args.max_tokens,
                               thinking=args.thinking, seed=args.seed, generation_timeout=args.generation_timeout,

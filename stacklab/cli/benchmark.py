@@ -55,6 +55,7 @@ def run_case(name, args, directory, *, case=None):
         else:
             command += ['--source', source, '--target', target]
         command += ['--feedback-rounds', str(args.feedback_rounds), '--model', lock(args.model)['model_key'],
+                    '--device', getattr(args, 'device', 'cpu'),
                     '--instruction', user['instruction'], '--max-tokens', str(args.max_tokens),
                     '--threads', str(args.threads), '--seed', str(generation_seed),
                     '--generation-timeout', str(args.generation_timeout),
@@ -73,6 +74,8 @@ def run_case(name, args, directory, *, case=None):
             command.append('--axes')
         if args.stackviz:
             command.append('--stackviz')
+        if getattr(args, 'video', False):
+            command += ['--video', str(directory/'simulation.mp4')]
         env = os.environ.copy()
         env['OPENBLAS_NUM_THREADS'] = '1'
         with (directory/'simulation.log').open('w', encoding='utf-8') as log:
@@ -106,10 +109,13 @@ def main(argv=None):
     sub.add_parser('models', help='List pinned models and their local download status')
     install = sub.add_parser('setup', help='Download and SHA-256-verify model and CPU runtime')
     install.add_argument('--model', help='Model alias or exact Hugging Face model ID')
+    install.add_argument('--device', choices=['cpu', 'cuda'], default='cpu')
     install.add_argument('--all', action='store_true', help='Install all catalog models sequentially')
     test = sub.add_parser('test', help='Generate a program and test it in MuJoCo')
     test.add_argument('--case', choices=CASES, default='red-on-blue')
     test.add_argument('--model', help='Model alias or exact Hugging Face model ID; default: qwen9b')
+    test.add_argument('--device', choices=['cpu', 'cuda'], default='cpu')
+    test.add_argument('--video', action='store_true', help='Record actual simulated execution to simulation.mp4')
     test.add_argument('--feedback-rounds', type=int, default=0,
                       help='0: one-block baseline; positive N: up to N blocks using real simulation feedback')
     test.add_argument('--suite', action='store_true', help='Run four development cases')
@@ -141,9 +147,9 @@ def main(argv=None):
             if args.all and args.model:
                 raise ValueError('Choose --all or --model')
             for name in model_keys() if args.all else [args.model]:
-                setup(name)
+                setup(name, device=args.device)
             return 0
-        config = lock(args.model)
+        config = lock(args.model, device=args.device)
         if args.feedback_rounds < 0:
             raise ValueError('feedback-rounds must be non-negative')
         if args.thinking is None:

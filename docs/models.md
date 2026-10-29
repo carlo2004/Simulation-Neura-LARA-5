@@ -63,7 +63,7 @@ Nach jedem Block liegen die Werte unter `round_XX/generation.json` im Feld `perf
 
 Die Decodiermessung folgt llama.cpp: Das erste Ausgabetoken entsteht noch aus dem Prompt-Durchlauf und zählt nicht als eigener Decodierschritt. Die Gesamtzahl der Ausgabetokens enthält es weiterhin. Das Messformat ab Schema 2 unterscheidet beide Zähler ausdrücklich; ältere Entwicklungsprotokolle werden beim Summieren entsprechend gelesen.
 
-Die mitgelieferte Runtime arbeitet auf der **CPU**, auch wenn eine GPU im Rechner steckt. Modellarchitektur, Kontext, Denkbudget, Quantisierung, Arbeitsspeicher und Threadzahl beeinflussen die Laufzeit. Ein langsamer Start allein belegt keinen Quantisierungsfehler. Zum Vergleichen kalte und warme Starts getrennt betrachten und dieselben Einstellungen verwenden.
+Standardmäßig arbeitet die Runtime auf der **CPU**, auch wenn eine GPU im Rechner steckt. Unter Linux x86-64 aktiviert `--device cuda` bei `setup`, `chat`, `benchmark` und `experiment plan` den separaten NVIDIA-Pfad. [Colab-Notebook für L4/A100 und CUDA-Einrichtung](colab.md). Modellarchitektur, Kontext, Denkbudget, Quantisierung, Arbeitsspeicher und Threadzahl beeinflussen die Laufzeit. Ein langsamer Start allein belegt keinen Quantisierungsfehler. Zum Vergleichen kalte und warme Starts getrennt betrachten und dieselben Einstellungen verwenden.
 
 ## Neue Modelle installieren
 

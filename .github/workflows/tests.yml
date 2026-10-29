@@ -5,6 +5,34 @@ on:
 permissions:
   contents: read
 jobs:
+  cuda-source-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    container: nvidia/cuda:12.8.1-devel-ubuntu24.04
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install source-build tools
+        run: |
+          apt-get update -qq
+          apt-get install -y -qq git cmake python3 g++
+      - name: Compile pinned Dory CUDA kernels for A100 and L4
+        run: |
+          python3 - <<'PY'
+          from stacklab.llm.catalog import CACHE_ROOT, lock
+          from stacklab.llm.source_runtime import build_runtime
+          config = lock('dory4b', device='cuda')
+          print(build_runtime(config, CACHE_ROOT/'runtime'/config['runtime_version']))
+          print('CUDA compilation checked; this runner has no GPU for inference.')
+          PY
+      - name: CUDA build diagnostics on failure
+        if: failure()
+        run: |
+          python3 - <<'PY'
+          from stacklab.llm.catalog import CACHE_ROOT, lock
+          config=lock('dory4b', device='cuda')
+          log=CACHE_ROOT/'runtime'/config['runtime_version']/'build.log'
+          print(log.read_text(encoding='utf-8', errors='replace')[-24000:] if log.is_file() else 'No CUDA build log')
+          PY
   tests:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 25
@@ -29,6 +57,16 @@ jobs:
           .venv/bin/python tools/validate.py
           .venv/bin/python tools/validate_objects.py
           .venv/bin/python tools/validate_controls.py
+      - name: Verify pinned CUDA binary and library archives without a GPU
+        if: matrix.os == 'ubuntu-latest' && matrix.python == '3.13'
+        run: |
+          .venv/bin/python - <<'PY'
+          import subprocess
+          from stacklab.llm.catalog import lock, install_cuda_runtime, runtime_env
+          executable=install_cuda_runtime(lock('granite8b', device='cuda'))
+          subprocess.run([str(executable),'--version'], env=runtime_env(executable), check=True)
+          print('Pinned CUDA packages verified and executable launched; no GPU inference claimed.')
+          PY
       - name: Build and launch the pinned Dory CPU runtime
         if: matrix.os == 'windows-latest' && matrix.python == '3.13'
         run: >-

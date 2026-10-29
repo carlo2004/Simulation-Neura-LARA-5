@@ -203,6 +203,20 @@ class ExperimentTests(unittest.TestCase):
         self.assertEqual(report['groups'][0]['success'], 0)
         self.assertEqual(report['groups'][0]['infrastructure_error'], 1)
 
+    def test_cuda_plan_keeps_case_identity_and_exports_gpu_provenance(self):
+        cpu=self.plan()
+        gpu=dict(name='fixture NVIDIA L4',memory_total_mib=23034,driver_version='fixture-driver',uuid='fixture-uuid')
+        with patch.object(exp, 'environment', return_value=dict(gpus=[gpu])), \
+                patch('stacklab.llm.catalog.platform_key', return_value='linux-x86_64'):
+            cuda=exp.create_plan(Path(self.temp.name)/'cuda',models=['lfm2.6b'],cases=['move-right'],
+                                 scene_seeds=[3],generation_seeds=[109],blocks=[1],max_tokens=1024,device='cuda')
+        self.assertEqual(cpu['cases'],cuda['cases'])
+        self.assertNotEqual(cpu['conditions'][0]['condition_id'],cuda['conditions'][0]['condition_id'])
+        report=exp.write_report(Path(self.temp.name)/'cuda')
+        self.assertEqual(report['episodes'][0]['device'],'cuda')
+        self.assertEqual(report['episodes'][0]['gpu_names'],'fixture NVIDIA L4')
+        self.assertEqual(report['episodes'][0]['plan_sha256'],cuda['plan_sha256'])
+
 
 if __name__ == '__main__':
     unittest.main()

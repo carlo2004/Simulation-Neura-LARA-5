@@ -16,6 +16,8 @@ PACKAGES = [('mujoco', 'mujoco'), ('numpy', 'numpy'), ('scipy', 'scipy'),
 def main(argv=None):
     parser = argparse.ArgumentParser(description='Python-Interpreter und Simulationspakete prüfen')
     parser.add_argument('--json', action='store_true', help='Maschinenlesbarer Bericht')
+    parser.add_argument('--device', choices=['cpu', 'cuda'], default='cpu')
+    parser.add_argument('--model', help='Model runtime to diagnose when --device cuda is selected')
     args = parser.parse_args(argv)
     result = dict(python=platform.python_version(), interpreter=sys.executable,
                   virtualenv=sys.prefix != sys.base_prefix, packages={}, errors=[])
@@ -31,6 +33,15 @@ def main(argv=None):
     result['assets_ready'] = model_ready() and (ROOT/'assets/sources/Neura-LARA-5.robot').is_file()
     if not result['assets_ready']:
         result['errors'].append('Modelldaten fehlen: python bootstrap.py ausführen.')
+    if args.device == 'cuda':
+        from stacklab.llm.hardware import gpu_inventory, check_cuda_backend
+        from stacklab.llm.catalog import find_executable, runtime_env
+        try:
+            result['gpus'] = gpu_inventory(required=True)
+            executable = find_executable(args.model, device='cuda')
+            result['cuda_backend'] = check_cuda_backend(executable, runtime_env(executable))
+        except (ValueError, RuntimeError, OSError) as error:
+            result['errors'].append(str(error))
     result['success'] = not result['errors']
     if args.json:
         print(json.dumps(result, indent=2))
@@ -40,6 +51,8 @@ def main(argv=None):
         print('Virtuelle Umgebung: '+('ja' if result['virtualenv'] else 'nein'))
         for package, version in result['packages'].items():
             print('OK '+package+' '+version)
+        for gpu in result.get('gpus', []):
+            print(f'GPU {gpu["name"]}: {gpu["memory_total_mib"]} MiB; Treiber {gpu["driver_version"]}')
         for error in result['errors']:
             print('FEHLER '+error)
         if not result['success']:

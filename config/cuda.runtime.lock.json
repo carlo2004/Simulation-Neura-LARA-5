@@ -1,0 +1,24 @@
+{
+  "format_version": 1,
+  "base_runtime_version": "b11951",
+  "runtime_version": "b11951-cuda12.8",
+  "runtime_assets": {
+    "linux-x86_64": {
+      "filename": "llama-b11951-bin-ubuntu-cuda-12.8-x64.tar.gz",
+      "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11951/llama-b11951-bin-ubuntu-cuda-12.8-x64.tar.gz",
+      "sha256": "51a6dae48f9cae0af5dd4971df691a3cb1cf36bac459f89bcccd805edc6dba92",
+      "bytes": 182382782
+    }
+  },
+  "runtime_dependencies": {
+    "linux-x86_64": [
+      {
+        "filename": "cudart-llama-b11951-bin-ubuntu-cuda-12.8-x64.tar.gz",
+        "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11951/cudart-llama-b11951-bin-ubuntu-cuda-12.8-x64.tar.gz",
+        "sha256": "150f4d36ee4f97e85dbcb139e7fcbfeee03d4d74251c98076cdd4879d35c34eb",
+        "bytes": 594377552
+      }
+    ]
+  },
+  "source_cuda_architectures": [80, 89]
+}

@@ -9,11 +9,13 @@ import tarfile
 import urllib.request
 import zipfile
 
-from stacklab.paths import CACHE_ROOT, REGISTRY_PATH
+from stacklab.paths import ROOT, CACHE_ROOT, REGISTRY_PATH
 DOWNLOAD_RESERVE_BYTES = 512*1024*1024
 
 
-def lock(model=None):
+def lock(model=None, device='cpu'):
+    if device not in ('cpu', 'cuda'):
+        raise ValueError('device must be cpu or cuda')
     registry = json.loads(REGISTRY_PATH.read_text(encoding='utf-8'))
     if 'models' in registry:
         key = model or registry['default_model']
@@ -36,6 +38,18 @@ def lock(model=None):
         raise ValueError('total_parameters must be a positive integer')
     if ceiling is not None and (type(ceiling) is not int or ceiling <= 0 or total > ceiling):
         raise ValueError('Model exceeds the configured total-parameter budget')
+    if device == 'cuda':
+        spec = json.loads((ROOT/'config/cuda.runtime.lock.json').read_text(encoding='utf-8'))
+        if platform_key() not in spec['runtime_assets']:
+            raise ValueError('Pinned CUDA support currently targets Linux x86-64, including Colab L4/A100')
+        if config.get('runtime_source'):
+            config.update(runtime_version=config['runtime_version']+'-cuda', device='cuda',
+                          cuda_architectures=spec['source_cuda_architectures'])
+        else:
+            if config['runtime_version'] != spec['base_runtime_version']:
+                raise ValueError('No pinned CUDA recipe for '+config['runtime_version'])
+            config.update(runtime_version=spec['runtime_version'], runtime_assets=spec['runtime_assets'],
+                          runtime_dependencies=spec['runtime_dependencies'], device='cuda')
     return config
 
 
@@ -108,7 +122,19 @@ def platform_key():
     return system+'-'+machine
 
 
-def setup(model=None):
+def setup(model=None, device='cpu'):
+    if device == 'cuda':
+        from stacklab.llm.hardware import gpu_inventory, check_cuda_backend
+        gpu_inventory(required=True)
+        config = lock(model, device=device)
+        executable = install_cuda_runtime(config)
+        check_cuda_backend(executable, runtime_env(executable))
+        download(config['model_url'], CACHE_ROOT/'models'/config['model_filename'],
+                 config['model_sha256'], config['model_bytes'])
+        print('Model and CUDA runtime verified: '+str(executable), flush=True)
+        return executable
+    if device != 'cpu':
+        raise ValueError('device must be cpu or cuda')
     config = lock(model)
     key = platform_key()
     if config.get('runtime_source'):
@@ -146,8 +172,41 @@ def setup(model=None):
     return executable
 
 
-def find_executable(model=None):
-    config = lock(model)
+def install_cuda_runtime(config):
+    """Install pinned binaries/libraries, or the model-specific source build; no weights."""
+    if config.get('device') != 'cuda':
+        raise ValueError('Expected an explicitly resolved CUDA configuration')
+    directory = CACHE_ROOT/'runtime'/config['runtime_version']
+    if config.get('runtime_source'):
+        from stacklab.llm.source_runtime import build_runtime
+        return build_runtime(config, directory)
+    key = platform_key()
+    assets = [config['runtime_assets'][key], *config.get('runtime_dependencies', {}).get(key, [])]
+    marker = directory/'installed.json'
+    expected = [a['sha256'] for a in assets]
+    if marker.is_file():
+        installed = json.loads(marker.read_text(encoding='utf-8'))
+        if installed.get('archive_sha256') == expected:
+            return find_executable(config['model_key'], device='cuda')
+    directory.mkdir(parents=True, exist_ok=True)
+    for asset in assets:
+        archive = download(asset['url'], CACHE_ROOT/'downloads'/asset['filename'], asset['sha256'], asset['bytes'])
+        with tarfile.open(archive) as bundle:
+            bundle.extractall(directory, filter='data')
+    matches = sorted(directory.rglob('llama-server'))
+    if not matches:
+        raise ValueError('CUDA archive contains no llama-server')
+    executable = matches[0].resolve()
+    temporary = marker.with_suffix('.tmp')
+    temporary.write_text(json.dumps(dict(archive_sha256=expected, platform=key, device='cuda',
+                                         executable=str(executable.relative_to(directory.resolve())),
+                                         executable_sha256=sha256(executable)), indent=2)+'\n', encoding='utf-8')
+    temporary.replace(marker)
+    return executable
+
+
+def find_executable(model=None, device='cpu'):
+    config = lock(model, device=device)
     directory = CACHE_ROOT/'runtime'/config['runtime_version']
     if config.get('runtime_source'):
         from stacklab.llm.source_runtime import ready_runtime
@@ -155,6 +214,18 @@ def find_executable(model=None):
         if executable:
             return executable
         raise ValueError('Pinned source runtime missing or changed. Run python -m stacklab setup --model '+config['model_key'])
+    if device == 'cuda':
+        marker = directory/'installed.json'
+        if marker.is_file():
+            installed = json.loads(marker.read_text(encoding='utf-8'))
+            executable = (directory/installed.get('executable', '')).resolve()
+            assets = [config['runtime_assets'][platform_key()],
+                      *config.get('runtime_dependencies', {}).get(platform_key(), [])]
+            if (installed.get('archive_sha256') == [a['sha256'] for a in assets]
+                    and executable.is_relative_to(directory.resolve()) and executable.is_file()
+                    and sha256(executable) == installed.get('executable_sha256')):
+                return executable
+        raise ValueError('Pinned CUDA runtime missing or changed. Run stacklab setup --device cuda --model '+config['model_key'])
     suffix = '.exe' if os.name == 'nt' else ''
     for name in ('llama-server',):
         matches = list(directory.rglob(name+suffix)) if directory.exists() else []
@@ -168,6 +239,11 @@ def runtime_env(executable):
     # Also works when /proc/self/exe is unavailable: the cwd is the runtime folder.
     env.pop('GGML_BACKEND_PATH', None)
     if platform.system() == 'Linux':
-        env['LD_LIBRARY_PATH'] = str(executable.parent)+(os.pathsep+env['LD_LIBRARY_PATH'] if env.get('LD_LIBRARY_PATH') else '')
+        root = next((p for p in executable.parents if (p/'installed.json').is_file()), executable.parent)
+        directories = [executable.parent, *sorted({p.parent for p in root.rglob('*.so*')})]
+        paths = list(dict.fromkeys(str(p) for p in directories))
+        if env.get('LD_LIBRARY_PATH'):
+            paths.append(env['LD_LIBRARY_PATH'])
+        env['LD_LIBRARY_PATH'] = os.pathsep.join(paths)
     return env
 

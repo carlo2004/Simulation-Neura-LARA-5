@@ -9,6 +9,7 @@ import urllib.request
 from pathlib import Path
 from stacklab.llm.catalog import find_executable, lock, runtime_env
 from stacklab.llm.metrics import GenerationMetrics
+from stacklab.llm.hardware import gpu_inventory, check_cuda_backend, gpu_offload
 
 
 class GenerationCancelled(RuntimeError):
@@ -16,10 +17,12 @@ class GenerationCancelled(RuntimeError):
 
 
 class LocalModel:
-    def __init__(self, model=None, threads=8):
+    def __init__(self, model=None, threads=8, device='cpu'):
         if type(threads) is not int or threads < 1:
             raise ValueError('threads must be a positive integer')
-        self.config = lock(model)
+        self.config = lock(model, device=device)
+        self.device = device
+        self.hardware = None
         self.model = self.config.get('model_key', model)
         self.threads = threads
         self.process = None
@@ -36,20 +39,24 @@ class LocalModel:
         weights = CACHE_ROOT/'models'/config['model_filename']
         if not weights.is_file() or weights.stat().st_size != config['model_bytes']:
             raise ValueError('Model missing/incomplete. Run python -m stacklab setup --model '+str(self.model))
-        exe = find_executable(self.model)
+        exe = find_executable(self.model, device=self.device) if self.device != 'cpu' else find_executable(self.model)
         output = Path(output).resolve()
         output.mkdir(parents=True, exist_ok=True)
+        if self.device == 'cuda':
+            self.hardware = dict(gpus=gpu_inventory(required=True),
+                                 backend_devices=check_cuda_backend(exe, runtime_env(exe)))
         with socket.socket() as probe:
             probe.bind(('127.0.0.1', 0))
             port = probe.getsockname()[1]
         self.address = 'http://127.0.0.1:'+str(port)
         command = [str(exe), '--model', str(weights), '--host', '127.0.0.1', '--port', str(port),
                    '--ctx-size', str(config.get('context_tokens', 4096)), '--threads', str(self.threads),
-                   '--gpu-layers', '0', '--parallel', '1', '--jinja', '--reasoning', 'auto']
+                   '--gpu-layers', '999' if self.device == 'cuda' else '0',
+                   '--parallel', '1', '--jinja', '--reasoning', 'auto']
         extra = config.get('server_args', [])
         reserved = {'--host', '--port', '--model', '-m', '--gpu-layers', '-ngl'}
         if not isinstance(extra, list) or any(not isinstance(arg, str) or arg.split('=')[0] in reserved for arg in extra):
-            raise ValueError('server_args must be strings and must preserve the private model/CPU/loopback configuration')
+            raise ValueError('server_args must be strings and must preserve the private model/device/loopback configuration')
         command += extra
         self.log = (output/'inference.log').open('w', encoding='utf-8')
         started = time.monotonic()
@@ -69,6 +76,9 @@ class LocalModel:
                 except OSError:
                     time.sleep(.25)
             self.load_seconds = time.monotonic()-started
+            if self.device == 'cuda':
+                self.hardware.update(gpu_offload((output/'inference.log').read_text(encoding='utf-8', errors='replace')))
+                (output/'device.json').write_text(json.dumps(self.hardware, indent=2)+'\n', encoding='utf-8')
         except BaseException:
             self.close()
             raise
@@ -112,7 +122,7 @@ class LocalModel:
                         training_revision=config.get('training_revision', config['original_revision']))
         metadata.update(model_key=self.model, thinking=thinking, **sampling, seed=seed, threads=self.threads,
                         context_tokens=config.get('context_tokens', 4096), max_output_tokens=max_tokens,
-                        prompt_sha256=hashlib.sha256(canonical.encode()).hexdigest(), device='CPU',
+                        prompt_sha256=hashlib.sha256(canonical.encode()).hexdigest(), device=self.device.upper(),
                         inference='Local subprocess; temporary loopback HTTP; no hosted API',
                         prompt_format='GGUF native chat template / Jinja',
                         constrained_decoding=bool(config.get('response_format')))
@@ -142,6 +152,7 @@ class LocalModel:
             warm = self.process is not None and self.process.poll() is None
             self.start(output, timeout=min(120, timeout), cancelled=cancelled)
             metadata['model_load_seconds'] = 0. if warm else self.load_seconds
+            metadata['hardware'] = self.hardware
             installation = CACHE_ROOT/'runtime'/config['runtime_version']/'installed.json'
             try:
                 metadata['runtime_installation'] = json.loads(installation.read_text(encoding='utf-8'))

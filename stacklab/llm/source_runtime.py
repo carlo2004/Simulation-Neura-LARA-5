@@ -13,9 +13,16 @@ BUILD_FLAGS = ['-DCMAKE_BUILD_TYPE=Release', '-DGGML_NATIVE=OFF', '-DGGML_CUDA=O
                '-DLLAMA_BUILD_UI=OFF', '-DLLAMA_BUILD_TESTS=OFF', '-DLLAMA_BUILD_EXAMPLES=OFF']
 
 
+def build_flags(config):
+    if config.get('device') == 'cuda':
+        return [flag.replace('GGML_CUDA=OFF', 'GGML_CUDA=ON') for flag in BUILD_FLAGS]+[
+            '-DCMAKE_CUDA_ARCHITECTURES='+';'.join(map(str, config.get('cuda_architectures', [80, 89])))]
+    return BUILD_FLAGS
+
+
 def runtime_identity(config):
     spec = config['runtime_source']
-    return dict(repository=spec['repository'], revision=spec['revision'], platform=platform_key(), cmake_flags=BUILD_FLAGS)
+    return dict(repository=spec['repository'], revision=spec['revision'], platform=platform_key(), cmake_flags=build_flags(config))
 
 
 def ready_runtime(config, directory):
@@ -50,16 +57,18 @@ def build_runtime(config, directory):
     if not shutil.which('git'):
         raise ValueError('This model needs Git to fetch its pinned source runtime')
     cmake = cmake_executable()
+    if config.get('device') == 'cuda' and not shutil.which('nvcc'):
+        raise ValueError('This CUDA source runtime needs the NVIDIA CUDA Toolkit (nvcc), CMake and a C++ compiler')
     directory = Path(directory)
     source = directory/'source'
     build = directory/'build'
     marker = directory/'installed.json'
-    flags = BUILD_FLAGS
+    flags = build_flags(config)
     identity = runtime_identity(config)
     suffix = '.exe' if os.name == 'nt' else ''
     directory.mkdir(parents=True, exist_ok=True)
     log_path = directory/'build.log'
-    print('Build pinned CPU runtime: '+revision+'; log: '+str(log_path), flush=True)
+    print('Build pinned '+config.get('device', 'cpu').upper()+' runtime: '+revision+'; log: '+str(log_path), flush=True)
     with log_path.open('a', encoding='utf-8') as log:
         def run(args, cwd=directory):
             subprocess.run(args, cwd=cwd, stdout=log, stderr=subprocess.STDOUT, check=True)
@@ -92,7 +101,7 @@ def build_runtime(config, directory):
                 raise ValueError('Source cache contains changes; move it aside before rebuilding: '+dirty.strip()[:1600])
             run([cmake, '-S', str(source), '-B', str(build), *flags])
             run([cmake, '--build', str(build), '--config', 'Release', '--target', 'llama-server',
-                 '--parallel', str(min(4, os.cpu_count() or 1))])
+                 '--parallel', str(min(2 if config.get('device') == 'cuda' else 4, os.cpu_count() or 1))])
         except subprocess.CalledProcessError as error:
             raise RuntimeError('Runtime build failed. Check CMake/C++ build tools and '+str(log_path)) from error
     candidates = sorted(build.rglob('llama-server'+suffix))

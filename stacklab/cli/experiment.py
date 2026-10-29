@@ -14,6 +14,8 @@ def main(argv=None):
     plan = sub.add_parser('plan', help='Freeze cases, models, seeds and budgets before execution')
     plan.add_argument('--output', type=Path, required=True, help='New empty experiment directory')
     plan.add_argument('--models', nargs='+', required=True)
+    plan.add_argument('--device', choices=['cpu', 'cuda'], default='cpu')
+    plan.add_argument('--video', action='store_true')
     plan.add_argument('--cases', nargs='+', choices=CASES, default=['move-right', 'red-on-blue'])
     plan.add_argument('--scene-seeds', type=int, nargs='+', default=[42])
     plan.add_argument('--generation-seeds', type=int, nargs='+', default=[42])
@@ -25,11 +27,20 @@ def main(argv=None):
     plan.add_argument('--generation-timeout', type=int, default=600)
     plan.add_argument('--execution-timeout', type=int, default=180)
     for command, help_text in [('run', 'Run pending episodes; preserve existing attempts'),
-                                ('report', 'Rebuild JSON, CSV and Markdown without starting a model')]:
+                                ('report', 'Rebuild JSON, CSV and Markdown without starting a model'),
+                                ('backup', 'Save existing raw evidence and reports in an atomic ZIP')]:
         child = sub.add_parser(command, help=help_text)
         child.add_argument('directory', type=Path)
+        if command == 'run':
+            child.add_argument('--backup-dir', type=Path, help='Checkpoint after each episode, e.g. a mounted Drive folder')
+        if command == 'backup':
+            child.add_argument('--output', type=Path, required=True, help='Destination folder outside the experiment')
     args = parser.parse_args(argv)
     try:
+        if args.command == 'backup':
+            from stacklab.backup import backup_experiment
+            print(backup_experiment(args.directory, args.output))
+            return 0
         if args.command == 'plan':
             options = vars(args).copy()
             options.pop('command')
@@ -39,7 +50,7 @@ def main(argv=None):
             print(f'{len(frozen["episodes"])} planned episodes: {directory.resolve()}')
             print('Install selected models with stacklab setup, then: stacklab experiment run '+str(directory))
             return 0
-        report = run_plan(args.directory) if args.command == 'run' else write_report(args.directory)
+        report = run_plan(args.directory, backup_dir=args.backup_dir) if args.command == 'run' else write_report(args.directory)
         success = sum(g['success'] for g in report['groups'])
         print(f'{success}/{report["planned"]} planned episodes physically successful; '
               f'complete={report["complete"]}; report: {args.directory.resolve()}/report.md')

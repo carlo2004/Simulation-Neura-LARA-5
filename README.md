@@ -39,6 +39,8 @@ Der Roboter kann über Terminal, Tastatur und Python gesteuert werden. Szenen, O
 
 Die Modellanbindung unterstützt Qwen3.5-4B/9B, Ministral 3 8B Reasoning, Nemotron 3.5 Bolt, Nemotron Labs Dory1.0-4B, IBM Granite 4.2 8B und LiquidAI LFM2.5-2.6B. Chat und Benchmark zeigen echte Tokens pro Sekunde, Prompttempo und Ladezeit an. Dory benötigt einen einmaligen separaten Quellbuild; die [Modellanleitung](docs/models.md) erklärt die Voraussetzungen. In den bisherigen echten Versuchen gelangen einfache Bewegungen; **zuverlässiges Stapeln durch die unveränderten Modelle ist noch nicht erreicht**. Negative Ergebnisse stehen im [Versuchsindex](experiments/README.md). Softwaretests mit vorgegebenen Antworten sind kein Nachweis für Modellqualität.
 
+Für Colab Pro mit **L4 oder A100** gibt es ein [startfertiges Notebook](https://colab.research.google.com/github/carlo2004/Simulation-Neura-LARA-5/blob/main/notebooks/colab_gpu.ipynb). `--device cuda` aktiviert die geprüfte CUDA-Runtime unter Linux; CPU bleibt Standard. Das Notebook prüft die GPU-Nutzung, zeigt eine optionale Video-Vorschau und sichert die Versuchsergebnisse nach jeder Episode. [Einrichtung und GPU-Vergleich](docs/colab.md).
+
 Die Geometrie und Kinematik stammen aus einer RoboDK-Quelldatei. Dynamik, Greifer und Regelung enthalten eigene Annahmen; dies ist eine Forschungsumgebung für die Tischaufgabe, kein validierter digitaler Zwilling. [Herkunft und Lizenzen](assets/sources/NOTICE.md).
 
 ## Orientierung
