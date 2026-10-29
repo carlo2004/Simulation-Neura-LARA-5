@@ -7,7 +7,8 @@ permissions:
 jobs:
   cuda-source-build:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    # Both GPU architectures can exceed 40 minutes on a cold hosted runner.
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
