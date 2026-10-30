@@ -12,6 +12,7 @@ from stacklab.config import Config, write_json
 from stacklab.llm.catalog import lock, setup, model_keys
 from stacklab.cli.speed import format_speed
 from stacklab.cli.process import run_logged
+from stacklab.console import print_safe as print
 
 CASES = {
     'red-on-blue': ('Staple den roten Würfel auf den blauen Würfel.', 'red', 'blue', 'scenes/default.json', 0),
@@ -71,6 +72,7 @@ def run_case(name, args, directory, *, case=None):
             command += ['--result-hold-seconds', '0']
         command += ['--recording', getattr(args, 'recording', 'full'),
                     '--motion-fps', str(getattr(args, 'motion_fps', 0))]
+        command += ['--prompt-profile', getattr(args, 'prompt_profile', 'auto')]
         if args.thinking_budget is not None:
             command += ['--thinking-budget', str(args.thinking_budget)]
         if args.gui:
@@ -88,6 +90,8 @@ def run_case(name, args, directory, *, case=None):
             command += ['--video', str(directory/'simulation.mp4')]
         env = os.environ.copy()
         env['OPENBLAS_NUM_THREADS'] = '1'
+        env['PYTHONIOENCODING'] = 'utf-8'
+        env['PYTHONUTF8'] = '1'
         with (directory/'simulation.log').open('w', encoding='utf-8') as log:
             worker_timeout = ((args.generation_timeout+args.execution_timeout+30)*args.feedback_rounds
                               if args.feedback_rounds else args.generation_timeout+args.execution_timeout+30)
@@ -136,6 +140,7 @@ def main(argv=None):
     test.add_argument('--thinking', action=argparse.BooleanOptionalAction, default=None,
                       help='Override model-specific reasoning default')
     test.add_argument('--thinking-budget', type=int, help='Maximum reasoning tokens; -1 for no separate cap')
+    test.add_argument('--prompt-profile', choices=['auto', 'legacy', 'one-shot'], default='auto')
     test.add_argument('--seed', type=int, default=42)
     test.add_argument('--max-tokens', type=int)
     test.add_argument('--threads', type=int, default=min(8, os.cpu_count() or 1))

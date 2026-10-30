@@ -1,5 +1,7 @@
 # LARA Stack Lab
 
+[A100 Folgeversuch mit kurzem One-Shot-Prompt und CPU-Vorprüfung](docs/one-shot-followup.md)
+
 Interaktive MuJoCo-Simulation eines NEURA LARA 5 mit Greifer, Kontaktphysik und lokaler LLM-Steuerung in Python. Das Seminarziel: prüfen, ob kleine Sprachmodelle aus Sprache brauchbare Roboterprogramme erzeugen, und später ein Finetuning mit denselben Aufgaben vergleichen.
 
 ## Schnell starten

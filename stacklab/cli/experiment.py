@@ -31,6 +31,7 @@ def main(argv=None):
     plan.add_argument('--threads', type=int, default=min(8, os.cpu_count() or 1))
     plan.add_argument('--thinking', action=argparse.BooleanOptionalAction, default=None)
     plan.add_argument('--thinking-budget', type=int)
+    plan.add_argument('--prompt-profile', choices=['auto', 'legacy', 'one-shot'], default='auto')
     plan.add_argument('--generation-timeout', type=int, default=600)
     plan.add_argument('--execution-timeout', type=int, default=180)
     pilot = sub.add_parser('pilot', help='Plan and run ten trials per model with automatic remote model changes')
@@ -41,6 +42,7 @@ def main(argv=None):
     pilot.add_argument('--cases', nargs='+', choices=CASES, default=['move-right', 'red-on-blue-jitter'])
     pilot.add_argument('--blocks', nargs='+', type=int, default=[1], help='One-block screening by default; select 4 for feedback trials')
     pilot.add_argument('--max-tokens', type=int, default=2048)
+    pilot.add_argument('--prompt-profile', choices=['auto', 'legacy', 'one-shot'], default='auto')
     pilot.add_argument('--generation-timeout', type=int, default=180)
     pilot.add_argument('--execution-timeout', type=int, default=180)
     pilot.add_argument('--recording', choices=['slim', 'full'], default='slim')
@@ -109,7 +111,8 @@ def main(argv=None):
                 blocks=args.blocks, max_tokens=args.max_tokens, server_url=args.server_url,
                 video=(args.video if args.video is not None else args.recording == 'full'),
                 gui=args.gui, generation_timeout=args.generation_timeout,
-                execution_timeout=args.execution_timeout, recording=args.recording, motion_fps=args.motion_fps)
+                execution_timeout=args.execution_timeout, recording=args.recording, motion_fps=args.motion_fps,
+                prompt_profile=args.prompt_profile)
             print(f'{len(frozen["episodes"])} planned episodes; all outputs: {args.output.resolve()}', flush=True)
             report = run_plan(args.output, backup_dir=args.backup_dir)
             from stacklab.review import write_review

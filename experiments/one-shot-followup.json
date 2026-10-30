@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "purpose": "Paired development comparison of legacy and one-shot system prompts; no error feedback",
+  "models": ["nemotron8b", "granite8b", "qwen9b"],
+  "cases": ["move-right", "red-on-blue-jitter"],
+  "scene_seeds": [100, 101, 102, 103, 104],
+  "generation_seeds": [1000, 1001, 1002, 1003, 1004],
+  "prompt_profiles": ["legacy", "one-shot"],
+  "blocks": [1],
+  "max_tokens": 2048,
+  "generation_timeout": 180,
+  "execution_timeout": 180,
+  "recording": "slim",
+  "motion_fps": 10,
+  "video": false,
+  "gui": false
+}
