@@ -128,7 +128,8 @@ class Agent:
         started = time.monotonic()
         with (directory/'trajectory.jsonl').open('w', encoding='utf-8') as trajectory:
             def record(kind, data):
-                trajectory.write(json.dumps(dict(event=kind, data=data), ensure_ascii=False)+'\n')
+                trajectory.write(json.dumps(dict(event=kind, data=data, wall_seconds=time.monotonic()-started,
+                                                 simulation_time_s=float(self.robot.data.time)), ensure_ascii=False)+'\n')
                 trajectory.flush()
 
             try:

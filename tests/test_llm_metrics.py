@@ -204,6 +204,27 @@ class MetricsTests(unittest.TestCase):
             self.assertTrue(metadata['constrained_decoding'])
             self.assertNotIn('enable_thinking', request['chat_template_kwargs'])
 
+    def test_slim_local_recording_keeps_native_counters_without_writing_token_chunks(self):
+        chunk = dict(choices=[dict(delta=dict(content='{"code":"","done":true}'), finish_reason='stop')],
+                     usage=dict(completion_tokens=3), timings=dict(predicted_n=3, predicted_ms=1000))
+        data = ('data: '+json.dumps(chunk)+'\n\ndata: [DONE]\n\n').encode()
+        with tempfile.TemporaryDirectory() as temp:
+            client = LocalModel('lfm2.6b')
+            client.record_stream = False
+            client.address = 'http://127.0.0.1:12345'
+            with patch.object(client, 'start'), patch.object(client.opener, 'open', return_value=io.BytesIO(data)):
+                _, metadata = client.complete([dict(role='system', content='fixture'), dict(role='user', content='fixture')], temp)
+            self.assertEqual(metadata['performance']['native_decode_tokens'], 2)
+            self.assertEqual(metadata['performance']['decode_tokens_per_second'], 2)
+            self.assertIs(metadata['native_stream_recorded'], False)
+            self.assertFalse((Path(temp)/'stream.jsonl').exists())
+
+    def test_hidden_token_text_is_not_queued_for_the_terminal(self):
+        display = Presenter(stats_stream=io.StringIO())
+        for _ in range(1000):
+            display.event('token', dict(kind='reasoning_content', text='unused display text'))
+        self.assertTrue(display.events.empty())
+
 
 if __name__ == '__main__':
     unittest.main()

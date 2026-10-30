@@ -113,6 +113,37 @@ class RemoteTests(unittest.TestCase):
             RemoteModel(self.url, model='qwen9b')
         self.assertEqual(self.model.calls, [])
 
+    def test_slim_recording_keeps_complete_evidence_and_skips_duplicate_stream_files(self):
+        self.generate(output=self.root/'full')
+        client = RemoteModel(self.url, recording='slim')
+        raw, metadata = self.generate(client=client, output=self.root/'slim')
+        full, slim = self.root/'full', self.root/'slim'
+        self.assertIn('robot.jog', raw)
+        self.assertEqual(metadata['recording'], 'slim')
+        for name in ('request.json', 'response.json', 'generation.json', 'remote-server.json', 'remote-request.json'):
+            self.assertTrue((slim/name).is_file(), name)
+        for name in ('stream.jsonl', 'remote-stream.jsonl', 'server-generation.json'):
+            self.assertFalse((slim/name).exists(), name)
+        for name in ('request.json', 'response.json'):
+            self.assertEqual(json.loads((slim/name).read_text(encoding='utf-8')),
+                             json.loads((full/name).read_text(encoding='utf-8')))
+        self.assertIs(self.model.calls[-1]['options']['record_stream'], False)
+        self.assertLess(sum(p.stat().st_size for p in slim.iterdir()),
+                        sum(p.stat().st_size for p in full.iterdir()))
+
+    def test_slim_recording_preserves_partial_text_after_a_disconnected_stream(self):
+        def disconnect(handler):
+            handler.send_response(200)
+            handler.end_headers()
+            handler.wfile.write((json.dumps(dict(event='delta', data=dict(kind='content', text='robot.jog(')))+'\n').encode())
+            handler.wfile.flush()
+        client = RemoteModel(self.url, recording='slim')
+        with patch.object(InferenceHandler, 'do_POST', disconnect), self.assertRaisesRegex(RuntimeError, 'ended before'):
+            self.generate(client=client)
+        value = json.loads((self.root/'local/response.json').read_text(encoding='utf-8'))
+        self.assertEqual(value['choices'][0]['message']['content'], 'robot.jog(')
+        self.assertFalse((self.root/'local/remote-stream.jsonl').exists())
+
     def test_restarted_server_cannot_silently_change_the_model(self):
         self.server.info['server_id'] = uuid4().hex
         with self.assertRaisesRegex(RuntimeError, 'restarted'):
@@ -180,6 +211,22 @@ class RemoteTests(unittest.TestCase):
         metadata = json.loads((self.root/'local/generation.json').read_text(encoding='utf-8'))
         self.assertTrue(metadata['performance']['partial'])
         self.assertIsNone(metadata['finish_reason'])
+
+    def test_a_structured_timeout_reply_still_marks_native_metrics_as_partial(self):
+        def timeout_reply(handler):
+            handler.send_response(200)
+            handler.end_headers()
+            value = dict(event='result', data=dict(raw=None, error=dict(type='TimeoutError', message='controlled timeout'),
+                files={'request.json': {}, 'response.json': {},
+                       'generation.json': dict(finish_reason='stop', performance=dict(partial=False))}))
+            handler.wfile.write((json.dumps(value)+'\n').encode())
+            handler.wfile.flush()
+        with patch.object(InferenceHandler, 'do_POST', timeout_reply), self.assertRaises(TimeoutError):
+            self.generate()
+        value = json.loads((self.root/'local/generation.json').read_text(encoding='utf-8'))
+        self.assertTrue(value['transport_complete'])
+        self.assertTrue(value['performance']['partial'])
+        self.assertIsNone(value['finish_reason'])
 
     def test_dropped_connection_preserves_partial_output_and_never_returns_a_program(self):
         def disconnect(handler):

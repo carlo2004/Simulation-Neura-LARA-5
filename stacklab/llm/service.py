@@ -32,6 +32,7 @@ class InferenceServer(ThreadingHTTPServer):
         self.install_missing = install_missing
         self.load_timeout = load_timeout
         self.info['capabilities'] = dict(model_switch=allow_model_switch, install_missing=install_missing)
+        self.info['capabilities']['recordings'] = ['slim', 'full']
         if allow_model_switch:
             from stacklab.llm.catalog import lock, model_keys
             self.info['model_catalog'] = {key: lock(key, device=self.device) for key in model_keys()}
@@ -149,6 +150,9 @@ class InferenceHandler(BaseHTTPRequestHandler):
                 self.reply(503, dict(error='No model is ready; select a working model first'))
                 return
             messages, options = data.get('messages'), data.get('options')
+            recording = data.get('recording', 'full')
+            if recording not in ('slim', 'full'):
+                raise ValueError('recording must be slim or full')
             if not isinstance(messages, list) or not messages or not all(
                     isinstance(m, dict) and m.get('role') in ('system', 'user', 'assistant')
                     and isinstance(m.get('content'), str) for m in messages):
@@ -193,7 +197,8 @@ class InferenceHandler(BaseHTTPRequestHandler):
                     cancelled=stopped.is_set,
                     on_delta=lambda kind, text: emit('delta', dict(kind=kind, text=text)),
                     on_progress=lambda value: emit('progress', value),
-                    on_native=lambda value: emit('native', value))
+                    on_native=(lambda value: emit('native', value)) if recording == 'full' else (lambda value: None),
+                    record_stream=recording == 'full')
             except Exception as failure:
                 error = dict(type=type(failure).__name__, message=str(failure))
             files = {name: json.loads((output/name).read_text(encoding='utf-8'))

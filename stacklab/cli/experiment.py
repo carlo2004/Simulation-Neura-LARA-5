@@ -18,6 +18,8 @@ def main(argv=None):
     plan.add_argument('--models', nargs='+', required=True)
     plan.add_argument('--device', choices=['cpu', 'cuda'], default='cpu')
     plan.add_argument('--video', action='store_true')
+    plan.add_argument('--recording', choices=['slim', 'full'], default='full')
+    plan.add_argument('--motion-fps', type=int, default=0)
     plan.add_argument('--gui', action='store_true')
     plan.add_argument('--server-url', help='SSH loopback URL of a benchmark-enabled model server')
     plan.add_argument('--paired-seeds', action='store_true', help='Zip scene/generation seeds instead of a Cartesian product')
@@ -41,7 +43,10 @@ def main(argv=None):
     pilot.add_argument('--max-tokens', type=int, default=2048)
     pilot.add_argument('--generation-timeout', type=int, default=180)
     pilot.add_argument('--execution-timeout', type=int, default=180)
-    pilot.add_argument('--video', action=argparse.BooleanOptionalAction, default=True)
+    pilot.add_argument('--recording', choices=['slim', 'full'], default='slim')
+    pilot.add_argument('--motion-fps', type=int, default=10, help='Small pose records for later replay; 0 disables them')
+    pilot.add_argument('--video', action=argparse.BooleanOptionalAction, default=None,
+                       help='Encode video during the trial; default off in slim, on in full mode')
     pilot.add_argument('--gui', action='store_true', help='Watch the local viewer; use identically on both GPUs')
     pilot.add_argument('--backup-dir', type=Path)
     pilot.add_argument('--publish', metavar='OWNER/REPO', help='Publish evidence as a GitHub Release after the run')
@@ -51,6 +56,13 @@ def main(argv=None):
     publication = sub.add_parser('publish', help='Upload recorded raw data/video and reports as a GitHub Release')
     publication.add_argument('directory', type=Path)
     publication.add_argument('--repository', required=True)
+    review = sub.add_parser('review', help='Build an offline HTML report with prompts, code, timing and optional videos')
+    review.add_argument('directory', type=Path)
+    review.add_argument('--include-reasoning', action='store_true', help='Include actual model-provided reasoning, folded by default')
+    review.add_argument('--videos', type=int, default=0, help='Render at most N sample clips from saved poses')
+    replay = sub.add_parser('replay', help='Render a recorded episode; no inference or physics evaluation')
+    replay.add_argument('directory', type=Path, help='episode-... directory containing motion.jsonl and scene.json')
+    replay.add_argument('--output', type=Path)
     for command, help_text in [('run', 'Run pending episodes; preserve existing attempts'),
                                 ('report', 'Rebuild JSON, CSV and Markdown without starting a model'),
                                 ('backup', 'Save existing raw evidence and reports in an atomic ZIP')]:
@@ -63,6 +75,17 @@ def main(argv=None):
             child.add_argument('--output', type=Path, required=True, help='Destination folder outside the experiment')
     args = parser.parse_args(argv)
     try:
+        if args.command == 'review':
+            from stacklab.review import write_review
+            print(write_review(args.directory, include_reasoning=args.include_reasoning, videos=args.videos))
+            return 0
+        if args.command == 'replay':
+            from stacklab.sim.recording import render_replay
+            print(render_replay(args.directory, args.output))
+            if (args.directory.parent/'manifest.json').is_file():
+                from stacklab.review import write_review
+                print(write_review(args.directory.parent))
+            return 0
         if args.command == 'compare':
             from stacklab.comparison import compare_experiments
             compare_experiments(args.directories, args.output)
@@ -84,10 +107,13 @@ def main(argv=None):
                 scene_seeds=list(range(100, 100+args.repetitions)),
                 generation_seeds=list(range(1000, 1000+args.repetitions)), paired_seeds=True,
                 blocks=args.blocks, max_tokens=args.max_tokens, server_url=args.server_url,
-                video=args.video, gui=args.gui, generation_timeout=args.generation_timeout,
-                execution_timeout=args.execution_timeout)
+                video=(args.video if args.video is not None else args.recording == 'full'),
+                gui=args.gui, generation_timeout=args.generation_timeout,
+                execution_timeout=args.execution_timeout, recording=args.recording, motion_fps=args.motion_fps)
             print(f'{len(frozen["episodes"])} planned episodes; all outputs: {args.output.resolve()}', flush=True)
             report = run_plan(args.output, backup_dir=args.backup_dir)
+            from stacklab.review import write_review
+            print('Review: '+str(write_review(args.output, report=report)), flush=True)
             if args.publish:
                 from stacklab.publication import publish_experiment
                 print(publish_experiment(args.output, args.publish))
@@ -105,6 +131,8 @@ def main(argv=None):
             print('Install selected models with stacklab setup, then: stacklab experiment run '+str(directory))
             return 0
         report = run_plan(args.directory, backup_dir=args.backup_dir) if args.command == 'run' else write_report(args.directory)
+        from stacklab.review import write_review
+        write_review(args.directory, report=report)
         if args.command == 'run' and args.publish:
             from stacklab.publication import publish_experiment
             print(publish_experiment(args.directory, args.publish))

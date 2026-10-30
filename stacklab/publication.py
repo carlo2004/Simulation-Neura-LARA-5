@@ -19,10 +19,12 @@ def publish_experiment(directory, repository):
         raise ValueError('GitHub CLI is missing; install gh and run gh auth login on the local computer')
     directory = Path(directory).resolve()
     plan = load_plan(directory)
-    write_report(directory)
+    report = write_report(directory)
+    from stacklab.review import write_review
+    write_review(directory, report=report)
     allowed_roots = {e['episode_id'] for e in plan['episodes']} | {'model-setups'}
     allowed_files = {'manifest.json', 'runtime-verification.json', 'summary.json', 'results.csv',
-                     'report.md', 'ranking.json', 'ranking.md'}
+                     'report.md', 'ranking.json', 'ranking.md', 'review.html'}
     # Export only the benchmark's own records, not unrelated local files.
     paths = [p for p in directory.rglob('*') if
              p.relative_to(directory).parts[0] in allowed_roots or p.name in allowed_files

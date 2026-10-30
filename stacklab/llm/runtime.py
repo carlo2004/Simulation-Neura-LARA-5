@@ -1,6 +1,7 @@
 """Reusable local llama.cpp session with streamed output and explicit cancellation."""
 from stacklab.paths import ROOT, CACHE_ROOT
 import hashlib
+from contextlib import nullcontext
 import json
 import socket
 import subprocess
@@ -89,8 +90,10 @@ class LocalModel:
 
     def complete(self, messages, output, *, max_tokens=2048, seed=42, thinking=None,
                  timeout=600, on_delta=None, cancelled=None, thinking_budget=None, on_progress=None,
-                 on_native=None):
+                 on_native=None, record_stream=None):
         config = self.config
+        if record_stream is None:
+            record_stream = getattr(self, 'record_stream', True)
         if type(max_tokens) is not int or not 0 < max_tokens < config.get('context_tokens', 4096):
             raise ValueError('max-tokens must be positive and smaller than the model context')
         if timeout <= 0:
@@ -137,6 +140,7 @@ class LocalModel:
         metadata['server_args'] = config.get('server_args', [])
         metadata['prompt_cache_enabled'] = getattr(self, 'cache_prompt', True)
         metadata['runtime_source'] = config.get('runtime_source')
+        metadata['native_stream_recorded'] = bool(record_stream)
         started = time.monotonic()
         metrics = GenerationMetrics()
         last_progress = float('-inf')
@@ -171,7 +175,8 @@ class LocalModel:
             request = urllib.request.Request(self.address+'/v1/chat/completions',
                         data=json.dumps(payload).encode('utf-8'), headers={'Content-Type': 'application/json'})
             remaining = max(1, timeout-(time.monotonic()-started))
-            with self.opener.open(request, timeout=remaining) as response, (output/'stream.jsonl').open('w', encoding='utf-8') as events:
+            with self.opener.open(request, timeout=remaining) as response, \
+                    ((output/'stream.jsonl').open('w', encoding='utf-8') if record_stream else nullcontext(None)) as events:
                 for line in response:
                     if cancelled and cancelled():
                         raise GenerationCancelled('Generation cancelled')
@@ -184,8 +189,9 @@ class LocalModel:
                     if data == '[DONE]':
                         break
                     chunk = json.loads(data)
-                    events.write(json.dumps(chunk, ensure_ascii=False)+'\n')
-                    events.flush()
+                    if events is not None:
+                        events.write(json.dumps(chunk, ensure_ascii=False)+'\n')
+                        events.flush()
                     if on_native:
                         on_native(chunk)
                     metrics.update(chunk)

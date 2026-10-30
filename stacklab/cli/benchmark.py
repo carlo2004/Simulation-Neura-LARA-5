@@ -69,6 +69,8 @@ def run_case(name, args, directory, *, case=None):
             command += ['--server-url', args.server_url, '--expected-server-id', args.expected_server_id]
         if getattr(args, 'batch', False):
             command += ['--result-hold-seconds', '0']
+        command += ['--recording', getattr(args, 'recording', 'full'),
+                    '--motion-fps', str(getattr(args, 'motion_fps', 0))]
         if args.thinking_budget is not None:
             command += ['--thinking-budget', str(args.thinking_budget)]
         if args.gui:

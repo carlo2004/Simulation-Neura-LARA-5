@@ -159,7 +159,25 @@ class RemoteExperimentTests(unittest.TestCase):
                          '--no-video'])
         self.assertEqual(code, 0)
         self.assertEqual(len(exp.load_plan(self.root/'pilot')['episodes']), 70)
+        for condition in exp.load_plan(self.root/'pilot')['conditions']:
+            self.assertEqual(condition['recording'], 'slim')
+            self.assertEqual(condition['motion_fps'], 10)
+            self.assertIs(condition['video'], False)
         run.assert_called_once()
+
+    def test_slim_worker_records_actual_motion_without_live_video_encoding(self):
+        plan = self.plan(recording='slim', motion_fps=10, video=False)
+        with redirect_stdout(io.StringIO()):
+            report = exp.run_plan(self.root/'run')
+        self.assertEqual(report['episodes'][0]['status'], 'success')
+        path = self.root/'run'/plan['episodes'][0]['episode_id']
+        poses = [json.loads(line) for line in (path/'motion.jsonl').read_text(encoding='utf-8').splitlines()]
+        self.assertEqual(poses[0]['kind'], 'header')
+        self.assertEqual(poses[-1]['kind'], 'end')
+        self.assertGreater(poses[-1]['samples'], 10)
+        self.assertFalse((path/'simulation.mp4').exists())
+        self.assertTrue((path/'episode/round_01/response.json').is_file())
+        self.assertFalse((path/'episode/round_01/stream.jsonl').exists())
 
     def test_gpu_comparison_requires_identical_cases_profiles_and_budgets(self):
         first = self.plan('l4')

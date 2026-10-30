@@ -11,7 +11,7 @@ from stacklab.sim.overlays import Overlays
 from stacklab.sim.manual import ManualControl
 from stacklab.paths import ROOT
 
-def scene_xml(c):
+def scene_xml(c, *, visuals=True):
     root = E.parse(ROOT/'assets/robots/lara5/lara5.xml').getroot()
     root.find('compiler').set('meshdir', str(ROOT/'assets/robots/lara5/assets'))
     root.find('option').attrib.update(timestep='0.002', gravity='0 0 -9.81', iterations='80', cone='elliptic')
@@ -59,16 +59,32 @@ def scene_xml(c):
         E.SubElement(body, 'geom', name=name+'_geom', type=kind,
                      size=' '.join(map(str, size)), mass=str(spec.mass_kg), friction='1 .01 .001',
                      condim='4', solref='.005 1', rgba=' '.join(map(str, spec.rgba())))
+    if not visuals:
+        # Explicit body inertia (robot) or zero density (object visuals) keeps
+        # these non-colliding meshes independent of the physical mass model.
+        for body in w.iter('body'):
+            for geom in list(body.findall('geom')):
+                if (geom.get('type') == 'mesh' and geom.get('contype') == '0'
+                        and geom.get('conaffinity') == '0'
+                        and (body.find('inertial') is not None or geom.get('density') == '0')):
+                    body.remove(geom)
+        used = {geom.get('mesh') for geom in w.iter('geom') if geom.get('mesh')}
+        for mesh in list(asset.findall('mesh')):
+            if mesh.get('name') not in used:
+                asset.remove(mesh)
     return E.tostring(root, encoding='unicode')
 
 class Simulation:
-    def __init__(self, config=None, video=None, gui=False, show_settings=False, axes=False, stackviz=None):
+    def __init__(self, config=None, video=None, gui=False, show_settings=False, axes=False, stackviz=None, visuals=True):
         self.config = (config or Config()).validate()
+        self.visuals = bool(visuals)
+        if not self.visuals and (gui or video):
+            raise ValueError('GUI/video require visual geometry; use visuals=True')
         self.show_settings = bool(show_settings)
         self.manual = ManualControl()
         self._push_watch = None
         self._push_had_contact = False
-        self.model = mujoco.MjModel.from_xml_string(scene_xml(self.config))
+        self.model = mujoco.MjModel.from_xml_string(scene_xml(self.config, visuals=self.visuals))
         self.objects = {spec.name: spec for spec in self.config.object_specs()}
         self.overlays = Overlays(axes)
         if stackviz is not None:
@@ -77,6 +93,7 @@ class Simulation:
         self.ikdata = mujoco.MjData(self.model)
         self.sid = self.model.site('tcp').id
         self.events = []
+        self.record_callback = None
         self.frames = 0
         self._last_view_refresh = None
         self._last_overlay_refresh = None
@@ -108,6 +125,8 @@ class Simulation:
         return tuple(self.objects)
 
     def open_viewer(self):
+        if not self.visuals:
+            raise ValueError('Recreate the simulation with visuals=True before opening a viewer')
         from mujoco import viewer
         self.viewer = viewer.launch_passive(
             self.model, self.data,
@@ -251,6 +270,9 @@ class Simulation:
                     for c in self.data.contact)
             if not np.all(np.isfinite(self.data.qpos)):
                 raise RuntimeError('Nonfinite simulation state')
+            record = getattr(self, 'record_callback', None)
+            if record is not None:
+                record(self)
             target_frame = int(self.data.time*self.config.fps)
             if target_frame > self.frames:
                 self.frames = target_frame

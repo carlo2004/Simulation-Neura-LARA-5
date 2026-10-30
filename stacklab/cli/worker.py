@@ -27,6 +27,8 @@ def main():
     p.add_argument('--expected-server-id')
     p.add_argument('--device', choices=['cpu', 'cuda'], default='cpu')
     p.add_argument('--video', type=Path)
+    p.add_argument('--recording', choices=['slim', 'full'], default='full')
+    p.add_argument('--motion-fps', type=int, default=0)
     p.add_argument('--instruction')
     p.add_argument('--max-tokens', type=int, default=2048)
     p.add_argument('--threads', type=int, default=8)
@@ -39,10 +41,13 @@ def main():
     result = dict(success=False, stage='validation', actions=[])
     robot = None
     interpreter = None
+    recorder = None
     started = time.monotonic()
     try:
         if not math.isfinite(args.result_hold_seconds) or args.result_hold_seconds < 0:
             raise ValueError('result-hold-seconds must be finite and nonnegative')
+        if not 0 <= args.motion_fps <= 60:
+            raise ValueError('motion-fps must be 0–60')
         if args.code is not None:
             code = args.code.read_text(encoding='utf-8')
             validate(code)
@@ -50,7 +55,12 @@ def main():
             raise ValueError('Choose a source/target pair or a movement delta')
         from stacklab.sim.robot import Simulation
         robot = Simulation(Config.load(args.config), video=args.video, gui=args.gui, axes=args.axes,
-                           stackviz=(args.source, args.target) if args.stackviz and args.source else None)
+                           stackviz=(args.source, args.target) if args.stackviz and args.source else None,
+                           visuals=not (args.recording == 'slim' and not (args.gui or args.video)))
+        if args.motion_fps:
+            from stacklab.sim.recording import MotionRecorder
+            recorder = MotionRecorder(robot, args.result.parent/'motion.jsonl', args.motion_fps)
+            robot.record_callback = recorder.capture
         if args.source:
             robot._pair(args.source, args.target)
             goal = dict(type='stack', source=args.source, target=args.target)
@@ -64,12 +74,14 @@ def main():
             from stacklab.cli.presentation import Presenter
             if not args.instruction:
                 raise ValueError('Feedback evaluation needs --instruction')
-            client = RemoteModel(args.server_url, args.model) if args.server_url else LocalModel(
+            client = RemoteModel(args.server_url, args.model, recording=args.recording) if args.server_url else LocalModel(
                 args.model, threads=args.threads, device=args.device)
+            if not args.server_url:
+                client.record_stream = args.recording == 'full'
             if args.expected_server_id and client.info['server_id'] != args.expected_server_id:
                 raise ValueError('Remote server changed after model selection; episode was not run')
             with closing(client):
-                display = Presenter(stats_stream=sys.stdout)
+                display = Presenter(stats_stream=sys.stdout, compact=args.recording == 'slim')
                 agent = Agent(robot, client, max_rounds=max(1, args.feedback_rounds), max_tokens=args.max_tokens,
                               thinking=args.thinking, seed=args.seed, generation_timeout=args.generation_timeout,
                               thinking_budget=args.thinking_budget,
@@ -124,6 +136,11 @@ def main():
     finally:
         if interpreter is not None:
             result['actions'] = interpreter.actions
+        if recorder is not None:
+            robot.record_callback = None
+            result['motion'] = recorder.close(robot)
+            if result['motion']['error']:
+                result['recording_error'] = result['motion']['error']
         result['wall_seconds'] = time.monotonic()-started
         write_json(args.result, result)
         if robot is not None:

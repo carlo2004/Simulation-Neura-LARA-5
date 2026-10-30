@@ -1,5 +1,10 @@
 # Automatischer Modellvergleich auf L4 und A100
 
+Ab Version 3.6 ist der Pilot standardmäßig schlank: kompakte Bewegungsdaten statt
+laufendem Video-Encoding. Die [schlanke Aufzeichnung und HTML-Sichtung](slim-benchmark.md)
+erklärt Datenumfang, optionale Videos und die Aufteilung zwischen automatischer
+Bewertung und händischer Fehleranalyse.
+
 ## Der erste sinnvolle Vergleich
 
 Eine kleine **Entwicklungsprobe mit zehn Episoden je Modell und GPU** beantwortet
@@ -81,15 +86,15 @@ Windows PowerShell im lokalen Projektordner:
 
 ```powershell
 .\.venv\Scripts\python.exe -m stacklab doctor --server-url http://127.0.0.1:8765
-.\.venv\Scripts\python.exe -m stacklab experiment pilot --server-url http://127.0.0.1:8765 --output runs/l4-pilot --gui
+.\.venv\Scripts\python.exe -m stacklab experiment pilot --server-url http://127.0.0.1:8765 --output runs/l4-pilot
 ```
 
-Das sind standardmäßig alle sieben Modelle mit je zehn Episoden. `--gui` zeigt
-die Versuche live; Overlays bleiben aus. Ohne `--gui` läuft die lokale Physik ohne
-Fenster schneller. Videos werden in beiden Fällen standardmäßig aufgezeichnet;
-`--no-video` spart Aufzeichnungsaufwand. Auf beiden GPUs dieselben Optionen
-verwenden. Die Videolaufzeit folgt der Simulationszeit. Wartezeit während der
-Inferenz steht in den Messdaten und erscheint nicht als minutenlanges Standbild.
+Das sind standardmäßig alle sieben Modelle mit je zehn Episoden. Die Physik läuft
+ohne Fenster und Video-Encoding; kleine Bewegungsdaten erlauben späteres Replay.
+`--gui` zeigt die Versuche live, `--video` zeichnet sofort auf, und
+`--recording full` aktiviert ausführliche Streams samt sofortiger Videos.
+Auf beiden GPUs dieselben Optionen verwenden. Videos folgen der Simulationszeit;
+Modellwartezeiten stehen separat in den Messdaten.
 
 Ein kleiner Verbindungscheck vor dem Hauptlauf:
 
@@ -117,7 +122,7 @@ Die unbenutzte L4-Sitzung beenden und GPU-Ressourcen freigeben. Auf A100 denselb
 Code-Stand und Serverbefehl mit neuem Tunnel verwenden. Dann lokal:
 
 ```powershell
-.\.venv\Scripts\python.exe -m stacklab experiment pilot --server-url http://127.0.0.1:8765 --output runs/a100-pilot --gui
+.\.venv\Scripts\python.exe -m stacklab experiment pilot --server-url http://127.0.0.1:8765 --output runs/a100-pilot
 .\.venv\Scripts\python.exe -m stacklab experiment compare runs/l4-pilot runs/a100-pilot --output runs/l4-a100-comparison
 ```
 
@@ -133,9 +138,11 @@ Gleiche Seeds garantieren keine bitgleichen Antworten auf verschiedener Hardware
 | `manifest.json` | Eingefrorener Plan, Modelle, Quantisierung, Profile, Seeds, lokale und entfernte Hardware/Software/Quellcode-Hashes |
 | `model-setups/` | Einrichtung, Ladezeit, Modellwechsel, Offload-Diagnose und gesonderter Aufwärmversuch |
 | `episode-…/` | Szene, rohe Antworten/Streams, erzeugter Code, API-Aktionen, Fehler, Physikzustände und Bewertung |
-| `episode-…/simulation.mp4` | Tatsächlich ausgeführte Bewegung, auch bei Fehlversuchen |
+| `episode-…/motion.jsonl` | Kompakte Posen der tatsächlichen Bewegung für späteres Replay |
+| `episode-…/simulation.mp4` | Optional sofort oder später erzeugtes Video |
 | `results.csv`, `summary.json`, `report.md` | Ergebnisse pro Episode, Modell, Aufgabe und Blockbudget |
 | `ranking.json`, `ranking.md` | Vorläufiger Modellvergleich, Technikfehler, Tokenrate, erstes Token und Episodendauer |
+| `review.html` | Offline-Sichtung mit Auftrag, Antwort, Code, Zeiten und optionalen Videos |
 | Vergleichsordner | `comparison.csv`, `.json`, `.md` mit beiden GPU-Läufen |
 
 **Qualität:** Gemessener Zielerfolg. Eine Fertigmeldung des Modells genügt nicht.
@@ -164,7 +171,7 @@ Auf dem **lokalen Rechner** die GitHub CLI `gh` installieren und einmal mit
 Automatisch nach dem Lauf veröffentlichen:
 
 ```powershell
-.\.venv\Scripts\python.exe -m stacklab experiment pilot --server-url http://127.0.0.1:8765 --output runs/l4-pilot --gui --publish carlo2004/Simulation-Neura-LARA-5
+.\.venv\Scripts\python.exe -m stacklab experiment pilot --server-url http://127.0.0.1:8765 --output runs/l4-pilot --publish carlo2004/Simulation-Neura-LARA-5
 ```
 
 Oder einen vorhandenen Lauf später hochladen:

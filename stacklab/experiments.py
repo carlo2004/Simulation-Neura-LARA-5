@@ -59,7 +59,7 @@ def source_hashes():
 def create_plan(directory, *, models, cases, scene_seeds, generation_seeds, blocks,
                 max_tokens=2048, threads=8, thinking=None, thinking_budget=None,
                 generation_timeout=600, execution_timeout=180, device='cpu', video=False,
-                server_url=None, paired_seeds=False, gui=False):
+                server_url=None, paired_seeds=False, gui=False, recording='full', motion_fps=0):
     directory = Path(directory).resolve()
     if directory.exists() and any(directory.iterdir()):
         raise ValueError('Choose a new empty experiment directory; existing evidence is preserved')
@@ -75,6 +75,8 @@ def create_plan(directory, *, models, cases, scene_seeds, generation_seeds, bloc
         raise ValueError('Token, thread and time budgets must be positive integers')
     if max(generation_seeds)+max(blocks)-1 > 2**31-1:
         raise ValueError('Generation seeds plus round offsets exceed the supported range')
+    if recording not in ('slim', 'full') or type(motion_fps) is not int or not 0 <= motion_fps <= 60:
+        raise ValueError('Use recording slim/full and motion-fps 0–60')
     if paired_seeds and len(scene_seeds) != len(generation_seeds):
         raise ValueError('Paired scene and generation seeds must have equal lengths')
     remote = None
@@ -84,6 +86,8 @@ def create_plan(directory, *, models, cases, scene_seeds, generation_seeds, bloc
             raise ValueError('Remote experiments need serve --allow-model-switch')
         if info.get('prompt_cache') is not False:
             raise ValueError('Benchmark server must explicitly disable prompt caching')
+        if recording == 'slim' and 'slim' not in info.get('capabilities', {}).get('recordings', []):
+            raise ValueError('Update the model server for slim recording, or select --recording full')
         remote = dict(url=server_url, identity=remote_identity(info))
         device = info.get('device', 'cpu')
         threads = info['threads']
@@ -116,7 +120,9 @@ def create_plan(directory, *, models, cases, scene_seeds, generation_seeds, bloc
         if enabled and (budget < -1 or budget >= max_tokens):
             raise ValueError('Thinking budget must be -1 or smaller than max-tokens')
         for count in blocks:
-            condition = dict(model=key, model_config=config, device=device, video=video, gui=gui, blocks=count, max_tokens=max_tokens,
+            condition = dict(model=key, model_config=config, device=device, video=video, gui=gui,
+                             recording=recording, motion_fps=motion_fps, blocks=count, max_tokens=max_tokens,
+                             visual_meshes=not (recording == 'slim' and not (gui or video)),
                              threads=threads, thinking=enabled, thinking_budget=budget if enabled else None,
                              generation_timeout=generation_timeout, execution_timeout=execution_timeout)
             condition['condition_id'] = 'condition-'+digest(condition)[:16]
@@ -151,6 +157,7 @@ def create_plan(directory, *, models, cases, scene_seeds, generation_seeds, bloc
                  profiles=c['model_config']['profiles'], server_args=c['model_config'].get('server_args'),
                  response_format=c['model_config'].get('response_format'),
                  gui=c.get('gui', False), video=c.get('video', False), threads=c['threads'],
+                 recording=c['recording'], motion_fps=c['motion_fps'],
                  generation_timeout=c['generation_timeout'], execution_timeout=c['execution_timeout'])
             for e in episodes for c in conditions if c['condition_id'] == e['condition_id']],
         server_software=({k: remote['identity']['software'].get(k) for k in
@@ -248,7 +255,7 @@ def run_plan(directory, backup_dir=None):
                     warm_started = time.monotonic()
                     client = None
                     try:
-                        client = RemoteModel(remote['url'], condition['model'])
+                        client = RemoteModel(remote['url'], condition['model'], recording=condition.get('recording', 'full'))
                         client.complete([dict(role='system', content='Return a short JSON object.'),
                                          dict(role='user', content='Return {"code":"","done":true}.')],
                                         setup_path/'warmup', max_tokens=64, seed=0,
@@ -285,7 +292,7 @@ def run_plan(directory, backup_dir=None):
             write_json(path/'manifest.json', dict(schema_version=SCHEMA, **episode,
                        plan_sha256=plan['plan_sha256'], started_at_utc=utc_now()))
             args = SimpleNamespace(**{k: v for k, v in condition.items()
-                                     if k not in ('condition_id', 'model_config', 'blocks', 'gui')},
+                                     if k not in ('condition_id', 'model_config', 'blocks', 'gui', 'visual_meshes')},
                                    seed=episode['generation_seed'], generation_seed=episode['generation_seed'],
                                    scene_seed=case['scene_seed'],
                                    feedback_rounds=0 if condition['blocks'] == 1 else condition['blocks'],
@@ -338,6 +345,7 @@ def episode_result(directory, episode, condition, case, plan_sha256):
                    execution_seconds=sum(r.get('execution_seconds', 0) for r in turns),
                    evaluation_seconds=sum(r.get('evaluation_seconds', 0) for r in turns),
                    performance=execution.get('inference_performance', {}))
+        row['recording_error'] = execution.get('recording_error')
         if not complete:
             return row
         status = execution.get('status')

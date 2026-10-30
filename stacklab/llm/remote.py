@@ -1,5 +1,6 @@
 """Inference across a loopback SSH forward; the robot and its interpreter stay local."""
 import http.client
+from contextlib import nullcontext
 import json
 from pathlib import Path
 import socket
@@ -28,7 +29,10 @@ def endpoint(url):
 
 class RemoteModel:
     """Same complete/cancel interface as LocalModel, with native evidence copied back."""
-    def __init__(self, url, model=None):
+    def __init__(self, url, model=None, *, recording='full'):
+        if recording not in ('slim', 'full'):
+            raise ValueError('recording must be slim or full')
+        self.recording = recording
         self.host, self.port = endpoint(url)
         self.address = url.rstrip('/')
         self._guard = threading.Lock()
@@ -77,9 +81,11 @@ class RemoteModel:
             raise GenerationCancelled('Generation cancelled')
         output = Path(output)
         output.mkdir(parents=True, exist_ok=True)
-        (output/'remote-server.json').write_text(json.dumps(self.info, indent=2)+'\n', encoding='utf-8')
+        info = self.info if self.recording == 'full' else {k: v for k, v in self.info.items()
+                                                        if k not in ('model_catalog', 'capabilities')}
+        (output/'remote-server.json').write_text(json.dumps(info, indent=2)+'\n', encoding='utf-8')
         request_id = uuid4().hex
-        payload = dict(server_id=self.info['server_id'], request_id=request_id, messages=messages,
+        payload = dict(server_id=self.info['server_id'], request_id=request_id, messages=messages, recording=self.recording,
                        options=dict(max_tokens=max_tokens, seed=seed, thinking=thinking,
                                     timeout=timeout, thinking_budget=thinking_budget))
         (output/'remote-request.json').write_text(json.dumps(payload, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
@@ -110,8 +116,9 @@ class RemoteModel:
             response = connection.getresponse()
             if response.status != 200:
                 raise RuntimeError(json.loads(response.read(MAX_RECORD)).get('error', 'Remote request failed'))
-            with (output/'remote-stream.jsonl').open('w', encoding='utf-8') as wire, \
-                    (output/'stream.jsonl').open('w', encoding='utf-8') as native:
+            wire_log = (output/'remote-stream.jsonl').open('w', encoding='utf-8') if self.recording == 'full' else nullcontext(None)
+            native_log = (output/'stream.jsonl').open('w', encoding='utf-8') if self.recording == 'full' else nullcontext(None)
+            with wire_log as wire, native_log as native:
                 while True:
                     line = response.readline(MAX_RECORD+1)
                     if len(line) > MAX_RECORD:
@@ -119,12 +126,14 @@ class RemoteModel:
                     if not line:
                         raise RuntimeError('Remote connection ended before the result; partial evidence retained')
                     record = json.loads(line)
-                    wire.write(line.decode('utf-8'))
-                    wire.flush()
+                    if wire is not None:
+                        wire.write(line.decode('utf-8'))
+                        wire.flush()
                     kind, data = record['event'], record['data']
                     if kind == 'native':
-                        native.write(json.dumps(data, ensure_ascii=False)+'\n')
-                        native.flush()
+                        if native is not None:
+                            native.write(json.dumps(data, ensure_ascii=False)+'\n')
+                            native.flush()
                     elif kind == 'delta':
                         (partial_content if data['kind'] == 'content' else partial_reasoning).append(data['text'])
                         if on_delta:
@@ -169,7 +178,8 @@ class RemoteModel:
                 if name in files:
                     value = files[name]
                     if name == 'generation.json':
-                        (output/'server-generation.json').write_text(json.dumps(value, indent=2)+'\n', encoding='utf-8')
+                        if self.recording == 'full':
+                            (output/'server-generation.json').write_text(json.dumps(value, indent=2)+'\n', encoding='utf-8')
                         value = self._metadata(value, started)
                     (output/name).write_text(json.dumps(value, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
             if error:
@@ -181,9 +191,9 @@ class RemoteModel:
                          performance=dict(partial_performance, partial=True)), started)
                 metadata['error'] = type(error).__name__+': '+str(error)
                 metadata['transport_complete'] = final is not None
-                if final is None:
+                metadata['performance'] = dict(metadata.get('performance') or {}, partial=True)
+                if final is None or isinstance(error, (TimeoutError, GenerationCancelled)):
                     metadata['finish_reason'] = None
-                    metadata['performance']['partial'] = True
                 path.write_text(json.dumps(metadata, indent=2)+'\n', encoding='utf-8')
                 if 'response.json' not in files:
                     response = dict(choices=[dict(finish_reason=None, message=dict(role='assistant',
@@ -192,7 +202,7 @@ class RemoteModel:
         return final['raw'], json.loads((output/'generation.json').read_text(encoding='utf-8'))
 
     def _metadata(self, original, started):
-        return dict(original, inference='Remote Stack Lab inference through a loopback SSH forward',
+        return dict(original, recording=self.recording, inference='Remote Stack Lab inference through a loopback SSH forward',
                     transport=dict(protocol=PROTOCOL, url=self.address, server_id=self.info['server_id'],
                                    server_software=self.info['software'],
                                    client_round_trip_seconds=time.monotonic()-started))

@@ -7,9 +7,10 @@ from stacklab.cli.speed import format_speed
 
 
 class Presenter:
-    def __init__(self, stream=False, show_thinking=False, stats_stream=None):
+    def __init__(self, stream=False, show_thinking=False, stats_stream=None, compact=False):
         self.events = queue.Queue()
         self.stream, self.show_thinking = stream, show_thinking
+        self.compact = compact
         self.characters = 0
         self.last_progress = time.monotonic()
         self.stats_stream = sys.stderr if stats_stream is None else stats_stream
@@ -34,6 +35,8 @@ class Presenter:
         self.last_progress = time.monotonic()
 
     def event(self, kind, data):
+        if kind == 'token' and not (self.stream or self.show_thinking):
+            return
         if kind in ('token', 'inference'):
             self.events.put(dict(event=kind, **data))
         elif kind == 'generating':
@@ -49,8 +52,13 @@ class Presenter:
                 print()
             if data['message']:
                 print('Modell: '+data['message'], flush=True)
-            print('Generierter Python-Code:\n'+(data['code'] or '(keine weitere Aktion)'), flush=True)
+            if self.compact:
+                print('Programm: '+str(len(data['code'].splitlines()))+' Zeilen; vollstaendig im Protokoll.', flush=True)
+            else:
+                print('Generierter Python-Code:\n'+(data['code'] or '(keine weitere Aktion)'), flush=True)
         elif kind == 'action':
+            if self.compact:
+                return
             if data['phase'] == 'start':
                 print('  -> robot.'+data['method']+' '+json.dumps(dict(args=data['args'], kwargs=data['kwargs'])), flush=True)
             elif data.get('error'):
