@@ -1,19 +1,24 @@
 name: Python compatibility
 on:
   push:
+    branches: [main]
   pull_request:
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 permissions:
   contents: read
 jobs:
   cuda-source-build:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
         model: [granite8b, dory4b]
     container: nvidia/cuda:12.8.1-devel-ubuntu24.04
     env:
+      STACKLAB_CACHE_DIR: .cuda-cache
       # Build-only driver stub on GPU-less CI; Colab uses its actual NVIDIA driver.
       LD_LIBRARY_PATH: /usr/local/cuda/lib64/stubs:/usr/local/cuda/lib64:/usr/local/nvidia/lib:/usr/local/nvidia/lib64
       LDFLAGS: -Wl,-rpath-link,/usr/local/cuda/lib64/stubs
@@ -22,20 +27,30 @@ jobs:
       - name: Install source-build tools
         run: |
           apt-get update -qq
-          apt-get install -y -qq git cmake python3 g++
+          apt-get install -y -qq git cmake python3 g++ zstd
           ln -sf libcuda.so /usr/local/cuda/lib64/stubs/libcuda.so.1
-      - name: Compile pinned CUDA kernels for A100 and L4
+      - name: Cache verified CUDA runtime binaries
+        uses: actions/cache@v5
+        with:
+          path: |
+            .cuda-cache/runtime/**/installed.json
+            .cuda-cache/runtime/**/build/bin/**
+          key: ${{ runner.os }}-cuda-12.8.1-sm80-sm89-${{ matrix.model }}-${{ hashFiles('config/models.lock.json', 'stacklab/llm/source_runtime.py', 'stacklab/llm/catalog.py', 'stacklab/paths.py', '.github/workflows/tests.yml') }}
+      - name: Verify or build pinned CUDA kernels for A100 and L4
         env:
           STACKLAB_CUDA_RUNTIME: source
           STACKLAB_CI_MODEL: ${{ matrix.model }}
         run: |
           python3 - <<'PY'
-          import os
-          from stacklab.llm.catalog import CACHE_ROOT, lock
-          from stacklab.llm.source_runtime import build_runtime
+          import os, subprocess
+          from stacklab.llm.catalog import CACHE_ROOT, lock, runtime_env
+          from stacklab.llm.source_runtime import build_runtime, ready_runtime
           config = lock(os.environ['STACKLAB_CI_MODEL'], device='cuda')
-          print(build_runtime(config, CACHE_ROOT/'runtime'/config['runtime_version']))
-          print('CUDA compilation checked; this runner has no GPU for inference.')
+          directory = CACHE_ROOT/'runtime'/config['runtime_version']
+          print('Reusing verified CUDA binary' if ready_runtime(config, directory) else 'Cold CUDA build', flush=True)
+          executable = build_runtime(config, directory)
+          subprocess.run([str(executable), '--version'], env=runtime_env(executable), check=True)
+          print('Pinned CUDA runtime verified; this runner has no GPU for inference.')
           PY
       - name: CUDA build diagnostics on failure
         if: failure()
