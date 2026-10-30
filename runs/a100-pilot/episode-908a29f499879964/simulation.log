@@ -1,0 +1,20 @@
+
+Modell generiert Block 1/1 ...
+[Inferenz] Prompt verarbeiten / auf erstes Token warten | 0.0 s
+[Inferenz] Gesamt inkl. Prompt: 1.9 Token/s | Prompt: 3806.7 Token/s | 1 Ausgabetoken | 0.9 s
+[Inferenz] Ausgabe: 116.4 Token/s | Prompt: 3806.7 Token/s | 118 Ausgabetoken | 1.8 s
+[Inferenz] Ausgabe: 116.5 Token/s | Prompt: 3806.7 Token/s | 235 Ausgabetoken | 3.0 s
+[Inferenz] Ausgabe: 116.4 Token/s | Prompt: 3806.7 Token/s | 352 Ausgabetoken | 4.0 s
+[Inferenz] Ausgabe: 116.6 Token/s | Prompt: 3806.7 Token/s | 470 Ausgabetoken | 5.0 s
+[Inferenz] Ausgabe: 116.5 Token/s | Prompt: 3806.7 Token/s | 587 Ausgabetoken | 6.0 s
+[Inferenz] Ausgabe: 116.3 Token/s | Prompt: 3806.7 Token/s | 703 Ausgabetoken | 7.1 s
+[Inferenz] Ausgabe: 116.3 Token/s | Prompt: 3806.7 Token/s | 820 Ausgabetoken | 8.1 s
+[Inferenz] Ausgabe: 116.2 Token/s | Prompt: 3806.7 Token/s | 936 Ausgabetoken | 9.1 s
+[Inferenz] Ausgabe: 116.2 Token/s | Prompt: 3806.7 Token/s | 1053 Ausgabetoken | 10.1 s
+[Inferenz] Ausgabe: 116.1 Token/s | Prompt: 3806.7 Token/s | 1169 Ausgabetoken | 11.1 s
+[Inferenz] Ausgabe: 116.0 Token/s | Prompt: 3806.7 Token/s | 1285 Ausgabetoken | 12.1 s
+[Inferenz] Ausgabe: 116.0 Token/s | Prompt: 3806.7 Token/s | 1362 Ausgabetoken | 12.3 s | Laden: 0.0 s | Erstes Token: 0.52 s
+Feedback: TCP=[0.4, -0.12, 0.26], Fingerkontakt=[]
+Ausfuehrungsfehler: ValueError: Expected JSON code, one fenced Python block or a Python program: Unsupported Python construct: Import
+Physik: red auf blue: 0/20; Greifer frei=True
+FAIL evaluated

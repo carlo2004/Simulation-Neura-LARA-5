@@ -1,0 +1,16 @@
+
+Modell generiert Block 1/1 ...
+[Inferenz] Prompt verarbeiten / auf erstes Token warten | 0.0 s
+[Inferenz] Gesamt inkl. Prompt: 3.2 Token/s | Prompt: 3459.3 Token/s | 1 Ausgabetoken | 1.0 s
+[Inferenz] Ausgabe: 108.0 Token/s | Prompt: 3459.3 Token/s | 110 Ausgabetoken | 2.0 s
+[Inferenz] Ausgabe: 108.3 Token/s | Prompt: 3459.3 Token/s | 219 Ausgabetoken | 3.0 s
+[Inferenz] Ausgabe: 108.5 Token/s | Prompt: 3459.3 Token/s | 328 Ausgabetoken | 3.9 s
+[Inferenz] Ausgabe: 108.4 Token/s | Prompt: 3459.3 Token/s | 437 Ausgabetoken | 4.8 s
+[Inferenz] Ausgabe: 108.2 Token/s | Prompt: 3459.3 Token/s | 545 Ausgabetoken | 5.9 s
+[Inferenz] Ausgabe: 108.1 Token/s | Prompt: 3459.3 Token/s | 653 Ausgabetoken | 7.1 s
+[Inferenz] Ausgabe: 107.9 Token/s | Prompt: 3459.3 Token/s | 827 Ausgabetoken | 8.0 s | Laden: 0.0 s | Erstes Token: 0.31 s
+Modell: Move the gripper 5 cm to the right (positive X) while keeping the same height (Z).
+Programm: 1 Zeilen; vollstaendig im Protokoll.
+Feedback: TCP=[0.45, -0.12, 0.26], Fingerkontakt=[]
+Zielabweichung: 2.6707138509448495e-07 m
+PASS evaluated

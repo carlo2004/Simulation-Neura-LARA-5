@@ -1,0 +1,31 @@
+{
+  "choices": [
+    {
+      "finish_reason": "length",
+      "message": {
+        "role": "assistant",
+        "content": "",
+        "reasoning_content": "Okay, the user is asking me to return a short JSON object with {\"code\":\"\",\"done\":true}. I need to make sure I output exactly that without any extra text. Let me check the instructions: \"Return a short JSON object.\" So I should just output the JSON as specified. No need for any explanation."
+      }
+    }
+  ],
+  "usage": {
+    "completion_tokens": 64,
+    "prompt_tokens": 29,
+    "total_tokens": 93,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    }
+  },
+  "timings": {
+    "cache_n": 0,
+    "prompt_n": 29,
+    "prompt_ms": 99.512,
+    "prompt_per_token_ms": 3.431448275862069,
+    "prompt_per_second": 291.42214004341184,
+    "predicted_n": 64,
+    "predicted_ms": 603.06,
+    "predicted_per_token_ms": 9.572380952380952,
+    "predicted_per_second": 104.46721719231918
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "server_id": "c0999f035d9d4d3c8617fd894538a44c",
+  "request_id": "79454e8ef06845dbacd5ff148eda229d",
+  "messages": [
+    {
+      "role": "system",
+      "content": "Return a short JSON object."
+    },
+    {
+      "role": "user",
+      "content": "Return {\"code\":\"\",\"done\":true}."
+    }
+  ],
+  "recording": "slim",
+  "options": {
+    "max_tokens": 64,
+    "seed": 0,
+    "thinking": true,
+    "timeout": 120,
+    "thinking_budget": -1
+  }
+}

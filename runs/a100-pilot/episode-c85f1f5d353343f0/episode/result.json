@@ -1,0 +1,644 @@
+{
+  "instruction": "Staple den roten W\u00fcrfel auf den blauen W\u00fcrfel.",
+  "goal": {
+    "type": "stack",
+    "source": "red",
+    "target": "blue"
+  },
+  "success": false,
+  "status": "budget_exhausted",
+  "mode": "closed_loop_feedback",
+  "max_rounds": 1,
+  "protocol_version": 2,
+  "policy_limits": {
+    "code_characters": 64000,
+    "statements": 256,
+    "ast_nodes": 4096,
+    "api_calls": 256,
+    "sequence_items": 64,
+    "wait_per_call_s": 5.0,
+    "wait_total_s": 15.0
+  },
+  "software": {
+    "version": "3.6.0",
+    "python": "3.13.2",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "recorded_at_utc": "2026-10-30T17:23:07.729449+00:00",
+    "git_commit": "50f214fb913985c5639cbc766f1bca36ad771012",
+    "tracked_changes": false
+  },
+  "physics_during_inference": "paused; viewer remains responsive",
+  "model_observation_decimal_places": 6,
+  "model": {
+    "format_version": 2,
+    "max_total_parameters": 10000000000,
+    "runtime": "llama.cpp",
+    "runtime_version": "b11951-cuda12.8",
+    "runtime_assets": {
+      "linux-x86_64": {
+        "filename": "llama-b11951-bin-ubuntu-cuda-12.8-x64.tar.gz",
+        "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11951/llama-b11951-bin-ubuntu-cuda-12.8-x64.tar.gz",
+        "sha256": "51a6dae48f9cae0af5dd4971df691a3cb1cf36bac459f89bcccd805edc6dba92",
+        "bytes": 182382782
+      }
+    },
+    "model_id": "Qwen/Qwen3.5-9B",
+    "original_revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+    "training_model_id": "Qwen/Qwen3.5-9B",
+    "training_revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+    "total_parameters": 9653104368,
+    "quantization": "Q4_K_M",
+    "gguf_repository": "unsloth/Qwen3.5-9B-GGUF",
+    "gguf_revision": "3885219b6810b007914f3a7950a8d1b469d598a5",
+    "model_filename": "Qwen3.5-9B-Q4_K_M.gguf",
+    "model_bytes": 5680522464,
+    "model_sha256": "03b74727a860a56338e042c4420bb3f04b2fec5734175f4cb9fa853daf52b7e8",
+    "model_url": "https://huggingface.co/unsloth/Qwen3.5-9B-GGUF/resolve/3885219b6810b007914f3a7950a8d1b469d598a5/Qwen3.5-9B-Q4_K_M.gguf?download=true",
+    "license": "Apache-2.0",
+    "default_thinking": true,
+    "supports_thinking_toggle": true,
+    "context_tokens": 8192,
+    "profiles": {
+      "instruct": {
+        "temperature": 0.7,
+        "top_p": 0.8,
+        "top_k": 20,
+        "min_p": 0,
+        "presence_penalty": 1.5,
+        "repeat_penalty": 1
+      },
+      "thinking": {
+        "temperature": 0.6,
+        "top_p": 0.95,
+        "top_k": 20,
+        "min_p": 0,
+        "presence_penalty": 0,
+        "repeat_penalty": 1
+      }
+    },
+    "chat_template_kwargs": {},
+    "preserve_reasoning": false,
+    "thinking_budget_tokens": 768,
+    "model_key": "qwen9b",
+    "runtime_dependencies": {
+      "linux-x86_64": [
+        {
+          "filename": "cudart-llama-b11951-bin-ubuntu-cuda-12.8-x64.tar.gz",
+          "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11951/cudart-llama-b11951-bin-ubuntu-cuda-12.8-x64.tar.gz",
+          "sha256": "150f4d36ee4f97e85dbcb139e7fcbfeee03d4d74251c98076cdd4879d35c34eb",
+          "bytes": 594377552
+        }
+      ]
+    },
+    "device": "cuda",
+    "cuda_runtime_kind": "binary"
+  },
+  "initial_observation": {
+    "tcp_m": [
+      0.39999999999999997,
+      -0.11999999999999983,
+      0.2600000000000002
+    ],
+    "gripper_command": "open",
+    "finger_contact_objects": [],
+    "simulation_time_s": 0.5000000000000003,
+    "objects": [
+      {
+        "name": "red",
+        "shape": "cube",
+        "size_m": [
+          0.04,
+          0.04,
+          0.04
+        ],
+        "centre_m": [
+          0.38944513619161253,
+          -0.11652104138771328,
+          0.019957398275961748
+        ]
+      },
+      {
+        "name": "blue",
+        "shape": "cube",
+        "size_m": [
+          0.04,
+          0.04,
+          0.04
+        ],
+        "centre_m": [
+          0.39009057467157005,
+          0.1263752084211578,
+          0.019957398275961748
+        ]
+      }
+    ]
+  },
+  "rounds": [
+    {
+      "round": 1,
+      "stage": "evaluated",
+      "actions": [
+        {
+          "method": "position",
+          "args": [
+            "red"
+          ],
+          "kwargs": {},
+          "time_s": 0.5000000000000003,
+          "result": [
+            0.38944513619161253,
+            -0.11652104138771328,
+            0.019957398275961748
+          ],
+          "status": "ok"
+        },
+        {
+          "method": "position",
+          "args": [
+            "blue"
+          ],
+          "kwargs": {},
+          "time_s": 0.5000000000000003,
+          "result": [
+            0.39009057467157005,
+            0.1263752084211578,
+            0.019957398275961748
+          ],
+          "status": "ok"
+        },
+        {
+          "method": "gripper",
+          "args": [],
+          "kwargs": {
+            "closed": false
+          },
+          "time_s": 0.5000000000000003,
+          "status": "ok"
+        },
+        {
+          "method": "move_to",
+          "args": [
+            [
+              0.38944513619161253,
+              -0.11652104138771328,
+              0.24
+            ]
+          ],
+          "kwargs": {},
+          "time_s": 1.2000000000000008,
+          "status": "ok"
+        },
+        {
+          "method": "gripper",
+          "args": [],
+          "kwargs": {
+            "closed": true
+          },
+          "time_s": 2.2999999999999683,
+          "status": "ok"
+        },
+        {
+          "method": "move_to",
+          "args": [
+            [
+              0.38944513619161253,
+              -0.11652104138771328,
+              0.06
+            ]
+          ],
+          "kwargs": {},
+          "time_s": 2.999999999999891,
+          "status": "ok"
+        },
+        {
+          "method": "move_to",
+          "args": [
+            [
+              0.39009057467157005,
+              0.1263752084211578,
+              0.05995739827596175
+            ]
+          ],
+          "kwargs": {},
+          "time_s": 6.679999999999486,
+          "status": "ok"
+        },
+        {
+          "method": "gripper",
+          "args": [],
+          "kwargs": {
+            "closed": false
+          },
+          "time_s": 11.540000000000523,
+          "status": "ok"
+        },
+        {
+          "method": "move_to",
+          "args": [
+            [
+              0.5,
+              -0.1,
+              0.3
+            ]
+          ],
+          "kwargs": {},
+          "time_s": 12.240000000000757,
+          "status": "ok"
+        }
+      ],
+      "execution_outcome": "executed",
+      "generation": {
+        "model_id": "Qwen/Qwen3.5-9B",
+        "original_revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+        "total_parameters": 9653104368,
+        "model_sha256": "03b74727a860a56338e042c4420bb3f04b2fec5734175f4cb9fa853daf52b7e8",
+        "quantization": "Q4_K_M",
+        "runtime": "llama.cpp",
+        "runtime_version": "b11951-cuda12.8",
+        "training_model_id": "Qwen/Qwen3.5-9B",
+        "training_revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+        "model_key": "qwen9b",
+        "thinking": true,
+        "temperature": 0.6,
+        "top_p": 0.95,
+        "top_k": 20,
+        "min_p": 0,
+        "presence_penalty": 0,
+        "repeat_penalty": 1,
+        "seed": 1002,
+        "threads": 2,
+        "context_tokens": 8192,
+        "max_output_tokens": 2048,
+        "prompt_sha256": "8b2820cb9fda865e76b563f1c6f1699caa0a6fac42b7a3f136ead165b71d3d9e",
+        "device": "CUDA",
+        "inference": "Remote Stack Lab inference through a loopback SSH forward",
+        "prompt_format": "GGUF native chat template / Jinja",
+        "constrained_decoding": false,
+        "reasoning_budget_tokens": 768,
+        "server_args": [],
+        "prompt_cache_enabled": false,
+        "runtime_source": null,
+        "native_stream_recorded": false,
+        "model_load_seconds": 0.0,
+        "hardware": {
+          "gpus": [
+            {
+              "index": 0,
+              "name": "NVIDIA A100-SXM4-40GB",
+              "uuid": "GPU-9ec12e03-8fd7-f540-4a87-e4606cb87831",
+              "memory_total_mib": 40960,
+              "driver_version": "580.82.07"
+            }
+          ],
+          "backend_devices": "Available devices:\n  CUDA0: NVIDIA A100-SXM4-40GB (40441 MiB, 40013 MiB free)\n\n",
+          "offloaded_layers": 33,
+          "total_layers": 33
+        },
+        "runtime_installation": {
+          "archive_sha256": [
+            "51a6dae48f9cae0af5dd4971df691a3cb1cf36bac459f89bcccd805edc6dba92",
+            "150f4d36ee4f97e85dbcb139e7fcbfeee03d4d74251c98076cdd4879d35c34eb"
+          ],
+          "platform": "linux-x86_64",
+          "device": "cuda",
+          "executable": "llama-b11951/llama-server",
+          "executable_sha256": "e9f6f866b4dd991c6532904ba0ab15272a1cd76d6dcce42809c337b9b452a2cc"
+        },
+        "finish_reason": "stop",
+        "usage": {
+          "completion_tokens": 742,
+          "prompt_tokens": 1050,
+          "total_tokens": 1792,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        "timings": {
+          "cache_n": 0,
+          "prompt_n": 1050,
+          "prompt_ms": 403.859,
+          "prompt_per_token_ms": 0.38462761904761905,
+          "prompt_per_second": 2599.9172978688107,
+          "predicted_n": 742,
+          "predicted_ms": 6061.34,
+          "predicted_per_token_ms": 8.179946018893387,
+          "predicted_per_second": 122.25019550132478
+        },
+        "performance": {
+          "schema_version": 2,
+          "phase": "finished",
+          "input_tokens": 1050,
+          "output_tokens": 742,
+          "native_prompt_tokens": 1050,
+          "native_predicted_tokens": 742,
+          "native_decode_tokens": 741,
+          "decode_seconds": 6.06134,
+          "prompt_seconds": 0.40385899999999997,
+          "decode_tokens_per_second": 122.25019550132478,
+          "prompt_tokens_per_second": 2599.9172978688107,
+          "effective_tokens_per_second": 111.52552990989429,
+          "request_seconds": 6.653185154999846,
+          "total_seconds": 6.653379378999944,
+          "model_load_seconds": 0.0,
+          "time_to_first_token_seconds": 0.5917909429999781,
+          "partial": false,
+          "output_includes_reasoning": true,
+          "rate_source": "runtime"
+        },
+        "generation_seconds": 6.653654518000167,
+        "recording": "slim",
+        "transport": {
+          "protocol": "stacklab-inference-v1",
+          "url": "http://127.0.0.1:8765",
+          "server_id": "5d609903e4bb46498b7cfe46b1ca64c5",
+          "server_software": {
+            "version": "3.6.0",
+            "python": "3.13.16",
+            "platform": "Linux-6.6.159+-x86_64-with-glibc2.39",
+            "recorded_at_utc": "2026-10-30T17:16:58.915973+00:00",
+            "git_commit": "50f214fb913985c5639cbc766f1bca36ad771012",
+            "tracked_changes": false
+          },
+          "client_round_trip_seconds": 7.401016100018751
+        }
+      },
+      "execution_seconds": 8.253192499978468,
+      "execution_simulation_seconds": 18.580000000000304,
+      "evaluation_seconds": 0.05099980003433302,
+      "evaluation_simulation_seconds": 1.9999999999988916,
+      "feedback": {
+        "error": null,
+        "observation": {
+          "tcp_m": [
+            0.49999999999997896,
+            -0.09999999999999945,
+            0.2999999999999892
+          ],
+          "gripper_command": "open",
+          "finger_contact_objects": [],
+          "simulation_time_s": 21.279999999999085,
+          "objects": [
+            {
+              "name": "red",
+              "shape": "cube",
+              "size_m": [
+                0.04,
+                0.04,
+                0.04
+              ],
+              "centre_m": [
+                0.38944513619161253,
+                -0.11652104138771328,
+                0.019957398275963014
+              ]
+            },
+            {
+              "name": "blue",
+              "shape": "cube",
+              "size_m": [
+                0.04,
+                0.04,
+                0.04
+              ],
+              "centre_m": [
+                0.39009057467157005,
+                0.1263752084211578,
+                0.019957398275963014
+              ]
+            }
+          ]
+        },
+        "evaluation": {
+          "success": false,
+          "goal": {
+            "type": "stack",
+            "source": "red",
+            "target": "blue"
+          },
+          "stack_checks": [
+            {
+              "source": "red",
+              "target": "blue",
+              "success": false,
+              "stable_checks": 0,
+              "checks": 20,
+              "tool_clear": true,
+              "diagnostics": {
+                "xy_error_m": 0.2428971073562732,
+                "height_error_m": 0.04,
+                "shapes_ok": true,
+                "centered": false,
+                "height_ok": false,
+                "stationary": true,
+                "touching": false,
+                "supported": true,
+                "valid": false
+              }
+            }
+          ]
+        },
+        "actions": [
+          {
+            "method": "position",
+            "args": [
+              "red"
+            ],
+            "kwargs": {},
+            "time_s": 0.5000000000000003,
+            "result": [
+              0.38944513619161253,
+              -0.11652104138771328,
+              0.019957398275961748
+            ],
+            "status": "ok"
+          },
+          {
+            "method": "position",
+            "args": [
+              "blue"
+            ],
+            "kwargs": {},
+            "time_s": 0.5000000000000003,
+            "result": [
+              0.39009057467157005,
+              0.1263752084211578,
+              0.019957398275961748
+            ],
+            "status": "ok"
+          },
+          {
+            "method": "gripper",
+            "args": [],
+            "kwargs": {
+              "closed": false
+            },
+            "time_s": 0.5000000000000003,
+            "status": "ok"
+          },
+          {
+            "method": "move_to",
+            "args": [
+              [
+                0.38944513619161253,
+                -0.11652104138771328,
+                0.24
+              ]
+            ],
+            "kwargs": {},
+            "time_s": 1.2000000000000008,
+            "status": "ok"
+          },
+          {
+            "method": "gripper",
+            "args": [],
+            "kwargs": {
+              "closed": true
+            },
+            "time_s": 2.2999999999999683,
+            "status": "ok"
+          },
+          {
+            "method": "move_to",
+            "args": [
+              [
+                0.38944513619161253,
+                -0.11652104138771328,
+                0.06
+              ]
+            ],
+            "kwargs": {},
+            "time_s": 2.999999999999891,
+            "status": "ok"
+          },
+          {
+            "method": "move_to",
+            "args": [
+              [
+                0.39009057467157005,
+                0.1263752084211578,
+                0.05995739827596175
+              ]
+            ],
+            "kwargs": {},
+            "time_s": 6.679999999999486,
+            "status": "ok"
+          },
+          {
+            "method": "gripper",
+            "args": [],
+            "kwargs": {
+              "closed": false
+            },
+            "time_s": 11.540000000000523,
+            "status": "ok"
+          },
+          {
+            "method": "move_to",
+            "args": [
+              [
+                0.5,
+                -0.1,
+                0.3
+              ]
+            ],
+            "kwargs": {},
+            "time_s": 12.240000000000757,
+            "status": "ok"
+          }
+        ],
+        "local_variables_reset": true,
+        "remaining_blocks": 0,
+        "model_declared_done": true
+      },
+      "model_declared_done": true
+    }
+  ],
+  "evaluation": {
+    "success": false,
+    "goal": {
+      "type": "stack",
+      "source": "red",
+      "target": "blue"
+    },
+    "stack_checks": [
+      {
+        "source": "red",
+        "target": "blue",
+        "success": false,
+        "stable_checks": 0,
+        "checks": 20,
+        "tool_clear": true,
+        "diagnostics": {
+          "xy_error_m": 0.2428971073562732,
+          "height_error_m": 0.04,
+          "shapes_ok": true,
+          "centered": false,
+          "height_ok": false,
+          "stationary": true,
+          "touching": false,
+          "supported": true,
+          "valid": false
+        }
+      }
+    ]
+  },
+  "wall_seconds": 15.780710299964994,
+  "final_observation": {
+    "tcp_m": [
+      0.49999999999997896,
+      -0.09999999999999945,
+      0.2999999999999892
+    ],
+    "gripper_command": "open",
+    "finger_contact_objects": [],
+    "simulation_time_s": 21.279999999999085,
+    "objects": [
+      {
+        "name": "red",
+        "shape": "cube",
+        "size_m": [
+          0.04,
+          0.04,
+          0.04
+        ],
+        "centre_m": [
+          0.38944513619161253,
+          -0.11652104138771328,
+          0.019957398275963014
+        ]
+      },
+      {
+        "name": "blue",
+        "shape": "cube",
+        "size_m": [
+          0.04,
+          0.04,
+          0.04
+        ],
+        "centre_m": [
+          0.39009057467157005,
+          0.1263752084211578,
+          0.019957398275963014
+        ]
+      }
+    ]
+  },
+  "inference_performance": {
+    "schema_version": 2,
+    "measured_rounds": 1,
+    "total_rounds": 1,
+    "counted_rounds": 1,
+    "output_tokens": 742,
+    "native_decode_tokens": 741,
+    "decode_seconds": 6.06134,
+    "decode_tokens_per_second": 122.25019550132478,
+    "model_load_seconds": 0.0,
+    "request_seconds": 6.653185154999846,
+    "total_seconds": 6.653379378999944,
+    "first_token_seconds_sum": 0.5917909429999781,
+    "first_token_measurements": 1,
+    "first_token_seconds_mean": 0.5917909429999781,
+    "partial_rounds": 0,
+    "partial": false
+  }
+}

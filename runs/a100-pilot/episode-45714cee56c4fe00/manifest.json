@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "case_id": "case-88b5680dea4cb7b7",
+  "condition_id": "condition-c640abec99352d93",
+  "generation_seed": 1003,
+  "episode_id": "episode-45714cee56c4fe00",
+  "plan_sha256": "7fdef60e3b49bdddb95fc12e48f8b4cca8b25e9fee38ee00472b2a7c57490ce2",
+  "started_at_utc": "2026-10-30T17:36:00.626379+00:00"
+}

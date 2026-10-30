@@ -1,0 +1,8 @@
+
+Modell generiert Block 1/1 ...
+[Inferenz] Modell laden: 0.0 s | Token/s nach dem Start
+[Inferenz] Ausgabe: 97.4 Token/s | Prompt: 3608.8 Token/s | 18 Ausgabetoken | 0.6 s | Laden: 0.0 s | Erstes Token: 0.40 s
+Programm: 1 Zeilen; vollstaendig im Protokoll.
+Feedback: TCP=[0.45, -0.12, 0.26], Fingerkontakt=[]
+Zielabweichung: 2.6707138509448495e-07 m
+PASS evaluated

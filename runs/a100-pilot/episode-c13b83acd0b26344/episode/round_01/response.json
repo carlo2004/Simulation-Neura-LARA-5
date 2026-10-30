@@ -1,0 +1,31 @@
+{
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "message": {
+        "role": "assistant",
+        "content": "```json\n{\n  \"code\": \"robot.jog(\\\"x\\\", 0.05)\\nrobot.step(1.0)\"\n}\n```",
+        "reasoning_content": "The user wants me to move the gripper 5 cm to the right without changing the height.\n\nCurrent TCP position: [0.4, -0.12, 0.26]\nRight direction is +X\n5 cm = 0.05 m\n\nI need to use robot.jog(\"x\", 0.05) to move 5 cm to the right along the X axis.\n\nThis is a simple task that can be done in one block."
+      }
+    }
+  ],
+  "usage": {
+    "completion_tokens": 140,
+    "prompt_tokens": 1037,
+    "total_tokens": 1177,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    }
+  },
+  "timings": {
+    "cache_n": 0,
+    "prompt_n": 1037,
+    "prompt_ms": 398.246,
+    "prompt_per_token_ms": 0.38403664416586303,
+    "prompt_per_second": 2603.9181812246707,
+    "predicted_n": 140,
+    "predicted_ms": 1138.078,
+    "predicted_per_token_ms": 8.187611510791367,
+    "predicted_per_second": 122.13574113549335
+  }
+}

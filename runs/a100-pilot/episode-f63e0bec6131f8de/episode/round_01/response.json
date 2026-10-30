@@ -1,0 +1,31 @@
+{
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "message": {
+        "role": "assistant",
+        "content": "{\"code\": \"robot.gripper(True)\\nrobot.move_to([0.406957, 0.111829, 0.019957])\\nrobot.gripper(False)\\nrobot.move_to([0.413799, -0.108844, 0.019957])\\nrobot.gripper(True)\\nrobot.move_to([0.406957, 0.111829, 0.26])\\nrobot.gripper(False)\", \"done\": true, \"message\": \"Grasp red cube, move to blue cube, release, then move up to clear stack\"}",
+        "reasoning_content": ""
+      }
+    }
+  ],
+  "usage": {
+    "completion_tokens": 167,
+    "prompt_tokens": 1093,
+    "total_tokens": 1260,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    }
+  },
+  "timings": {
+    "cache_n": 0,
+    "prompt_n": 1093,
+    "prompt_ms": 270.043,
+    "prompt_per_token_ms": 0.2470658737419945,
+    "prompt_per_second": 4047.5035457316058,
+    "predicted_n": 167,
+    "predicted_ms": 1902.848,
+    "predicted_per_token_ms": 11.462939759036145,
+    "predicted_per_second": 87.23765639714784
+  }
+}

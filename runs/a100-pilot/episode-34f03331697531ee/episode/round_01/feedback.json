@@ -1,0 +1,101 @@
+{
+  "error": null,
+  "observation": {
+    "tcp_m": [
+      0.41374547053921007,
+      -0.10879445711082446,
+      0.01996448751926483
+    ],
+    "gripper_command": "closed",
+    "finger_contact_objects": [
+      "red"
+    ],
+    "simulation_time_s": 8.219999999999414,
+    "objects": [
+      {
+        "name": "red",
+        "shape": "cube",
+        "size_m": [
+          0.04,
+          0.04,
+          0.04
+        ],
+        "centre_m": [
+          0.4130263064666058,
+          -0.10881119460709493,
+          0.01999912849108073
+        ]
+      },
+      {
+        "name": "blue",
+        "shape": "cube",
+        "size_m": [
+          0.04,
+          0.04,
+          0.04
+        ],
+        "centre_m": [
+          0.40695715884210054,
+          0.11182867222814007,
+          0.019957398275963014
+        ]
+      }
+    ]
+  },
+  "evaluation": {
+    "success": false,
+    "goal": {
+      "type": "stack",
+      "source": "red",
+      "target": "blue"
+    },
+    "stack_checks": [
+      {
+        "source": "red",
+        "target": "blue",
+        "success": false,
+        "stable_checks": 0,
+        "checks": 20,
+        "tool_clear": false,
+        "diagnostics": {
+          "xy_error_m": 0.22072332316716844,
+          "height_error_m": 0.03995826978488229,
+          "shapes_ok": true,
+          "centered": false,
+          "height_ok": false,
+          "stationary": false,
+          "touching": false,
+          "supported": true,
+          "valid": false
+        }
+      }
+    ]
+  },
+  "actions": [
+    {
+      "method": "move_to",
+      "args": [
+        [
+          0.4138,
+          -0.1088,
+          0.02
+        ]
+      ],
+      "kwargs": {},
+      "time_s": 0.5000000000000003,
+      "status": "ok"
+    },
+    {
+      "method": "gripper",
+      "args": [],
+      "kwargs": {
+        "closed": true
+      },
+      "time_s": 5.319999999999636,
+      "status": "ok"
+    }
+  ],
+  "local_variables_reset": true,
+  "remaining_blocks": 0,
+  "model_declared_done": true
+}

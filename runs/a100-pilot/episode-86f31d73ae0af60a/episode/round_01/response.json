@@ -1,0 +1,31 @@
+{
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "message": {
+        "role": "assistant",
+        "content": "```python\nrobot.move_to([0.406957, 0.111829, 0.019957])\nrobot.gripper(closed=True)\nrobot.step(1.0)\nrobot.gripper(closed=False)\nrobot.jog(\"x\", -0.03)\nrobot.move_to([0.406957, 0.111829, 0.019957])\n```",
+        "reasoning_content": ""
+      }
+    }
+  ],
+  "usage": {
+    "completion_tokens": 110,
+    "prompt_tokens": 1052,
+    "total_tokens": 1162,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    }
+  },
+  "timings": {
+    "cache_n": 0,
+    "prompt_n": 1052,
+    "prompt_ms": 282.576,
+    "prompt_per_token_ms": 0.2686083650190114,
+    "prompt_per_second": 3722.892248457052,
+    "predicted_n": 110,
+    "predicted_ms": 1070.782,
+    "predicted_per_token_ms": 9.823688073394495,
+    "predicted_per_second": 101.79476307969317
+  }
+}

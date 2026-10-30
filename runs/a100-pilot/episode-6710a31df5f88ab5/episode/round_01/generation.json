@@ -1,0 +1,115 @@
+{
+  "model_id": "mistralai/Ministral-3-8B-Reasoning-2512",
+  "original_revision": "81eaece1948f3875421d9a45bc55487d10e2d894",
+  "total_parameters": 8918026240,
+  "model_sha256": "894aa3645ef8708a81dbe201c26105ce37c4c741252c89c5a78f81b49ac438c6",
+  "quantization": "Q4_K_M",
+  "runtime": "llama.cpp",
+  "runtime_version": "b11951-cuda12.8",
+  "training_model_id": "mistralai/Ministral-3-8B-Reasoning-2512",
+  "training_revision": "81eaece1948f3875421d9a45bc55487d10e2d894",
+  "model_key": "ministral8b",
+  "thinking": true,
+  "temperature": 0.7,
+  "top_p": 0.95,
+  "top_k": 40,
+  "min_p": 0,
+  "presence_penalty": 0,
+  "repeat_penalty": 1,
+  "seed": 1001,
+  "threads": 2,
+  "context_tokens": 8192,
+  "max_output_tokens": 2048,
+  "prompt_sha256": "142cbfa4e8e5e228b8985469360e416e58f441bfd51a70298e5de9b137a2a8f1",
+  "device": "CUDA",
+  "inference": "Remote Stack Lab inference through a loopback SSH forward",
+  "prompt_format": "GGUF native chat template / Jinja",
+  "constrained_decoding": false,
+  "reasoning_budget_tokens": 768,
+  "server_args": [],
+  "prompt_cache_enabled": false,
+  "runtime_source": null,
+  "native_stream_recorded": false,
+  "model_load_seconds": 0.0,
+  "hardware": {
+    "gpus": [
+      {
+        "index": 0,
+        "name": "NVIDIA A100-SXM4-40GB",
+        "uuid": "GPU-9ec12e03-8fd7-f540-4a87-e4606cb87831",
+        "memory_total_mib": 40960,
+        "driver_version": "580.82.07"
+      }
+    ],
+    "backend_devices": "Available devices:\n  CUDA0: NVIDIA A100-SXM4-40GB (40441 MiB, 40013 MiB free)\n\n",
+    "offloaded_layers": 35,
+    "total_layers": 35
+  },
+  "runtime_installation": {
+    "archive_sha256": [
+      "51a6dae48f9cae0af5dd4971df691a3cb1cf36bac459f89bcccd805edc6dba92",
+      "150f4d36ee4f97e85dbcb139e7fcbfeee03d4d74251c98076cdd4879d35c34eb"
+    ],
+    "platform": "linux-x86_64",
+    "device": "cuda",
+    "executable": "llama-b11951/llama-server",
+    "executable_sha256": "e9f6f866b4dd991c6532904ba0ab15272a1cd76d6dcce42809c337b9b452a2cc"
+  },
+  "finish_reason": "stop",
+  "usage": {
+    "completion_tokens": 819,
+    "prompt_tokens": 1157,
+    "total_tokens": 1976,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    }
+  },
+  "timings": {
+    "cache_n": 0,
+    "prompt_n": 1157,
+    "prompt_ms": 293.279,
+    "prompt_per_token_ms": 0.25348228176318066,
+    "prompt_per_second": 3945.0489124690143,
+    "predicted_n": 819,
+    "predicted_ms": 7041.927,
+    "predicted_per_token_ms": 8.60871271393643,
+    "predicted_per_second": 116.16138593882044
+  },
+  "performance": {
+    "schema_version": 2,
+    "phase": "finished",
+    "input_tokens": 1157,
+    "output_tokens": 819,
+    "native_prompt_tokens": 1157,
+    "native_predicted_tokens": 819,
+    "native_decode_tokens": 818,
+    "decode_seconds": 7.041926999999999,
+    "prompt_seconds": 0.293279,
+    "decode_tokens_per_second": 116.16138593882044,
+    "prompt_tokens_per_second": 3945.0489124690143,
+    "effective_tokens_per_second": 111.52642044607325,
+    "request_seconds": 7.343551390999892,
+    "total_seconds": 7.34373285699985,
+    "model_load_seconds": 0.0,
+    "time_to_first_token_seconds": 0.30141007600013836,
+    "partial": false,
+    "output_includes_reasoning": true,
+    "rate_source": "runtime"
+  },
+  "generation_seconds": 7.344061649000196,
+  "recording": "slim",
+  "transport": {
+    "protocol": "stacklab-inference-v1",
+    "url": "http://127.0.0.1:8765",
+    "server_id": "c0999f035d9d4d3c8617fd894538a44c",
+    "server_software": {
+      "version": "3.6.0",
+      "python": "3.13.16",
+      "platform": "Linux-6.6.159+-x86_64-with-glibc2.39",
+      "recorded_at_utc": "2026-10-30T17:16:58.915973+00:00",
+      "git_commit": "50f214fb913985c5639cbc766f1bca36ad771012",
+      "tracked_changes": false
+    },
+    "client_round_trip_seconds": 8.142220600042492
+  }
+}

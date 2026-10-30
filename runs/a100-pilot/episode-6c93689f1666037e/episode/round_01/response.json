@@ -1,0 +1,31 @@
+{
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "message": {
+        "role": "assistant",
+        "content": "```python\n\"\"\"\nMove the gripper 5 cm to the right (+X) without changing height (Z).\nCurrent TCP: [0.4, -0.12, 0.26]\nTarget X: 0.4 + 0.05 = 0.45\nKeep Y and Z constant.\n\"\"\"\n\n# Use jog to move relative on the x-axis by 0.05 m (5 cm)\nrobot.jog(\"x\", 0.05)\n```",
+        "reasoning_content": ""
+      }
+    }
+  ],
+  "usage": {
+    "completion_tokens": 112,
+    "prompt_tokens": 1039,
+    "total_tokens": 1151,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    }
+  },
+  "timings": {
+    "cache_n": 0,
+    "prompt_n": 1039,
+    "prompt_ms": 273.147,
+    "prompt_per_token_ms": 0.2628941289701636,
+    "prompt_per_second": 3803.8125990766875,
+    "predicted_n": 112,
+    "predicted_ms": 1126.425,
+    "predicted_per_token_ms": 10.147972972972973,
+    "predicted_per_second": 98.54184699380785
+  }
+}

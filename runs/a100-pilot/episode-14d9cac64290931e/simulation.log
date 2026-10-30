@@ -1,0 +1,26 @@
+
+Modell generiert Block 1/1 ...
+[Inferenz] Prompt verarbeiten / auf erstes Token warten | 0.0 s
+[Inferenz] Gesamt inkl. Prompt: 3.4 Token/s | Prompt: 3683.0 Token/s | 1 Ausgabetoken | 1.0 s
+[Inferenz] Ausgabe: 98.6 Token/s | Prompt: 3683.0 Token/s | 100 Ausgabetoken | 2.0 s
+[Inferenz] Ausgabe: 97.8 Token/s | Prompt: 3683.0 Token/s | 197 Ausgabetoken | 3.0 s
+[Inferenz] Ausgabe: 98.1 Token/s | Prompt: 3683.0 Token/s | 296 Ausgabetoken | 4.0 s
+[Inferenz] Ausgabe: 98.1 Token/s | Prompt: 3683.0 Token/s | 395 Ausgabetoken | 5.0 s
+[Inferenz] Ausgabe: 97.7 Token/s | Prompt: 3683.0 Token/s | 491 Ausgabetoken | 6.0 s
+[Inferenz] Ausgabe: 97.3 Token/s | Prompt: 3683.0 Token/s | 587 Ausgabetoken | 7.1 s
+[Inferenz] Ausgabe: 97.1 Token/s | Prompt: 3683.0 Token/s | 683 Ausgabetoken | 8.1 s
+[Inferenz] Ausgabe: 96.9 Token/s | Prompt: 3683.0 Token/s | 779 Ausgabetoken | 9.1 s
+[Inferenz] Ausgabe: 96.7 Token/s | Prompt: 3683.0 Token/s | 874 Ausgabetoken | 10.1 s
+[Inferenz] Ausgabe: 96.5 Token/s | Prompt: 3683.0 Token/s | 970 Ausgabetoken | 11.1 s
+[Inferenz] Ausgabe: 96.5 Token/s | Prompt: 3683.0 Token/s | 1066 Ausgabetoken | 12.1 s
+[Inferenz] Ausgabe: 96.4 Token/s | Prompt: 3683.0 Token/s | 1162 Ausgabetoken | 13.1 s
+[Inferenz] Ausgabe: 96.5 Token/s | Prompt: 3683.0 Token/s | 1260 Ausgabetoken | 14.1 s
+[Inferenz] Ausgabe: 96.6 Token/s | Prompt: 3683.0 Token/s | 1359 Ausgabetoken | 15.1 s
+[Inferenz] Ausgabe: 96.8 Token/s | Prompt: 3683.0 Token/s | 1459 Ausgabetoken | 16.1 s
+[Inferenz] Ausgabe: 96.9 Token/s | Prompt: 3683.0 Token/s | 1557 Ausgabetoken | 17.1 s
+[Inferenz] Ausgabe: 96.8 Token/s | Prompt: 3683.0 Token/s | 1654 Ausgabetoken | 18.1 s
+[Inferenz] Ausgabe: 96.8 Token/s | Prompt: 3683.0 Token/s | 1751 Ausgabetoken | 19.1 s
+[Inferenz] Ausgabe: 96.8 Token/s | Prompt: 3683.0 Token/s | 1847 Ausgabetoken | 20.1 s
+[Inferenz] Ausgabe: 96.7 Token/s | Prompt: 3683.0 Token/s | 1942 Ausgabetoken | 21.2 s
+[Inferenz] Ausgabe: 96.6 Token/s | Prompt: 3683.0 Token/s | 2048 Ausgabetoken | 21.5 s | Laden: 0.0 s | Erstes Token: 0.29 s | Teilmessung
+FAIL evaluated

@@ -1,0 +1,31 @@
+{
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "message": {
+        "role": "assistant",
+        "content": "```json\n{\n  \"code\": \"robot.jog('x', 0.05)\",\n  \"done\": true,\n  \"message\": \"Moved TCP 5 cm in the positive X direction (right) while keeping Y and Z constant.\"\n}\n```",
+        "reasoning_content": ""
+      }
+    }
+  ],
+  "usage": {
+    "completion_tokens": 60,
+    "prompt_tokens": 1039,
+    "total_tokens": 1099,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    }
+  },
+  "timings": {
+    "cache_n": 0,
+    "prompt_n": 1039,
+    "prompt_ms": 295.603,
+    "prompt_per_token_ms": 0.28450721847930704,
+    "prompt_per_second": 3514.849308024614,
+    "predicted_n": 60,
+    "predicted_ms": 592.036,
+    "predicted_per_token_ms": 10.03450847457627,
+    "predicted_per_second": 99.65610199379768
+  }
+}

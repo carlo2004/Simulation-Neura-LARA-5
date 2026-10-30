@@ -1,0 +1,8 @@
+robot.move_to([0.38937, -0.121352, 0.025])
+robot.gripper(closed=True)
+robot.jog("z", 0.06)
+robot.jog("x", 0.018754)
+robot.jog("y", 0.247517)
+robot.jog("z", -0.06)
+robot.gripper(closed=False)
+robot.move_to([0.4, -0.12, 0.25])

@@ -1,0 +1,31 @@
+{
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "message": {
+        "role": "assistant",
+        "content": "{\"code\": \"robot.jog(\\\"x\\\", 0.05)\", \"done\": true, \"message\": \"Moved TCP 5cm right without changing height.\"}",
+        "reasoning_content": ""
+      }
+    }
+  ],
+  "usage": {
+    "completion_tokens": 38,
+    "prompt_tokens": 1081,
+    "total_tokens": 1119,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    }
+  },
+  "timings": {
+    "cache_n": 0,
+    "prompt_n": 1081,
+    "prompt_ms": 284.526,
+    "prompt_per_token_ms": 0.2632062904717854,
+    "prompt_per_second": 3799.301294082087,
+    "predicted_n": 38,
+    "predicted_ms": 441.948,
+    "predicted_per_token_ms": 11.94454054054054,
+    "predicted_per_second": 83.72025668178156
+  }
+}

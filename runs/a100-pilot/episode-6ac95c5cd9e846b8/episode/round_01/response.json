@@ -1,0 +1,31 @@
+{
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "message": {
+        "role": "assistant",
+        "content": "{\"code\": \"robot.jog(\\\"x\\\", 0.05)\", \"done\": true, \"message\": \"Jogged 5 cm (0.05m) right along the X-axis.\"}",
+        "reasoning_content": ""
+      }
+    }
+  ],
+  "usage": {
+    "completion_tokens": 48,
+    "prompt_tokens": 1081,
+    "total_tokens": 1129,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    }
+  },
+  "timings": {
+    "cache_n": 0,
+    "prompt_n": 1081,
+    "prompt_ms": 271.63,
+    "prompt_per_token_ms": 0.25127659574468086,
+    "prompt_per_second": 3979.6782387806943,
+    "predicted_n": 48,
+    "predicted_ms": 555.799,
+    "predicted_per_token_ms": 11.825510638297873,
+    "predicted_per_second": 84.56294451771234
+  }
+}

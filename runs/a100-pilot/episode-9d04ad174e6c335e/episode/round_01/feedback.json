@@ -1,0 +1,169 @@
+{
+  "error": "PolicyError: TCP outside supported workspace",
+  "observation": {
+    "tcp_m": [
+      0.4068588752697284,
+      -0.10882850319152466,
+      0.01989808962543177
+    ],
+    "gripper_command": "closed",
+    "finger_contact_objects": [
+      "red"
+    ],
+    "simulation_time_s": 11.68000000000057,
+    "objects": [
+      {
+        "name": "red",
+        "shape": "cube",
+        "size_m": [
+          0.04,
+          0.04,
+          0.04
+        ],
+        "centre_m": [
+          0.40670025476728244,
+          -0.10882873771153671,
+          0.019957518518231993
+        ]
+      },
+      {
+        "name": "blue",
+        "shape": "cube",
+        "size_m": [
+          0.04,
+          0.04,
+          0.04
+        ],
+        "centre_m": [
+          0.40695715884210054,
+          0.11182867222814007,
+          0.019957398275963014
+        ]
+      }
+    ]
+  },
+  "evaluation": {
+    "success": false,
+    "goal": {
+      "type": "stack",
+      "source": "red",
+      "target": "blue"
+    },
+    "stack_checks": [
+      {
+        "source": "red",
+        "target": "blue",
+        "success": false,
+        "stable_checks": 0,
+        "checks": 20,
+        "tool_clear": false,
+        "diagnostics": {
+          "xy_error_m": 0.22065755949205598,
+          "height_error_m": 0.03999987975773102,
+          "shapes_ok": true,
+          "centered": false,
+          "height_ok": false,
+          "stationary": true,
+          "touching": false,
+          "supported": true,
+          "valid": false
+        }
+      }
+    ]
+  },
+  "actions": [
+    {
+      "method": "gripper",
+      "args": [],
+      "kwargs": {
+        "closed": false
+      },
+      "time_s": 0.5000000000000003,
+      "status": "ok"
+    },
+    {
+      "method": "position",
+      "args": [
+        "red"
+      ],
+      "kwargs": {},
+      "time_s": 1.2000000000000008,
+      "result": [
+        0.4137988279058487,
+        -0.10884408938932282,
+        0.019957398275963014
+      ],
+      "status": "ok"
+    },
+    {
+      "method": "position",
+      "args": [
+        "blue"
+      ],
+      "kwargs": {},
+      "time_s": 1.2000000000000008,
+      "result": [
+        0.40695715884210054,
+        0.11182867222814007,
+        0.019957398275963014
+      ],
+      "status": "ok"
+    },
+    {
+      "method": "jog",
+      "args": [
+        "z",
+        0.03
+      ],
+      "kwargs": {},
+      "time_s": 1.2000000000000008,
+      "status": "ok"
+    },
+    {
+      "method": "move_to",
+      "args": [
+        [
+          0.4137988279058487,
+          -0.10884408938932282,
+          0.019957398275963014
+        ]
+      ],
+      "kwargs": {},
+      "time_s": 2.2999999999999683,
+      "status": "ok"
+    },
+    {
+      "method": "gripper",
+      "args": [],
+      "kwargs": {
+        "closed": true
+      },
+      "time_s": 7.679999999999376,
+      "status": "ok"
+    },
+    {
+      "method": "jog",
+      "args": [
+        "x",
+        -0.006841669063748168
+      ],
+      "kwargs": {},
+      "time_s": 8.379999999999468,
+      "status": "ok"
+    },
+    {
+      "method": "jog",
+      "args": [
+        "z",
+        -0.02
+      ],
+      "kwargs": {},
+      "time_s": 9.479999999999835,
+      "status": "error",
+      "error": "PolicyError: TCP outside supported workspace"
+    }
+  ],
+  "local_variables_reset": true,
+  "remaining_blocks": 0,
+  "model_declared_done": false
+}

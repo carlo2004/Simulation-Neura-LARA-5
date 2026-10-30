@@ -1,0 +1,17 @@
+
+Modell generiert Block 1/1 ...
+[Inferenz] Prompt verarbeiten / auf erstes Token warten | 0.0 s
+[Inferenz] Gesamt inkl. Prompt: 1.8 Token/s | Prompt: 3494.3 Token/s | 1 Ausgabetoken | 1.0 s
+[Inferenz] Ausgabe: 108.9 Token/s | Prompt: 3494.3 Token/s | 110 Ausgabetoken | 2.0 s
+[Inferenz] Ausgabe: 108.7 Token/s | Prompt: 3494.3 Token/s | 219 Ausgabetoken | 3.0 s
+[Inferenz] Ausgabe: 108.5 Token/s | Prompt: 3494.3 Token/s | 328 Ausgabetoken | 4.0 s
+[Inferenz] Ausgabe: 108.4 Token/s | Prompt: 3494.3 Token/s | 437 Ausgabetoken | 5.1 s
+[Inferenz] Ausgabe: 108.2 Token/s | Prompt: 3494.3 Token/s | 545 Ausgabetoken | 6.1 s
+[Inferenz] Ausgabe: 108.2 Token/s | Prompt: 3494.3 Token/s | 653 Ausgabetoken | 7.1 s
+[Inferenz] Ausgabe: 108.1 Token/s | Prompt: 3494.3 Token/s | 761 Ausgabetoken | 8.1 s
+[Inferenz] Ausgabe: 107.9 Token/s | Prompt: 3494.3 Token/s | 898 Ausgabetoken | 8.9 s | Laden: 0.0 s | Erstes Token: 0.55 s
+Modell: Move to red cube centre at grasp height, close gripper, then move to blue cube centre + half blue size and open gripper to place red on blue.
+Programm: 1 Zeilen; vollstaendig im Protokoll.
+Feedback: TCP=[0.4066, 0.127, 0.147], Fingerkontakt=[]
+Physik: red auf blue: 20/20; Greifer frei=True
+PASS evaluated

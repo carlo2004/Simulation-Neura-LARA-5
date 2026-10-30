@@ -1,0 +1,9 @@
+
+Modell generiert Block 1/1 ...
+[Inferenz] Prompt verarbeiten / auf erstes Token warten | 0.0 s
+[Inferenz] Gesamt inkl. Prompt: 3.6 Token/s | Prompt: 3803.8 Token/s | 1 Ausgabetoken | 1.0 s
+[Inferenz] Ausgabe: 98.5 Token/s | Prompt: 3803.8 Token/s | 112 Ausgabetoken | 1.4 s | Laden: 0.0 s | Erstes Token: 0.28 s
+Feedback: TCP=[0.4, -0.12, 0.26], Fingerkontakt=[]
+Ausfuehrungsfehler: ValueError: Expected JSON code, one fenced Python block or a Python program: String literal too long
+Zielabweichung: 0.04999999999999999 m
+FAIL evaluated

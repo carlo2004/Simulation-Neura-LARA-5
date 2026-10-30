@@ -1,0 +1,570 @@
+{
+  "instruction": "Staple den roten W\u00fcrfel auf den blauen W\u00fcrfel.",
+  "goal": {
+    "type": "stack",
+    "source": "red",
+    "target": "blue"
+  },
+  "success": false,
+  "status": "budget_exhausted",
+  "mode": "closed_loop_feedback",
+  "max_rounds": 1,
+  "protocol_version": 2,
+  "policy_limits": {
+    "code_characters": 64000,
+    "statements": 256,
+    "ast_nodes": 4096,
+    "api_calls": 256,
+    "sequence_items": 64,
+    "wait_per_call_s": 5.0,
+    "wait_total_s": 15.0
+  },
+  "software": {
+    "version": "3.6.0",
+    "python": "3.13.2",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "recorded_at_utc": "2026-10-30T17:33:37.511473+00:00",
+    "git_commit": "50f214fb913985c5639cbc766f1bca36ad771012",
+    "tracked_changes": false
+  },
+  "physics_during_inference": "paused; viewer remains responsive",
+  "model_observation_decimal_places": 6,
+  "model": {
+    "format_version": 2,
+    "max_total_parameters": 10000000000,
+    "runtime": "llama.cpp",
+    "runtime_version": "b11951-cuda12.8",
+    "runtime_assets": {
+      "linux-x86_64": {
+        "filename": "llama-b11951-bin-ubuntu-cuda-12.8-x64.tar.gz",
+        "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11951/llama-b11951-bin-ubuntu-cuda-12.8-x64.tar.gz",
+        "sha256": "51a6dae48f9cae0af5dd4971df691a3cb1cf36bac459f89bcccd805edc6dba92",
+        "bytes": 182382782
+      }
+    },
+    "model_id": "ibm-granite/granite-4.2-8b",
+    "original_revision": "a7042144125ce5ae64f89610e8289647fc000b9a",
+    "training_model_id": "ibm-granite/granite-4.2-8b",
+    "training_revision": "a7042144125ce5ae64f89610e8289647fc000b9a",
+    "total_parameters": 8791592960,
+    "quantization": "Q4_K_M",
+    "gguf_repository": "ibm-granite/granite-4.2-8b-GGUF",
+    "gguf_revision": "93f3f6a8938ee922b784cf4e5b4203cd3428df8f",
+    "model_filename": "granite-4.2-8b-Q4_K_M.gguf",
+    "model_bytes": 5347917952,
+    "model_sha256": "16a9369d0805f80b7377d25d87f937a90c05dc04ad79173a52001e42c9aab311",
+    "model_url": "https://huggingface.co/ibm-granite/granite-4.2-8b-GGUF/resolve/93f3f6a8938ee922b784cf4e5b4203cd3428df8f/granite-4.2-8b-Q4_K_M.gguf?download=true",
+    "license": "Apache-2.0",
+    "default_thinking": true,
+    "supports_thinking_toggle": true,
+    "context_tokens": 8192,
+    "profiles": {
+      "thinking": {
+        "temperature": 1.0,
+        "top_p": 0.95,
+        "top_k": 0,
+        "min_p": 0,
+        "presence_penalty": 0,
+        "repeat_penalty": 1
+      },
+      "instruct": {
+        "temperature": 1.0,
+        "top_p": 0.95,
+        "top_k": 0,
+        "min_p": 0,
+        "presence_penalty": 0,
+        "repeat_penalty": 1
+      }
+    },
+    "chat_template_kwargs": {},
+    "preserve_reasoning": false,
+    "thinking_budget_tokens": 768,
+    "model_key": "granite8b",
+    "runtime_dependencies": {
+      "linux-x86_64": [
+        {
+          "filename": "cudart-llama-b11951-bin-ubuntu-cuda-12.8-x64.tar.gz",
+          "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11951/cudart-llama-b11951-bin-ubuntu-cuda-12.8-x64.tar.gz",
+          "sha256": "150f4d36ee4f97e85dbcb139e7fcbfeee03d4d74251c98076cdd4879d35c34eb",
+          "bytes": 594377552
+        }
+      ]
+    },
+    "device": "cuda",
+    "cuda_runtime_kind": "binary"
+  },
+  "initial_observation": {
+    "tcp_m": [
+      0.39999999999999997,
+      -0.11999999999999983,
+      0.2600000000000002
+    ],
+    "gripper_command": "open",
+    "finger_contact_objects": [],
+    "simulation_time_s": 0.5000000000000003,
+    "objects": [
+      {
+        "name": "red",
+        "shape": "cube",
+        "size_m": [
+          0.04,
+          0.04,
+          0.04
+        ],
+        "centre_m": [
+          0.3893700776531239,
+          -0.12135218986448003,
+          0.019957398275961748
+        ]
+      },
+      {
+        "name": "blue",
+        "shape": "cube",
+        "size_m": [
+          0.04,
+          0.04,
+          0.04
+        ],
+        "centre_m": [
+          0.40812351416977066,
+          0.1261653968079224,
+          0.019957398275961748
+        ]
+      }
+    ]
+  },
+  "rounds": [
+    {
+      "round": 1,
+      "stage": "evaluated",
+      "actions": [
+        {
+          "method": "gripper",
+          "args": [],
+          "kwargs": {
+            "closed": true
+          },
+          "time_s": 0.5000000000000003,
+          "status": "ok"
+        },
+        {
+          "method": "move_to",
+          "args": [
+            [
+              0.38937,
+              -0.121352,
+              0.3
+            ]
+          ],
+          "kwargs": {},
+          "time_s": 1.2000000000000008,
+          "status": "ok"
+        },
+        {
+          "method": "move_to",
+          "args": [
+            [
+              0.408124,
+              0.126165,
+              0.3
+            ]
+          ],
+          "kwargs": {},
+          "time_s": 2.2999999999999683,
+          "status": "ok"
+        },
+        {
+          "method": "move_to",
+          "args": [
+            [
+              0.408124,
+              0.126165,
+              0.05
+            ]
+          ],
+          "kwargs": {},
+          "time_s": 7.2599999999994225,
+          "status": "ok"
+        },
+        {
+          "method": "gripper",
+          "args": [],
+          "kwargs": {
+            "closed": false
+          },
+          "time_s": 12.260000000000764,
+          "status": "ok"
+        },
+        {
+          "method": "move_to",
+          "args": [
+            [
+              0.4,
+              0.0,
+              0.2
+            ]
+          ],
+          "kwargs": {},
+          "time_s": 12.960000000000997,
+          "status": "ok"
+        }
+      ],
+      "execution_outcome": "executed",
+      "generation": {
+        "model_id": "ibm-granite/granite-4.2-8b",
+        "original_revision": "a7042144125ce5ae64f89610e8289647fc000b9a",
+        "total_parameters": 8791592960,
+        "model_sha256": "16a9369d0805f80b7377d25d87f937a90c05dc04ad79173a52001e42c9aab311",
+        "quantization": "Q4_K_M",
+        "runtime": "llama.cpp",
+        "runtime_version": "b11951-cuda12.8",
+        "training_model_id": "ibm-granite/granite-4.2-8b",
+        "training_revision": "a7042144125ce5ae64f89610e8289647fc000b9a",
+        "model_key": "granite8b",
+        "thinking": true,
+        "temperature": 1.0,
+        "top_p": 0.95,
+        "top_k": 0,
+        "min_p": 0,
+        "presence_penalty": 0,
+        "repeat_penalty": 1,
+        "seed": 1000,
+        "threads": 2,
+        "context_tokens": 8192,
+        "max_output_tokens": 2048,
+        "prompt_sha256": "47a9ac59022b025a3fffa07544e4942c128d29d2c06afa0343c3f95288913ed0",
+        "device": "CUDA",
+        "inference": "Remote Stack Lab inference through a loopback SSH forward",
+        "prompt_format": "GGUF native chat template / Jinja",
+        "constrained_decoding": false,
+        "reasoning_budget_tokens": 768,
+        "server_args": [],
+        "prompt_cache_enabled": false,
+        "runtime_source": null,
+        "native_stream_recorded": false,
+        "model_load_seconds": 0.0,
+        "hardware": {
+          "gpus": [
+            {
+              "index": 0,
+              "name": "NVIDIA A100-SXM4-40GB",
+              "uuid": "GPU-9ec12e03-8fd7-f540-4a87-e4606cb87831",
+              "memory_total_mib": 40960,
+              "driver_version": "580.82.07"
+            }
+          ],
+          "backend_devices": "Available devices:\n  CUDA0: NVIDIA A100-SXM4-40GB (40441 MiB, 40013 MiB free)\n\n",
+          "offloaded_layers": 41,
+          "total_layers": 41
+        },
+        "runtime_installation": {
+          "archive_sha256": [
+            "51a6dae48f9cae0af5dd4971df691a3cb1cf36bac459f89bcccd805edc6dba92",
+            "150f4d36ee4f97e85dbcb139e7fcbfeee03d4d74251c98076cdd4879d35c34eb"
+          ],
+          "platform": "linux-x86_64",
+          "device": "cuda",
+          "executable": "llama-b11951/llama-server",
+          "executable_sha256": "e9f6f866b4dd991c6532904ba0ab15272a1cd76d6dcce42809c337b9b452a2cc"
+        },
+        "finish_reason": "stop",
+        "usage": {
+          "completion_tokens": 1399,
+          "prompt_tokens": 1067,
+          "total_tokens": 2466,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        "timings": {
+          "cache_n": 0,
+          "prompt_n": 1067,
+          "prompt_ms": 294.817,
+          "prompt_per_token_ms": 0.2763045923149016,
+          "prompt_per_second": 3619.194279841393,
+          "predicted_n": 1399,
+          "predicted_ms": 13027.525,
+          "predicted_per_token_ms": 9.318687410586552,
+          "predicted_per_second": 107.31125060209057
+        },
+        "performance": {
+          "schema_version": 2,
+          "phase": "finished",
+          "input_tokens": 1067,
+          "output_tokens": 1399,
+          "native_prompt_tokens": 1067,
+          "native_predicted_tokens": 1399,
+          "native_decode_tokens": 1398,
+          "decode_seconds": 13.027524999999999,
+          "prompt_seconds": 0.294817,
+          "decode_tokens_per_second": 107.31125060209057,
+          "prompt_tokens_per_second": 3619.194279841393,
+          "effective_tokens_per_second": 103.22915360401862,
+          "request_seconds": 13.55237305699984,
+          "total_seconds": 13.552581205000024,
+          "model_load_seconds": 0.0,
+          "time_to_first_token_seconds": 0.5247132839999722,
+          "partial": false,
+          "output_includes_reasoning": true,
+          "rate_source": "runtime"
+        },
+        "generation_seconds": 13.552889531999881,
+        "recording": "slim",
+        "transport": {
+          "protocol": "stacklab-inference-v1",
+          "url": "http://127.0.0.1:8765",
+          "server_id": "a774520f5fc84b9eb19318d61816e3be",
+          "server_software": {
+            "version": "3.6.0",
+            "python": "3.13.16",
+            "platform": "Linux-6.6.159+-x86_64-with-glibc2.39",
+            "recorded_at_utc": "2026-10-30T17:16:58.915973+00:00",
+            "git_commit": "50f214fb913985c5639cbc766f1bca36ad771012",
+            "tracked_changes": false
+          },
+          "client_round_trip_seconds": 14.522230199945625
+        }
+      },
+      "execution_seconds": 7.000019999977667,
+      "execution_simulation_seconds": 16.400000000001512,
+      "evaluation_seconds": 0.04733539995504543,
+      "evaluation_simulation_seconds": 1.9999999999988916,
+      "feedback": {
+        "error": null,
+        "observation": {
+          "tcp_m": [
+            0.3999999999998841,
+            3.941486026448553e-14,
+            0.19999999999998885
+          ],
+          "gripper_command": "open",
+          "finger_contact_objects": [],
+          "simulation_time_s": 19.100000000000293,
+          "objects": [
+            {
+              "name": "red",
+              "shape": "cube",
+              "size_m": [
+                0.04,
+                0.04,
+                0.04
+              ],
+              "centre_m": [
+                0.3893700776531239,
+                -0.12135218986448003,
+                0.019957398275963014
+              ]
+            },
+            {
+              "name": "blue",
+              "shape": "cube",
+              "size_m": [
+                0.04,
+                0.04,
+                0.04
+              ],
+              "centre_m": [
+                0.4119746319230105,
+                0.12777315943456521,
+                0.01995739827596303
+              ]
+            }
+          ]
+        },
+        "evaluation": {
+          "success": false,
+          "goal": {
+            "type": "stack",
+            "source": "red",
+            "target": "blue"
+          },
+          "stack_checks": [
+            {
+              "source": "red",
+              "target": "blue",
+              "success": false,
+              "stable_checks": 0,
+              "checks": 20,
+              "tool_clear": true,
+              "diagnostics": {
+                "xy_error_m": 0.2501487668110949,
+                "height_error_m": 0.04000000000000002,
+                "shapes_ok": true,
+                "centered": false,
+                "height_ok": false,
+                "stationary": true,
+                "touching": false,
+                "supported": true,
+                "valid": false
+              }
+            }
+          ]
+        },
+        "actions": [
+          {
+            "method": "gripper",
+            "args": [],
+            "kwargs": {
+              "closed": true
+            },
+            "time_s": 0.5000000000000003,
+            "status": "ok"
+          },
+          {
+            "method": "move_to",
+            "args": [
+              [
+                0.38937,
+                -0.121352,
+                0.3
+              ]
+            ],
+            "kwargs": {},
+            "time_s": 1.2000000000000008,
+            "status": "ok"
+          },
+          {
+            "method": "move_to",
+            "args": [
+              [
+                0.408124,
+                0.126165,
+                0.3
+              ]
+            ],
+            "kwargs": {},
+            "time_s": 2.2999999999999683,
+            "status": "ok"
+          },
+          {
+            "method": "move_to",
+            "args": [
+              [
+                0.408124,
+                0.126165,
+                0.05
+              ]
+            ],
+            "kwargs": {},
+            "time_s": 7.2599999999994225,
+            "status": "ok"
+          },
+          {
+            "method": "gripper",
+            "args": [],
+            "kwargs": {
+              "closed": false
+            },
+            "time_s": 12.260000000000764,
+            "status": "ok"
+          },
+          {
+            "method": "move_to",
+            "args": [
+              [
+                0.4,
+                0.0,
+                0.2
+              ]
+            ],
+            "kwargs": {},
+            "time_s": 12.960000000000997,
+            "status": "ok"
+          }
+        ],
+        "local_variables_reset": true,
+        "remaining_blocks": 0,
+        "model_declared_done": true
+      },
+      "model_declared_done": true
+    }
+  ],
+  "evaluation": {
+    "success": false,
+    "goal": {
+      "type": "stack",
+      "source": "red",
+      "target": "blue"
+    },
+    "stack_checks": [
+      {
+        "source": "red",
+        "target": "blue",
+        "success": false,
+        "stable_checks": 0,
+        "checks": 20,
+        "tool_clear": true,
+        "diagnostics": {
+          "xy_error_m": 0.2501487668110949,
+          "height_error_m": 0.04000000000000002,
+          "shapes_ok": true,
+          "centered": false,
+          "height_ok": false,
+          "stationary": true,
+          "touching": false,
+          "supported": true,
+          "valid": false
+        }
+      }
+    ]
+  },
+  "wall_seconds": 21.637686000030953,
+  "final_observation": {
+    "tcp_m": [
+      0.3999999999998841,
+      3.941486026448553e-14,
+      0.19999999999998885
+    ],
+    "gripper_command": "open",
+    "finger_contact_objects": [],
+    "simulation_time_s": 19.100000000000293,
+    "objects": [
+      {
+        "name": "red",
+        "shape": "cube",
+        "size_m": [
+          0.04,
+          0.04,
+          0.04
+        ],
+        "centre_m": [
+          0.3893700776531239,
+          -0.12135218986448003,
+          0.019957398275963014
+        ]
+      },
+      {
+        "name": "blue",
+        "shape": "cube",
+        "size_m": [
+          0.04,
+          0.04,
+          0.04
+        ],
+        "centre_m": [
+          0.4119746319230105,
+          0.12777315943456521,
+          0.01995739827596303
+        ]
+      }
+    ]
+  },
+  "inference_performance": {
+    "schema_version": 2,
+    "measured_rounds": 1,
+    "total_rounds": 1,
+    "counted_rounds": 1,
+    "output_tokens": 1399,
+    "native_decode_tokens": 1398,
+    "decode_seconds": 13.027524999999999,
+    "decode_tokens_per_second": 107.31125060209058,
+    "model_load_seconds": 0.0,
+    "request_seconds": 13.55237305699984,
+    "total_seconds": 13.552581205000024,
+    "first_token_seconds_sum": 0.5247132839999722,
+    "first_token_measurements": 1,
+    "first_token_seconds_mean": 0.5247132839999722,
+    "partial_rounds": 0,
+    "partial": false
+  }
+}
