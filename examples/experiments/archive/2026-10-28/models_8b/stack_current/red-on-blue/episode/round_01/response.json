@@ -1,0 +1,31 @@
+{
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "message": {
+        "role": "assistant",
+        "content": "{\"code\": \"robot.gripper(closed=True)\\nrobot.move_to([0.4, -0.12, 0.3])\\nrobot.jog(\\\"y\\\", 0.24)\\nrobot.gripper(closed=False)\\nrobot.move_to([0.4, 0.12, 0.3])\\nrobot.jog(\\\"x\\\", 0.04)\\nrobot.jog(\\\"z\\\", -0.25)\\nrobot.gripper(closed=True)\\nrobot.move_to([0.6, 0.0, 0.3])\\nrobot.gripper(closed=False)\", \"done\": false, \"message\": \"Grasping red cube, moving to blue cube position, placing on top, then releasing and retreating.\"}",
+        "reasoning_content": ""
+      }
+    }
+  ],
+  "usage": {
+    "completion_tokens": 169,
+    "prompt_tokens": 1049,
+    "total_tokens": 1218,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    }
+  },
+  "timings": {
+    "cache_n": 0,
+    "prompt_n": 1049,
+    "prompt_ms": 20843.102,
+    "prompt_per_token_ms": 19.869496663489038,
+    "prompt_per_second": 50.32840121398437,
+    "predicted_n": 169,
+    "predicted_ms": 20849.553,
+    "predicted_per_token_ms": 124.10448214285714,
+    "predicted_per_second": 8.057726705220011
+  }
+}

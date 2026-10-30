@@ -1,0 +1,199 @@
+{
+  "case": "green-on-blue",
+  "instruction": "Staple den gr\u00fcnen W\u00fcrfel auf den blauen W\u00fcrfel.",
+  "source": "green",
+  "target": "blue",
+  "success": false,
+  "stage": "evaluated",
+  "seed": 42,
+  "generation": {
+    "model_id": "Qwen/Qwen3.5-4B",
+    "original_revision": "851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a",
+    "total_parameters": 4659865088,
+    "model_sha256": "00fe7986ff5f6b463e62455821146049db6f9313603938a70800d1fb69ef11a4",
+    "quantization": "Q4_K_M",
+    "runtime": "llama.cpp",
+    "runtime_version": "b11951",
+    "thinking": false,
+    "temperature": 0.7,
+    "top_p": 0.8,
+    "top_k": 20,
+    "min_p": 0.0,
+    "presence_penalty": 1.5,
+    "repeat_penalty": 1.0,
+    "seed": 42,
+    "threads": 8,
+    "context_tokens": 4096,
+    "max_output_tokens": 768,
+    "prompt_sha256": "89edc30848cb6f8619760f2b79e6f3240c54fa95f51e2396bd9e9b7495c6010f",
+    "device": "CPU",
+    "inference": "Local llama.cpp subprocess; temporary loopback HTTP; no hosted API",
+    "prompt_format": "GGUF chat template / Jinja",
+    "constrained_decoding": false,
+    "usage": {
+      "completion_tokens": 95,
+      "prompt_tokens": 680,
+      "total_tokens": 775,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    "timings": {
+      "cache_n": 0,
+      "prompt_n": 680,
+      "prompt_ms": 8650.431,
+      "prompt_per_token_ms": 12.72122205882353,
+      "prompt_per_second": 78.60879995459186,
+      "predicted_n": 95,
+      "predicted_ms": 7770.422,
+      "predicted_per_token_ms": 82.66406382978722,
+      "predicted_per_second": 12.09715508372647
+    },
+    "finish_reason": "stop",
+    "generation_seconds": 22.13477600000033,
+    "runtime_returncode": 0
+  },
+  "execution": {
+    "success": false,
+    "stage": "evaluated",
+    "actions": [
+      {
+        "method": "gripper",
+        "args": [],
+        "kwargs": {
+          "closed": false
+        },
+        "time_s": 0.5000000000000003
+      },
+      {
+        "method": "move_to",
+        "args": [
+          [
+            0.3,
+            -0.15,
+            0.24
+          ]
+        ],
+        "kwargs": {},
+        "time_s": 1.2000000000000008
+      },
+      {
+        "method": "gripper",
+        "args": [],
+        "kwargs": {
+          "closed": true
+        },
+        "time_s": 3.499999999999836
+      },
+      {
+        "method": "step",
+        "args": [
+          0.5
+        ],
+        "kwargs": {},
+        "time_s": 4.1999999999997595
+      },
+      {
+        "method": "move_to",
+        "args": [
+          [
+            0.3,
+            -0.15,
+            0.02
+          ]
+        ],
+        "kwargs": {},
+        "time_s": 4.699999999999704
+      },
+      {
+        "method": "gripper",
+        "args": [],
+        "kwargs": {
+          "closed": false
+        },
+        "time_s": 9.139999999999722
+      },
+      {
+        "method": "step",
+        "args": [
+          0.5
+        ],
+        "kwargs": {},
+        "time_s": 9.839999999999955
+      }
+    ],
+    "initial_positions": {
+      "red": [
+        0.4041828039537365,
+        -0.13424967734322055,
+        0.019957398275961748
+      ],
+      "blue": [
+        0.39325087955107363,
+        0.11169632214436619,
+        0.019957398275961748
+      ],
+      "green": [
+        0.5070941364249204,
+        0.005300984622687337,
+        0.019957398275961748
+      ]
+    },
+    "stable_checks": 0,
+    "checks": 20,
+    "check_samples": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "tool_clear": true,
+    "diagnostics": {
+      "xy_error_m": 0.15582122763602083,
+      "height_error_m": 0.04,
+      "shapes_ok": true,
+      "centered": false,
+      "height_ok": false,
+      "stationary": true,
+      "touching": false,
+      "supported": true,
+      "valid": false
+    },
+    "final_positions": {
+      "red": [
+        0.4041828039537365,
+        -0.13424967734322055,
+        0.019957398275963014
+      ],
+      "blue": [
+        0.39325087955107363,
+        0.11169632214436619,
+        0.019957398275963014
+      ],
+      "green": [
+        0.5070941364249204,
+        0.005300984622687337,
+        0.019957398275963014
+      ]
+    },
+    "simulation_seconds": 13.340000000001124,
+    "wall_seconds": 2.7367493990000185
+  },
+  "worker_returncode": 1
+}

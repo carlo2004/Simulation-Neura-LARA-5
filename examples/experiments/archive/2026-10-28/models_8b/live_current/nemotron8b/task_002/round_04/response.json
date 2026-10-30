@@ -1,0 +1,31 @@
+{
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "message": {
+        "role": "assistant",
+        "content": "{\"code\": \"robot.jog(\\\"x\\\", -0.05)\", \"done\": false, \"message\": \"Jog 5 cm left (negative X)\"}",
+        "reasoning_content": ""
+      }
+    }
+  ],
+  "usage": {
+    "completion_tokens": 37,
+    "prompt_tokens": 1746,
+    "total_tokens": 1783,
+    "prompt_tokens_details": {
+      "cached_tokens": 1097
+    }
+  },
+  "timings": {
+    "cache_n": 1097,
+    "prompt_n": 649,
+    "prompt_ms": 8970.446,
+    "prompt_per_token_ms": 13.821950693374422,
+    "prompt_per_second": 72.34868812542877,
+    "predicted_n": 37,
+    "predicted_ms": 3298.021,
+    "predicted_per_token_ms": 91.61169444444445,
+    "predicted_per_second": 10.915636983512233
+  }
+}
