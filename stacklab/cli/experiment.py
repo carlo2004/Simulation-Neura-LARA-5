@@ -39,7 +39,7 @@ def main(argv=None):
     pilot.add_argument('--models', nargs='+', default=['all'])
     pilot.add_argument('--repetitions', type=int, default=5, help='Paired trials for EACH task; 5 x 2 tasks = 10/model')
     pilot.add_argument('--cases', nargs='+', choices=CASES, default=['move-right', 'red-on-blue-jitter'])
-    pilot.add_argument('--blocks', nargs='+', type=int, default=[4])
+    pilot.add_argument('--blocks', nargs='+', type=int, default=[1], help='One-block screening by default; select 4 for feedback trials')
     pilot.add_argument('--max-tokens', type=int, default=2048)
     pilot.add_argument('--generation-timeout', type=int, default=180)
     pilot.add_argument('--execution-timeout', type=int, default=180)

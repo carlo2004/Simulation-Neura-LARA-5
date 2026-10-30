@@ -163,6 +163,7 @@ class RemoteExperimentTests(unittest.TestCase):
             self.assertEqual(condition['recording'], 'slim')
             self.assertEqual(condition['motion_fps'], 10)
             self.assertIs(condition['video'], False)
+            self.assertEqual(condition['blocks'], 1)
         run.assert_called_once()
 
     def test_slim_worker_records_actual_motion_without_live_video_encoding(self):

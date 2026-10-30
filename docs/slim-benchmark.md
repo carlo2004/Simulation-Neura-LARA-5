@@ -1,8 +1,9 @@
 # Schlanker Benchmark und einfache Sichtung
 
-Ab Version 3.6 ist `experiment pilot` standardmäßig **schlank**. Der Modellvergleich
-und seine physikalischen Erfolgskriterien bleiben gleich. Zusätzliche Darstellung
-und ausführliche Transportdiagnostik sind Optionen.
+Ab Version 3.6 ist `experiment pilot` standardmäßig **schlank**. Aufgaben und
+physikalische Erfolgskriterien bleiben gleich; der günstige Erstvergleich nutzt
+einen Programmblock pro Episode. Zusätzliche Darstellung, Feedbackblöcke und
+ausführliche Transportdiagnostik sind Optionen.
 
 ## Was im normalen Lauf nötig ist
 
@@ -67,6 +68,8 @@ wiederholen. [Server, GitHub-Upload und vollständiger Ablauf](remote-benchmark.
 | Option | Auswirkung |
 |---|---|
 | Standard: `--recording slim` | Kerndaten, kompakte Konsole, Bewegungszustände, keine sofortigen Videos |
+| Standard: `--blocks 1` | Zehn gewertete Episoden entsprechen zehn Anfragen je Modell, plus einem kurzen Aufwärmversuch |
+| `--blocks 4` | Separater Versuch mit bis zu vier Blöcken und tatsächlichem Ausführungsfeedback |
 | `--gui` | Lokale Simulation live ansehen; kostet zusätzliche Darstellungsarbeit |
 | `--video` | Video sofort während jedes Versuchs erzeugen |
 | `--recording full` | Ausführliche Streams und standardmäßig sofortige Videos |
@@ -76,6 +79,10 @@ wiederholen. [Server, GitHub-Upload und vollständiger Ablauf](remote-benchmark.
 Die Aufzeichnungs-, GUI- und Videooptionen müssen auf L4 und A100 gleich sein,
 damit der automatische Vergleich die Läufe zusammenführt. Bereits angelegte Pläne
 behalten ihre eingefrorenen Einstellungen.
+
+Modellspezifisches Thinking und Sampling bleiben dokumentierte Versuchsbedingungen.
+Das Ausblenden von Denktext spart Anzeige-/Protokollarbeit, schaltet aber nicht
+die modellinterne Generierung dieser Tokens ab.
 
 ## Benutzerfreundliche Sichtung
 

@@ -16,7 +16,7 @@ praktisch, und wo scheitern sie?
 | Einfache Bewegung | 5 Episoden: Greifer 5 cm nach rechts |
 | Seminaraufgabe | 5 Episoden: Rot auf Blau stapeln, mit leicht variierenden Startpositionen |
 | Wiederholungen | Szenenseeds 100–104, gepaart mit Generierungsseeds 1000–1004 |
-| Feedbackbudget | Bis zu 4 Programmblöcke je Episode |
+| Programmblockbudget | 1 Block für das günstige Screening; `--blocks 4` für einen gesonderten Feedbackvergleich |
 | Generierung | 2048 Ausgabetokens pro Block, 180 s Zeitlimit; dokumentierte Modellprofile |
 | Modelle / GPUs | Alle 7 Katalogmodelle, nacheinander auf L4 und A100 |
 | Umfang | 70 Episoden pro GPU, insgesamt 140 |
@@ -30,8 +30,11 @@ Danach die aussichtsreichsten Modelle mit mehr **neuen** Fällen prüfen. Zehn
 Episoden liefern noch keinen allgemeinen statistischen Sieger. Diese
 Entwicklungsfälle nicht als ungesehenen Test eines später darauf abgestimmten
 Fine-Tunings ausgeben. Als nächste Aufgaben eignen sich `move-forward`, `move-up`,
-`blue-on-red` und `green-on-blue`. Ein Vergleich mit einem Programmblock wird mit
-`--blocks 1` getrennt durchgeführt. `--blocks 1 4` verdoppelt den Umfang.
+`blue-on-red` und `green-on-blue`. Nach dem Screening können ausgewählte Modelle
+mit `--blocks 4` und neuen Ausgabeordnern Feedback nutzen. `--blocks 1 4`
+verdoppelt den Umfang. Bei durchgehend misslungenem Stapeln zuerst die
+Fehlerursachen und Feedbackbedingungen prüfen, bevor identische Fälle vielfach
+wiederholt werden.
 
 ## Was automatisch abläuft
 
