@@ -51,6 +51,7 @@ class InferenceServer(ThreadingHTTPServer):
         if model not in self.info.get('model_catalog', {}):
             raise ValueError('Choose an exact model alias from the server catalog')
         started = time.monotonic()
+        gpus = (self.info.get('hardware') or {}).get('gpus', [])
         self.client.close()  # Free VRAM before installing/loading the next model.
         self.info.update(server_id=uuid4().hex, ready=False)
         path = self.output/('model-'+model+'-'+self.info['server_id'])
@@ -59,7 +60,9 @@ class InferenceServer(ThreadingHTTPServer):
         try:
             self.client = LocalModel(model, threads=self.info['threads'], device=self.device)
             self.client.cache_prompt = False
-            self.info.update(config=self.client.config, hardware=None)
+            # Inventory describes the machine even when a selected model fails.
+            # Do not retain a previous model's positive offload counters.
+            self.info.update(config=self.client.config, hardware=dict(gpus=gpus))
             if self.install_missing:
                 setup(model, device=self.device)
             result['setup_seconds'] = time.monotonic()-started

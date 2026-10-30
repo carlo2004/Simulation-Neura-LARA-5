@@ -98,6 +98,7 @@ class RemoteExperimentTests(unittest.TestCase):
             old.complete([dict(role='user', content='must not execute')], self.root/'stale')
         failed = self.control.select('dory4b')
         self.assertIn('CONTROLLED setup failure', failed['error'])
+        self.assertEqual(failed['info']['hardware'], dict(gpus=[SwitchableFixture.gpu]))
         with self.assertRaisesRegex(RuntimeError, 'No model is ready'):
             RemoteModel(self.url)
         self.assertIsNone(self.control.select('lfm2.6b')['error'])
@@ -118,6 +119,15 @@ class RemoteExperimentTests(unittest.TestCase):
         self.server.info['hardware'] = dict(gpus=[dict(SwitchableFixture.gpu, uuid='changed')])
         with self.assertRaisesRegex(ValueError, 'Remote GPU'):
             exp.verify_environment(plan)
+
+    def test_failed_last_model_keeps_machine_identity_so_resume_is_a_noop(self):
+        self.plan(models=['dory4b'])
+        with redirect_stdout(io.StringIO()):
+            first = exp.run_plan(self.root/'run')
+            with patch.object(RemoteControl, 'select', side_effect=AssertionError('must not reload')):
+                second = exp.run_plan(self.root/'run')
+        self.assertTrue(first['complete'] and second['complete'])
+        self.assertEqual(second['groups'][0]['infrastructure_error'], 1)
 
     def test_worker_executes_both_models_in_real_local_physics_and_resume_never_repeats(self):
         self.plan(models=['lfm2.6b', 'granite8b'])
