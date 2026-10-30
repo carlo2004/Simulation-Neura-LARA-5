@@ -1,0 +1,31 @@
+{
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "message": {
+        "role": "assistant",
+        "content": "{\"code\": \"robot.jog(\\\"x\\\", 0.05)\", \"done\": true, \"message\": \"Moved gripper 5cm right\"}",
+        "reasoning_content": ""
+      }
+    }
+  ],
+  "usage": {
+    "completion_tokens": 34,
+    "prompt_tokens": 1081,
+    "total_tokens": 1115,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    }
+  },
+  "timings": {
+    "cache_n": 0,
+    "prompt_n": 1081,
+    "prompt_ms": 268.989,
+    "prompt_per_token_ms": 0.24883348751156334,
+    "prompt_per_second": 4018.7516961660144,
+    "predicted_n": 34,
+    "predicted_ms": 397.188,
+    "predicted_per_token_ms": 12.036,
+    "predicted_per_second": 83.08408109006314
+  }
+}

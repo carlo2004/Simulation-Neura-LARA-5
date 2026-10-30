@@ -1,0 +1,15 @@
+
+Modell generiert Block 1/1 ...
+[Inferenz] Prompt verarbeiten / auf erstes Token warten | 0.0 s
+[Inferenz] Gesamt inkl. Prompt: 2.0 Token/s | Prompt: 3848.2 Token/s | 1 Ausgabetoken | 1.0 s
+[Inferenz] Ausgabe: 99.4 Token/s | Prompt: 3848.2 Token/s | 101 Ausgabetoken | 2.0 s
+[Inferenz] Ausgabe: 98.8 Token/s | Prompt: 3848.2 Token/s | 200 Ausgabetoken | 3.0 s
+[Inferenz] Ausgabe: 97.4 Token/s | Prompt: 3848.2 Token/s | 295 Ausgabetoken | 4.0 s
+[Inferenz] Ausgabe: 96.9 Token/s | Prompt: 3848.2 Token/s | 391 Ausgabetoken | 5.1 s
+[Inferenz] Ausgabe: 96.8 Token/s | Prompt: 3848.2 Token/s | 459 Ausgabetoken | 5.2 s | Laden: 0.0 s | Erstes Token: 0.49 s
+Modell: Moved red cube to blue cube position and released it. Moving tool clear of stack.
+Programm: 39 Zeilen; vollstaendig im Protokoll.
+Feedback: TCP=[0.4, -0.12, 0.26], Fingerkontakt=[]
+Ausfuehrungsfehler: PolicyError: Unsupported Python construct: Import
+Physik: red auf blue: 0/20; Greifer frei=True
+FAIL evaluated

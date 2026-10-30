@@ -1,0 +1,20 @@
+
+Modell generiert Block 1/1 ...
+[Inferenz] Modell laden: 0.0 s | Token/s nach dem Start
+[Inferenz] Gesamt inkl. Prompt: 1.7 Token/s | Prompt: 3596.8 Token/s | 1 Ausgabetoken | 1.0 s
+[Inferenz] Ausgabe: 109.1 Token/s | Prompt: 3596.8 Token/s | 111 Ausgabetoken | 2.0 s
+[Inferenz] Ausgabe: 109.3 Token/s | Prompt: 3596.8 Token/s | 221 Ausgabetoken | 3.0 s
+[Inferenz] Ausgabe: 109.1 Token/s | Prompt: 3596.8 Token/s | 330 Ausgabetoken | 4.0 s
+[Inferenz] Ausgabe: 108.9 Token/s | Prompt: 3596.8 Token/s | 439 Ausgabetoken | 5.0 s
+[Inferenz] Ausgabe: 108.7 Token/s | Prompt: 3596.8 Token/s | 547 Ausgabetoken | 6.0 s
+[Inferenz] Ausgabe: 108.5 Token/s | Prompt: 3596.8 Token/s | 655 Ausgabetoken | 7.0 s
+[Inferenz] Ausgabe: 108.3 Token/s | Prompt: 3596.8 Token/s | 763 Ausgabetoken | 8.0 s
+[Inferenz] Ausgabe: 108.2 Token/s | Prompt: 3596.8 Token/s | 871 Ausgabetoken | 9.0 s
+[Inferenz] Ausgabe: 108.0 Token/s | Prompt: 3596.8 Token/s | 978 Ausgabetoken | 10.0 s
+[Inferenz] Ausgabe: 107.9 Token/s | Prompt: 3596.8 Token/s | 1085 Ausgabetoken | 11.0 s
+[Inferenz] Ausgabe: 107.8 Token/s | Prompt: 3596.8 Token/s | 1182 Ausgabetoken | 11.5 s | Laden: 0.0 s | Erstes Token: 0.59 s
+Programm: 25 Zeilen; vollstaendig im Protokoll.
+Feedback: TCP=[0.4321, -0.1387, 0.0553], Fingerkontakt=['red']
+Ausfuehrungsfehler: PolicyError: Undefined variable: blue_centre
+Physik: red auf blue: 0/20; Greifer frei=False
+FAIL evaluated

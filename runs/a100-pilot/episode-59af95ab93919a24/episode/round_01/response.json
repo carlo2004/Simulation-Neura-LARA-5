@@ -1,0 +1,31 @@
+{
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "message": {
+        "role": "assistant",
+        "content": "{\"code\": \"robot.gripper(closed=True)\\nrobot.move_to([0.406565, 0.127047, 0.019957])\\nrobot.gripper(closed=False)\\nrobot.move_to([0.414372, -0.121311, 0.019957])\\nrobot.gripper(closed=True)\\nrobot.move_to([0.406565, 0.127047, 0.24])\\nrobot.gripper(closed=False)\", \"done\": true, \"message\": \"Grasp red, move to blue position, release, grasp blue, move to red position, release, and move clear.\"}",
+        "reasoning_content": ""
+      }
+    }
+  ],
+  "usage": {
+    "completion_tokens": 182,
+    "prompt_tokens": 1093,
+    "total_tokens": 1275,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    }
+  },
+  "timings": {
+    "cache_n": 0,
+    "prompt_n": 1093,
+    "prompt_ms": 283.466,
+    "prompt_per_token_ms": 0.25934675205855445,
+    "prompt_per_second": 3855.8416176895994,
+    "predicted_n": 182,
+    "predicted_ms": 2095.458,
+    "predicted_per_token_ms": 11.577116022099448,
+    "predicted_per_second": 86.37729794632008
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "choices": [
+    {
+      "finish_reason": "length",
+      "message": {
+        "role": "assistant",
+        "content": "",
+        "reasoning_content": "Thinking Process:\n\n1.  **Analyze the Request:**\n    *   Input: \"Return a short JSON object.\"\n    *   Specific Content: \"Return {\"code\":\"\",\"done\":true}.\"\n    *   Constraint: The user explicitly asks for a JSON object with specific keys (`code` and"
+      }
+    }
+  ],
+  "usage": {
+    "completion_tokens": 64,
+    "prompt_tokens": 29,
+    "total_tokens": 93,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    }
+  },
+  "timings": {
+    "cache_n": 0,
+    "prompt_n": 29,
+    "prompt_ms": 241.064,
+    "prompt_per_token_ms": 8.312551724137931,
+    "prompt_per_second": 120.30000331862077,
+    "predicted_n": 64,
+    "predicted_ms": 536.473,
+    "predicted_per_token_ms": 8.515444444444444,
+    "predicted_per_second": 117.43368258980415
+  }
+}

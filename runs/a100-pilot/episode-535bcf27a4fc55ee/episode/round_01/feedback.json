@@ -1,0 +1,76 @@
+{
+  "error": "PolicyError: Unsupported Python construct: Import",
+  "observation": {
+    "tcp_m": [
+      0.39999999999999997,
+      -0.11999999999999983,
+      0.2600000000000002
+    ],
+    "gripper_command": "open",
+    "finger_contact_objects": [],
+    "simulation_time_s": 2.6999999999999242,
+    "objects": [
+      {
+        "name": "red",
+        "shape": "cube",
+        "size_m": [
+          0.04,
+          0.04,
+          0.04
+        ],
+        "centre_m": [
+          0.4143715036021833,
+          -0.12131105171124455,
+          0.019957398275963014
+        ]
+      },
+      {
+        "name": "blue",
+        "shape": "cube",
+        "size_m": [
+          0.04,
+          0.04,
+          0.04
+        ],
+        "centre_m": [
+          0.40656541102300714,
+          0.12704658727746176,
+          0.019957398275963014
+        ]
+      }
+    ]
+  },
+  "evaluation": {
+    "success": false,
+    "goal": {
+      "type": "stack",
+      "source": "red",
+      "target": "blue"
+    },
+    "stack_checks": [
+      {
+        "source": "red",
+        "target": "blue",
+        "success": false,
+        "stable_checks": 0,
+        "checks": 20,
+        "tool_clear": true,
+        "diagnostics": {
+          "xy_error_m": 0.24848028478211154,
+          "height_error_m": 0.04,
+          "shapes_ok": true,
+          "centered": false,
+          "height_ok": false,
+          "stationary": true,
+          "touching": false,
+          "supported": true,
+          "valid": false
+        }
+      }
+    ]
+  },
+  "actions": [],
+  "local_variables_reset": true,
+  "remaining_blocks": 0,
+  "model_declared_done": false
+}

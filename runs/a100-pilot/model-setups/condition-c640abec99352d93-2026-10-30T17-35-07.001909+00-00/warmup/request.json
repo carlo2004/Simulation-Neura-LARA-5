@@ -1,0 +1,55 @@
+{
+  "model": "local",
+  "messages": [
+    {
+      "role": "system",
+      "content": "Return a short JSON object."
+    },
+    {
+      "role": "user",
+      "content": "Return {\"code\":\"\",\"done\":true}."
+    }
+  ],
+  "max_tokens": 64,
+  "temperature": 0.1,
+  "top_p": 1.0,
+  "top_k": 50,
+  "min_p": 0,
+  "presence_penalty": 0,
+  "repeat_penalty": 1.1,
+  "seed": 0,
+  "chat_template_kwargs": {},
+  "stream": true,
+  "stream_options": {
+    "include_usage": true
+  },
+  "timings_per_token": true,
+  "cache_prompt": false,
+  "response_format": {
+    "type": "json_schema",
+    "json_schema": {
+      "name": "robot_program",
+      "strict": true,
+      "schema": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "done": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "done"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "reasoning_budget_tokens": -1
+}

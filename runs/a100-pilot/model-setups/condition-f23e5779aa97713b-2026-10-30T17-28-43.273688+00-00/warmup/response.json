@@ -1,0 +1,31 @@
+{
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "message": {
+        "role": "assistant",
+        "content": "{\"code\":\"\",\"done\":true}",
+        "reasoning_content": ""
+      }
+    }
+  ],
+  "usage": {
+    "completion_tokens": 8,
+    "prompt_tokens": 28,
+    "total_tokens": 36,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    }
+  },
+  "timings": {
+    "cache_n": 0,
+    "prompt_n": 28,
+    "prompt_ms": 16916.648,
+    "prompt_per_token_ms": 604.166,
+    "prompt_per_second": 1.655174240192265,
+    "predicted_n": 8,
+    "predicted_ms": 13825.865,
+    "predicted_per_token_ms": 1975.1235714285715,
+    "predicted_per_second": 0.5062974360012917
+  }
+}

@@ -1,0 +1,17 @@
+
+Modell generiert Block 1/1 ...
+[Inferenz] Prompt verarbeiten / auf erstes Token warten | 0.0 s
+[Inferenz] Gesamt inkl. Prompt: 1.7 Token/s | Prompt: 2650.3 Token/s | 1 Ausgabetoken | 1.0 s
+[Inferenz] Ausgabe: 121.1 Token/s | Prompt: 2650.3 Token/s | 123 Ausgabetoken | 2.0 s
+[Inferenz] Ausgabe: 121.1 Token/s | Prompt: 2650.3 Token/s | 245 Ausgabetoken | 3.0 s
+[Inferenz] Ausgabe: 121.3 Token/s | Prompt: 2650.3 Token/s | 367 Ausgabetoken | 4.0 s
+[Inferenz] Ausgabe: 121.1 Token/s | Prompt: 2650.3 Token/s | 488 Ausgabetoken | 5.1 s
+[Inferenz] Ausgabe: 120.9 Token/s | Prompt: 2650.3 Token/s | 608 Ausgabetoken | 6.1 s
+[Inferenz] Ausgabe: 120.9 Token/s | Prompt: 2650.3 Token/s | 729 Ausgabetoken | 7.1 s
+[Inferenz] Ausgabe: 120.8 Token/s | Prompt: 2650.3 Token/s | 837 Ausgabetoken | 7.5 s | Laden: 0.0 s | Erstes Token: 0.59 s
+Modell: First block: grasp red cube, lift, move to blue cube position, lower, release, move away
+Programm: 10 Zeilen; vollstaendig im Protokoll.
+Feedback: TCP=[0.4068, 0.11, 0.2497], Fingerkontakt=[]
+Ausfuehrungsfehler: PolicyError: TCP outside supported workspace
+Physik: red auf blue: 0/20; Greifer frei=True
+FAIL evaluated

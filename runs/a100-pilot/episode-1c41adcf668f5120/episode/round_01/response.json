@@ -1,0 +1,31 @@
+{
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "message": {
+        "role": "assistant",
+        "content": "{\"code\": \"robot.gripper(closed=True)\\nrobot.move_to([0.389445, -0.116521, 0.26])\\nrobot.gripper(closed=False)\\nrobot.move_to([0.390091, 0.126375, 0.26])\\nrobot.gripper(closed=True)\\nrobot.move_to([0.390091, 0.126375, 0.45])\", \"done\": true, \"message\": \"Grasp red, move to blue's position, release red onto blue, then move TCP clear.\"}",
+        "reasoning_content": ""
+      }
+    }
+  ],
+  "usage": {
+    "completion_tokens": 161,
+    "prompt_tokens": 1093,
+    "total_tokens": 1254,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    }
+  },
+  "timings": {
+    "cache_n": 0,
+    "prompt_n": 1093,
+    "prompt_ms": 264.014,
+    "prompt_per_token_ms": 0.24154986276303753,
+    "prompt_per_second": 4139.931973304446,
+    "predicted_n": 161,
+    "predicted_ms": 1837.897,
+    "predicted_per_token_ms": 11.486856249999999,
+    "predicted_per_second": 87.0560210936739
+  }
+}

@@ -1,0 +1,19 @@
+
+Modell generiert Block 1/1 ...
+[Inferenz] Prompt verarbeiten / auf erstes Token warten | 0.0 s
+[Inferenz] Gesamt inkl. Prompt: 1.9 Token/s | Prompt: 3733.7 Token/s | 1 Ausgabetoken | 1.0 s
+[Inferenz] Ausgabe: 108.3 Token/s | Prompt: 3733.7 Token/s | 110 Ausgabetoken | 2.0 s
+[Inferenz] Ausgabe: 108.4 Token/s | Prompt: 3733.7 Token/s | 219 Ausgabetoken | 3.0 s
+[Inferenz] Ausgabe: 108.5 Token/s | Prompt: 3733.7 Token/s | 328 Ausgabetoken | 4.0 s
+[Inferenz] Ausgabe: 108.5 Token/s | Prompt: 3733.7 Token/s | 437 Ausgabetoken | 5.0 s
+[Inferenz] Ausgabe: 108.3 Token/s | Prompt: 3733.7 Token/s | 545 Ausgabetoken | 6.0 s
+[Inferenz] Ausgabe: 108.2 Token/s | Prompt: 3733.7 Token/s | 653 Ausgabetoken | 7.0 s
+[Inferenz] Ausgabe: 108.0 Token/s | Prompt: 3733.7 Token/s | 760 Ausgabetoken | 8.0 s
+[Inferenz] Ausgabe: 107.9 Token/s | Prompt: 3733.7 Token/s | 867 Ausgabetoken | 9.0 s
+[Inferenz] Ausgabe: 107.8 Token/s | Prompt: 3733.7 Token/s | 968 Ausgabetoken | 9.5 s | Laden: 0.0 s | Erstes Token: 0.52 s
+Modell: Attempted to lift red cube, grasp, move over blue, and lower; but may need precise heights.
+Programm: 13 Zeilen; vollstaendig im Protokoll.
+Feedback: TCP=[0.4069, -0.1088, 0.0199], Fingerkontakt=['red']
+Ausfuehrungsfehler: PolicyError: TCP outside supported workspace
+Physik: red auf blue: 0/20; Greifer frei=False
+FAIL evaluated

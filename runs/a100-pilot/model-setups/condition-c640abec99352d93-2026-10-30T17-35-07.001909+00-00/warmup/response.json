@@ -1,0 +1,31 @@
+{
+  "choices": [
+    {
+      "finish_reason": "length",
+      "message": {
+        "role": "assistant",
+        "content": "",
+        "reasoning_content": "The user is asking me to return a specific JSON object with \"code\" set to an empty string and \"done\" set to true. This appears to be a test or verification request. I should comply with this request by returning exactly the JSON object they specified.\n\nLet me construct the response:\n```json\n{\"code"
+      }
+    }
+  ],
+  "usage": {
+    "completion_tokens": 64,
+    "prompt_tokens": 29,
+    "total_tokens": 93,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    }
+  },
+  "timings": {
+    "cache_n": 0,
+    "prompt_n": 29,
+    "prompt_ms": 94.102,
+    "prompt_per_token_ms": 3.244896551724138,
+    "prompt_per_second": 308.1762342989522,
+    "predicted_n": 64,
+    "predicted_ms": 398.383,
+    "predicted_per_token_ms": 6.323539682539682,
+    "predicted_per_second": 158.1392780314421
+  }
+}

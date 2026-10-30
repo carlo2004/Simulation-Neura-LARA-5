@@ -1,0 +1,131 @@
+{
+  "instruction": "Staple den roten W\u00fcrfel auf den blauen W\u00fcrfel.",
+  "goal": {
+    "type": "stack",
+    "source": "red",
+    "target": "blue"
+  },
+  "success": false,
+  "status": "budget_exhausted",
+  "mode": "closed_loop_feedback",
+  "max_rounds": 1,
+  "protocol_version": 2,
+  "policy_limits": {
+    "code_characters": 64000,
+    "statements": 256,
+    "ast_nodes": 4096,
+    "api_calls": 256,
+    "sequence_items": 64,
+    "wait_per_call_s": 5.0,
+    "wait_total_s": 15.0
+  },
+  "software": {
+    "version": "3.6.0",
+    "python": "3.13.2",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "recorded_at_utc": "2026-10-30T17:20:17.956073+00:00",
+    "git_commit": "50f214fb913985c5639cbc766f1bca36ad771012",
+    "tracked_changes": false
+  },
+  "physics_during_inference": "paused; viewer remains responsive",
+  "model_observation_decimal_places": 6,
+  "model": {
+    "format_version": 2,
+    "max_total_parameters": 10000000000,
+    "runtime": "llama.cpp",
+    "runtime_version": "b11951-cuda12.8",
+    "runtime_assets": {
+      "linux-x86_64": {
+        "filename": "llama-b11951-bin-ubuntu-cuda-12.8-x64.tar.gz",
+        "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11951/llama-b11951-bin-ubuntu-cuda-12.8-x64.tar.gz",
+        "sha256": "51a6dae48f9cae0af5dd4971df691a3cb1cf36bac459f89bcccd805edc6dba92",
+        "bytes": 182382782
+      }
+    },
+    "model_id": "Qwen/Qwen3.5-4B",
+    "original_revision": "851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a",
+    "total_parameters": 4659865088,
+    "quantization": "Q4_K_M",
+    "gguf_repository": "unsloth/Qwen3.5-4B-GGUF",
+    "gguf_revision": "e87f176479d0855a907a41277aca2f8ee7a09523",
+    "model_filename": "Qwen3.5-4B-Q4_K_M.gguf",
+    "model_bytes": 2740937888,
+    "model_sha256": "00fe7986ff5f6b463e62455821146049db6f9313603938a70800d1fb69ef11a4",
+    "model_url": "https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/e87f176479d0855a907a41277aca2f8ee7a09523/Qwen3.5-4B-Q4_K_M.gguf?download=true",
+    "license": "Apache-2.0",
+    "default_thinking": false,
+    "context_tokens": 4096,
+    "profiles": {
+      "instruct": {
+        "temperature": 0.7,
+        "top_p": 0.8,
+        "top_k": 20,
+        "min_p": 0,
+        "presence_penalty": 1.5,
+        "repeat_penalty": 1
+      },
+      "thinking": {
+        "temperature": 0.6,
+        "top_p": 0.95,
+        "top_k": 20,
+        "min_p": 0,
+        "presence_penalty": 0,
+        "repeat_penalty": 1
+      }
+    },
+    "model_key": "qwen4b",
+    "runtime_dependencies": {
+      "linux-x86_64": [
+        {
+          "filename": "cudart-llama-b11951-bin-ubuntu-cuda-12.8-x64.tar.gz",
+          "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11951/cudart-llama-b11951-bin-ubuntu-cuda-12.8-x64.tar.gz",
+          "sha256": "150f4d36ee4f97e85dbcb139e7fcbfeee03d4d74251c98076cdd4879d35c34eb",
+          "bytes": 594377552
+        }
+      ]
+    },
+    "device": "cuda",
+    "cuda_runtime_kind": "binary"
+  },
+  "initial_observation": {
+    "tcp_m": [
+      0.39999999999999997,
+      -0.11999999999999983,
+      0.2600000000000002
+    ],
+    "gripper_command": "open",
+    "finger_contact_objects": [],
+    "simulation_time_s": 0.5000000000000003,
+    "objects": [
+      {
+        "name": "red",
+        "shape": "cube",
+        "size_m": [
+          0.04,
+          0.04,
+          0.04
+        ],
+        "centre_m": [
+          0.4143715036021833,
+          -0.12131105171124455,
+          0.019957398275961748
+        ]
+      },
+      {
+        "name": "blue",
+        "shape": "cube",
+        "size_m": [
+          0.04,
+          0.04,
+          0.04
+        ],
+        "centre_m": [
+          0.40656541102300714,
+          0.12704658727746176,
+          0.019957398275961748
+        ]
+      }
+    ]
+  },
+  "rounds": []
+}

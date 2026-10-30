@@ -1,0 +1,31 @@
+{
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "message": {
+        "role": "assistant",
+        "content": "```python\nrobot.jog(\"x\", 0.05)\n```",
+        "reasoning_content": ""
+      }
+    }
+  ],
+  "usage": {
+    "completion_tokens": 18,
+    "prompt_tokens": 1039,
+    "total_tokens": 1057,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    }
+  },
+  "timings": {
+    "cache_n": 0,
+    "prompt_n": 1039,
+    "prompt_ms": 294.339,
+    "prompt_per_token_ms": 0.28329066410009623,
+    "prompt_per_second": 3529.9433646237844,
+    "predicted_n": 18,
+    "predicted_ms": 172.314,
+    "predicted_per_token_ms": 10.136117647058823,
+    "predicted_per_second": 98.65710273106075
+  }
+}

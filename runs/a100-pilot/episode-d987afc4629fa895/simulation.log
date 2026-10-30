@@ -1,0 +1,11 @@
+
+Modell generiert Block 1/1 ...
+[Inferenz] Prompt verarbeiten / auf erstes Token warten | 0.0 s
+[Inferenz] Gesamt inkl. Prompt: 3.4 Token/s | Prompt: 3832.3 Token/s | 1 Ausgabetoken | 1.0 s
+[Inferenz] Ausgabe: 86.5 Token/s | Prompt: 3832.3 Token/s | 88 Ausgabetoken | 2.0 s
+[Inferenz] Ausgabe: 86.7 Token/s | Prompt: 3832.3 Token/s | 192 Ausgabetoken | 2.5 s | Laden: 0.0 s | Erstes Token: 0.29 s
+Modell: Pick up red cube and place it on blue cube
+Programm: 8 Zeilen; vollstaendig im Protokoll.
+Feedback: TCP=[0.414, 0.1327, 0.45], Fingerkontakt=[]
+Physik: red auf blue: 0/20; Greifer frei=True
+FAIL evaluated

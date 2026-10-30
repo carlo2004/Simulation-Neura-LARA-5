@@ -1,0 +1,5 @@
+robot.move_to([0.402435, -0.129157, 0.019957])
+robot.gripper(closed=True)
+robot.move_to([0.413958, 0.132719, 0.04])
+robot.gripper(closed=False)
+robot.move_to([0.413958, 0.132719, 0.26])

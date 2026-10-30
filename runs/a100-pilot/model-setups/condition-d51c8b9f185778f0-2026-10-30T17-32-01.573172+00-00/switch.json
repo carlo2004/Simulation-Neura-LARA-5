@@ -1,0 +1,698 @@
+{
+  "model": "dory4b",
+  "setup_seconds": 0.0,
+  "load_seconds": null,
+  "error": "ValueError: This CUDA source runtime needs the NVIDIA CUDA Toolkit (nvcc), CMake and a C++ compiler",
+  "wall_seconds": 0.46781286700024793,
+  "info": {
+    "protocol": "stacklab-inference-v1",
+    "server_id": "fd04e4dce6714fa6bafe1fd8d425ec0d",
+    "config": {
+      "format_version": 2,
+      "max_total_parameters": 10000000000,
+      "runtime": "llama.cpp",
+      "runtime_version": "dory-98a74c97ea09-cpu-cuda",
+      "runtime_assets": {
+        "linux-x86_64": {
+          "filename": "llama-b11951-bin-ubuntu-x64.tar.gz",
+          "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11951/llama-b11951-bin-ubuntu-x64.tar.gz",
+          "sha256": "2897031960458f9422cd7c7bd37bdc7098da41893cf735ecce4b951ef5e2c658",
+          "bytes": 22646994
+        },
+        "windows-x86_64": {
+          "filename": "llama-b11951-bin-win-cpu-x64.zip",
+          "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11951/llama-b11951-bin-win-cpu-x64.zip",
+          "sha256": "ac5edf9c936132fb16c9ff863db8b627c2a67621ff2e796ffd184585aea567ea",
+          "bytes": 24378362
+        },
+        "darwin-arm64": {
+          "filename": "llama-b11951-bin-macos-arm64.tar.gz",
+          "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11951/llama-b11951-bin-macos-arm64.tar.gz",
+          "sha256": "e75da9f2e4696d2bf54f53b75c3cf5a2b6984bfc846904db1349834f867fa447",
+          "bytes": 16440283
+        },
+        "darwin-x86_64": {
+          "filename": "llama-b11951-bin-macos-x64.tar.gz",
+          "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11951/llama-b11951-bin-macos-x64.tar.gz",
+          "sha256": "bd4555e5ff1e4393b3326859688b663dc788fe5e070186de0b2b0b1aadc715bf",
+          "bytes": 12177301
+        }
+      },
+      "model_id": "nvidia/NVIDIA-Nemotron-Labs-Dory1.0-4B-BF16",
+      "original_revision": "48e0c3faac0aaa8b93fc4e68256d7e58b183645e",
+      "training_model_id": "nvidia/NVIDIA-Nemotron-Labs-Dory1.0-4B-BF16",
+      "training_revision": "48e0c3faac0aaa8b93fc4e68256d7e58b183645e",
+      "total_parameters": 3975229440,
+      "quantization": "Q5_K_M",
+      "gguf_repository": "nvidia/NVIDIA-Nemotron-Labs-Dory1.0-4B-GGUF",
+      "gguf_revision": "df53755cb8741843af8e019e088819fbef17e29b",
+      "model_filename": "NVIDIA-Nemotron-Labs-Dory1.0-4B-Q5_K_M.gguf",
+      "model_bytes": 3673288864,
+      "model_sha256": "96080be49ffd67b916018b7bdef8c484762576fb52780e10ab98ac4978a660e0",
+      "model_url": "https://huggingface.co/nvidia/NVIDIA-Nemotron-Labs-Dory1.0-4B-GGUF/resolve/df53755cb8741843af8e019e088819fbef17e29b/NVIDIA-Nemotron-Labs-Dory1.0-4B-Q5_K_M.gguf?download=true",
+      "license": "OpenMDW-1.1",
+      "default_thinking": true,
+      "supports_thinking_toggle": true,
+      "context_tokens": 8192,
+      "profiles": {
+        "thinking": {
+          "temperature": 1.0,
+          "top_p": 0.95,
+          "top_k": 0,
+          "min_p": 0,
+          "presence_penalty": 0,
+          "repeat_penalty": 1
+        },
+        "instruct": {
+          "temperature": 1.0,
+          "top_p": 0.95,
+          "top_k": 0,
+          "min_p": 0,
+          "presence_penalty": 0,
+          "repeat_penalty": 1
+        }
+      },
+      "chat_template_kwargs": {},
+      "preserve_reasoning": false,
+      "thinking_budget_tokens": 768,
+      "runtime_source": {
+        "repository": "https://github.com/brianchmielNV/llama.cpp.git",
+        "revision": "98a74c97ea09ac72f6ceda1559808fc0a2f447ce"
+      },
+      "server_args": [
+        "--flash-attn",
+        "off",
+        "--no-context-shift",
+        "--batch-size",
+        "512",
+        "--ubatch-size",
+        "512",
+        "--cache-type-k",
+        "f16",
+        "--cache-type-v",
+        "f16",
+        "--override-kv",
+        "dory.num_loops=int:2,dory.recurrent_kv_cache_mode=str:per_loop"
+      ],
+      "aliases": [
+        "nvidia/NVIDIA-Nemotron-Labs-Dory1.0-4B-GGUF",
+        "Dory1.0-4B",
+        "Nemotron Labs Dory 1.0 (4B)"
+      ],
+      "model_key": "dory4b",
+      "device": "cuda",
+      "cuda_architectures": [
+        80,
+        89
+      ],
+      "cuda_runtime_kind": "source",
+      "cuda_flash_attention_quants": "f16-f16"
+    },
+    "software": {
+      "version": "3.6.0",
+      "python": "3.13.16",
+      "platform": "Linux-6.6.159+-x86_64-with-glibc2.39",
+      "recorded_at_utc": "2026-10-30T17:16:58.915973+00:00",
+      "git_commit": "50f214fb913985c5639cbc766f1bca36ad771012",
+      "tracked_changes": false
+    },
+    "hardware": {
+      "gpus": [
+        {
+          "index": 0,
+          "name": "NVIDIA A100-SXM4-40GB",
+          "uuid": "GPU-9ec12e03-8fd7-f540-4a87-e4606cb87831",
+          "memory_total_mib": 40960,
+          "driver_version": "580.82.07"
+        }
+      ]
+    },
+    "threads": 2,
+    "source_hashes": {
+      "config/cuda.runtime.lock.json": "243ecf80be1d95671154dba9220ef7f56b35b0d978cb728b6915a5ddf5bcd1de",
+      "config/models.lock.json": "9e62e22753bca07ba74e602c9f1612bcccd1589403d73395d92c4fa1617a6bee",
+      "config/policy.json": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356",
+      "config/prompts/LICENSE-Apache-2.0.txt": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "config/prompts/README.md": "a19f3d497c80a79b142cde46b2a55d2cbecb7fea942d7a3c21c741cb5733e9b5",
+      "config/prompts/ministral_system.txt": "aba1efaff0bdc73f4a864139e2c07dce8fc1e3df7b5d5c2b2623df6816697156",
+      "config/prompts/robot_api.md": "9c1184e2ad9664e0d366d3e5aebc7c8d3ada07b22c26357f58526718414154a3",
+      "stacklab/__init__.py": "38ee31cf0883a5574dd33e23ac3325d2f64db06b44b647fb14aa005f85d958ea",
+      "stacklab/__main__.py": "ba1b35400ba123d60ee247308f8f71d699619838a6f82e04b4955a931638004f",
+      "stacklab/backup.py": "052e7773b8f04efb2a525345ead29ce6d022da2c3821bd3bc1f474301572b556",
+      "stacklab/cli/__init__.py": "8dee3208369d48c2f22b1f5349af054ff89d0e79fb203da9320b7ed5a3de2a24",
+      "stacklab/cli/benchmark.py": "23da1136784f3b34357dc8a0269fe7d6f043afe6ba3f76c20fe5101b88dba1d4",
+      "stacklab/cli/chat.py": "0ed27f5849fb434c39c32624b1abf4f5fd76881eae88caef772eaa240f5ea9d3",
+      "stacklab/cli/console.py": "c6caac7f88311fd1db57ebb07831d23455929bde2f7f032013190740d3887c0b",
+      "stacklab/cli/demo.py": "624603df67d68f9ee3de213a96820710a13548dbdbd877c51790900e51dd7153",
+      "stacklab/cli/doctor.py": "28313c76b84d04193b6d254ee1ed3a4f11e0902746cbbf004722e87f4cef560f",
+      "stacklab/cli/experiment.py": "cf31e2e32c77a9ca8d69d8d55a27ce5b4c010a39c0aec367123e5682db920e22",
+      "stacklab/cli/presentation.py": "9b1c1f1b89f0aac797e22f8f11971b02acd855ba88bf62aab56a89e1a157bacf",
+      "stacklab/cli/process.py": "e8aa25cf2fa6a902624c7180af65ab0f216a63821aab865e46052646dd3562fc",
+      "stacklab/cli/serve.py": "80938f6d9cab83129c53f6e382e06fdfb4409d844cd5c6c86cc9db5e11eee4a2",
+      "stacklab/cli/speed.py": "56decc7359c19e8d1b2699ecae84d9c635676150e074e7d7d4606c266eaf5920",
+      "stacklab/cli/worker.py": "43f559779c991b8fea2685164324421e033f92652ae6d4d44410e24035248b30",
+      "stacklab/comparison.py": "7654f6c5a4c67a58b6b31a3df02393293c5a116fbac53cb1a1748fdae616d43a",
+      "stacklab/config.py": "9420c40a0042c5401f3b518593dace10032a912ebb22ccf43f50148b8f899274",
+      "stacklab/evaluation.py": "6b6f8bb71815267f5d73c4093f79fd5c1fc6ee656d29b337dfa13ac8241a0454",
+      "stacklab/experiments.py": "28703593a04fac638c73e27cdea8902ff0d795ce792c661841855069981188b7",
+      "stacklab/llm/__init__.py": "a6fdcc87fa4f358f9ecfd01a5948d84f372302fa997c1c8cb2a853a0d1260dc7",
+      "stacklab/llm/agent.py": "da6f3ef0b6c072a9f753c33b8e05b95487b18a8275966ccd3e317650776bf757",
+      "stacklab/llm/catalog.py": "42c89f56d691e18b4d362b31e94fb29409058e9b7c68f4cac2c65ae952707e2d",
+      "stacklab/llm/hardware.py": "74f6813dd9c1224da930e3eceb615982ff7e28a2e1c25e6a80420b1d70466e0d",
+      "stacklab/llm/metrics.py": "55d0c1516438376fabc0c93c73b1ebb980bece217d816d9fbae27bd0643557fd",
+      "stacklab/llm/remote.py": "c4fc9c959513344b37c38a8df1bce886847caa1d713a5765b7cd6406d0529929",
+      "stacklab/llm/responses.py": "99d5191da0651948f7910816ca3cd584d671d17e404bbf77237d1709e995c8c8",
+      "stacklab/llm/runtime.py": "a07ab0824d4dd27c974499dbabae8113743190170c171a38b70762ba3ffd9ac1",
+      "stacklab/llm/service.py": "229aecbf0837113fea265d9d635da790054b911cfa5479a7854ff12b8741aace",
+      "stacklab/llm/source_runtime.py": "8d11f6b5fbf72e22a79fca14d81da10f4bb95d002dddd6d8d8dcb96f2e534f36",
+      "stacklab/paths.py": "1d61ce95de4a4295ffab1de5cc4a95452babefce6b67673ded43953d609865fa",
+      "stacklab/policy.py": "8e6bad317413f5c86571dc2fe3af8e677378deb3ed88bf9e2d09ba68c07b0149",
+      "stacklab/provenance.py": "78a4af181fe8e50fc7f388050f8c068690db71c6b536fd3f7ea863cb4d97d76b",
+      "stacklab/publication.py": "83f4005c6ec254f98897c2afd5c1b3a27ac47439cc766e796b0a2c0e6bada678",
+      "stacklab/review.py": "959700ad9d75f47b322cbf96f6082cab0ec4f3490827b5a81d00e4861581669b",
+      "stacklab/sim/__init__.py": "73dc0dfa4e97391ee242fbffcb04ef41d9f2602cdb2be7fbf6aac8411cd68a4c",
+      "stacklab/sim/assets.py": "d7c8995a7bab605bd27a60ce713f35a35f85831a3d7a96963cdfb6fcbc3c1d9f",
+      "stacklab/sim/convert.py": "80211ffe2e17d0862d6252771aaeaa4e7da2ed9ed91372a4d5b67ec7033a896a",
+      "stacklab/sim/manual.py": "e5bad8e99fcfd0557561601febc4563595c73ec52b54ce1a9f1b5da1f7d06224",
+      "stacklab/sim/meshes.py": "a2a1df6b3b9c3f99332dc80db902a9f1f5a2adb67bb3c1cbff6e7c59fe24f82b",
+      "stacklab/sim/overlays.py": "9a1920460248bcd537accbe8072d8d77caf9bcc3479c30051d45fcf0577e8614",
+      "stacklab/sim/recording.py": "33ab4e614c49abe08053fada6df26432ad69088ddcc43141df0001b546dbff6a",
+      "stacklab/sim/robot.py": "74ee68181cc89448f66a1bf6bc716eab3aa17a605bd2355e920f2debc78f2fac"
+    },
+    "capabilities": {
+      "model_switch": true,
+      "install_missing": true,
+      "recordings": [
+        "slim",
+        "full"
+      ]
+    },
+    "model_catalog": {
+      "qwen4b": {
+        "format_version": 2,
+        "max_total_parameters": 10000000000,
+        "runtime": "llama.cpp",
+        "runtime_version": "b11951-cuda12.8",
+        "runtime_assets": {
+          "linux-x86_64": {
+            "filename": "llama-b11951-bin-ubuntu-cuda-12.8-x64.tar.gz",
+            "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11951/llama-b11951-bin-ubuntu-cuda-12.8-x64.tar.gz",
+            "sha256": "51a6dae48f9cae0af5dd4971df691a3cb1cf36bac459f89bcccd805edc6dba92",
+            "bytes": 182382782
+          }
+        },
+        "model_id": "Qwen/Qwen3.5-4B",
+        "original_revision": "851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a",
+        "total_parameters": 4659865088,
+        "quantization": "Q4_K_M",
+        "gguf_repository": "unsloth/Qwen3.5-4B-GGUF",
+        "gguf_revision": "e87f176479d0855a907a41277aca2f8ee7a09523",
+        "model_filename": "Qwen3.5-4B-Q4_K_M.gguf",
+        "model_bytes": 2740937888,
+        "model_sha256": "00fe7986ff5f6b463e62455821146049db6f9313603938a70800d1fb69ef11a4",
+        "model_url": "https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/e87f176479d0855a907a41277aca2f8ee7a09523/Qwen3.5-4B-Q4_K_M.gguf?download=true",
+        "license": "Apache-2.0",
+        "default_thinking": false,
+        "context_tokens": 4096,
+        "profiles": {
+          "instruct": {
+            "temperature": 0.7,
+            "top_p": 0.8,
+            "top_k": 20,
+            "min_p": 0,
+            "presence_penalty": 1.5,
+            "repeat_penalty": 1
+          },
+          "thinking": {
+            "temperature": 0.6,
+            "top_p": 0.95,
+            "top_k": 20,
+            "min_p": 0,
+            "presence_penalty": 0,
+            "repeat_penalty": 1
+          }
+        },
+        "model_key": "qwen4b",
+        "runtime_dependencies": {
+          "linux-x86_64": [
+            {
+              "filename": "cudart-llama-b11951-bin-ubuntu-cuda-12.8-x64.tar.gz",
+              "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11951/cudart-llama-b11951-bin-ubuntu-cuda-12.8-x64.tar.gz",
+              "sha256": "150f4d36ee4f97e85dbcb139e7fcbfeee03d4d74251c98076cdd4879d35c34eb",
+              "bytes": 594377552
+            }
+          ]
+        },
+        "device": "cuda",
+        "cuda_runtime_kind": "binary"
+      },
+      "qwen9b": {
+        "format_version": 2,
+        "max_total_parameters": 10000000000,
+        "runtime": "llama.cpp",
+        "runtime_version": "b11951-cuda12.8",
+        "runtime_assets": {
+          "linux-x86_64": {
+            "filename": "llama-b11951-bin-ubuntu-cuda-12.8-x64.tar.gz",
+            "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11951/llama-b11951-bin-ubuntu-cuda-12.8-x64.tar.gz",
+            "sha256": "51a6dae48f9cae0af5dd4971df691a3cb1cf36bac459f89bcccd805edc6dba92",
+            "bytes": 182382782
+          }
+        },
+        "model_id": "Qwen/Qwen3.5-9B",
+        "original_revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+        "training_model_id": "Qwen/Qwen3.5-9B",
+        "training_revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+        "total_parameters": 9653104368,
+        "quantization": "Q4_K_M",
+        "gguf_repository": "unsloth/Qwen3.5-9B-GGUF",
+        "gguf_revision": "3885219b6810b007914f3a7950a8d1b469d598a5",
+        "model_filename": "Qwen3.5-9B-Q4_K_M.gguf",
+        "model_bytes": 5680522464,
+        "model_sha256": "03b74727a860a56338e042c4420bb3f04b2fec5734175f4cb9fa853daf52b7e8",
+        "model_url": "https://huggingface.co/unsloth/Qwen3.5-9B-GGUF/resolve/3885219b6810b007914f3a7950a8d1b469d598a5/Qwen3.5-9B-Q4_K_M.gguf?download=true",
+        "license": "Apache-2.0",
+        "default_thinking": true,
+        "supports_thinking_toggle": true,
+        "context_tokens": 8192,
+        "profiles": {
+          "instruct": {
+            "temperature": 0.7,
+            "top_p": 0.8,
+            "top_k": 20,
+            "min_p": 0,
+            "presence_penalty": 1.5,
+            "repeat_penalty": 1
+          },
+          "thinking": {
+            "temperature": 0.6,
+            "top_p": 0.95,
+            "top_k": 20,
+            "min_p": 0,
+            "presence_penalty": 0,
+            "repeat_penalty": 1
+          }
+        },
+        "chat_template_kwargs": {},
+        "preserve_reasoning": false,
+        "thinking_budget_tokens": 768,
+        "model_key": "qwen9b",
+        "runtime_dependencies": {
+          "linux-x86_64": [
+            {
+              "filename": "cudart-llama-b11951-bin-ubuntu-cuda-12.8-x64.tar.gz",
+              "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11951/cudart-llama-b11951-bin-ubuntu-cuda-12.8-x64.tar.gz",
+              "sha256": "150f4d36ee4f97e85dbcb139e7fcbfeee03d4d74251c98076cdd4879d35c34eb",
+              "bytes": 594377552
+            }
+          ]
+        },
+        "device": "cuda",
+        "cuda_runtime_kind": "binary"
+      },
+      "ministral8b": {
+        "format_version": 2,
+        "max_total_parameters": 10000000000,
+        "runtime": "llama.cpp",
+        "runtime_version": "b11951-cuda12.8",
+        "runtime_assets": {
+          "linux-x86_64": {
+            "filename": "llama-b11951-bin-ubuntu-cuda-12.8-x64.tar.gz",
+            "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11951/llama-b11951-bin-ubuntu-cuda-12.8-x64.tar.gz",
+            "sha256": "51a6dae48f9cae0af5dd4971df691a3cb1cf36bac459f89bcccd805edc6dba92",
+            "bytes": 182382782
+          }
+        },
+        "model_id": "mistralai/Ministral-3-8B-Reasoning-2512",
+        "original_revision": "81eaece1948f3875421d9a45bc55487d10e2d894",
+        "training_model_id": "mistralai/Ministral-3-8B-Reasoning-2512",
+        "training_revision": "81eaece1948f3875421d9a45bc55487d10e2d894",
+        "total_parameters": 8918026240,
+        "quantization": "Q4_K_M",
+        "gguf_repository": "mistralai/Ministral-3-8B-Reasoning-2512-GGUF",
+        "gguf_revision": "4413bc9b7b091ddad28101650d1395f5e045a328",
+        "model_filename": "Ministral-3-8B-Reasoning-2512-Q4_K_M.gguf",
+        "model_bytes": 5198910368,
+        "model_sha256": "894aa3645ef8708a81dbe201c26105ce37c4c741252c89c5a78f81b49ac438c6",
+        "model_url": "https://huggingface.co/mistralai/Ministral-3-8B-Reasoning-2512-GGUF/resolve/4413bc9b7b091ddad28101650d1395f5e045a328/Ministral-3-8B-Reasoning-2512-Q4_K_M.gguf?download=true",
+        "license": "Apache-2.0",
+        "default_thinking": true,
+        "supports_thinking_toggle": false,
+        "context_tokens": 8192,
+        "profiles": {
+          "thinking": {
+            "temperature": 0.7,
+            "top_p": 0.95,
+            "top_k": 40,
+            "min_p": 0,
+            "presence_penalty": 0,
+            "repeat_penalty": 1
+          },
+          "instruct": {
+            "temperature": 0.7,
+            "top_p": 0.95,
+            "top_k": 40,
+            "min_p": 0,
+            "presence_penalty": 0,
+            "repeat_penalty": 1
+          }
+        },
+        "chat_template_kwargs": {},
+        "preserve_reasoning": true,
+        "system_prompt_file": "config/prompts/ministral_system.txt",
+        "system_prompt_sha256": "aba1efaff0bdc73f4a864139e2c07dce8fc1e3df7b5d5c2b2623df6816697156",
+        "thinking_budget_tokens": 768,
+        "model_key": "ministral8b",
+        "runtime_dependencies": {
+          "linux-x86_64": [
+            {
+              "filename": "cudart-llama-b11951-bin-ubuntu-cuda-12.8-x64.tar.gz",
+              "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11951/cudart-llama-b11951-bin-ubuntu-cuda-12.8-x64.tar.gz",
+              "sha256": "150f4d36ee4f97e85dbcb139e7fcbfeee03d4d74251c98076cdd4879d35c34eb",
+              "bytes": 594377552
+            }
+          ]
+        },
+        "device": "cuda",
+        "cuda_runtime_kind": "binary"
+      },
+      "nemotron8b": {
+        "format_version": 2,
+        "max_total_parameters": 10000000000,
+        "runtime": "llama.cpp",
+        "runtime_version": "b11951-cuda12.8",
+        "runtime_assets": {
+          "linux-x86_64": {
+            "filename": "llama-b11951-bin-ubuntu-cuda-12.8-x64.tar.gz",
+            "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11951/llama-b11951-bin-ubuntu-cuda-12.8-x64.tar.gz",
+            "sha256": "51a6dae48f9cae0af5dd4971df691a3cb1cf36bac459f89bcccd805edc6dba92",
+            "bytes": 182382782
+          }
+        },
+        "model_id": "nvidia/NVIDIA-Nemotron-3.5-Bolt-E4B-4GB",
+        "original_revision": "1db54d5b12533ff1bcaa8e42cf4c667988a1f1be",
+        "training_model_id": "nvidia/NVIDIA-Nemotron-3.5-Bolt-E4B-BF16",
+        "training_revision": "49843eed8db1f1c616c47af75cfd36e07aec0667",
+        "total_parameters": 7996156490,
+        "quantization": "Q4_K_M",
+        "gguf_repository": "nvidia/NVIDIA-Nemotron-3.5-Bolt-E4B-4GB",
+        "gguf_revision": "1db54d5b12533ff1bcaa8e42cf4c667988a1f1be",
+        "model_filename": "Nemotron-3.5-Bolt-E4B-Q4_K_M.gguf",
+        "model_bytes": 6180446208,
+        "model_sha256": "c8af2b8aea10a690a1d9491db744a9446660173cb38fc489612b556615a69612",
+        "model_url": "https://huggingface.co/nvidia/NVIDIA-Nemotron-3.5-Bolt-E4B-4GB/resolve/1db54d5b12533ff1bcaa8e42cf4c667988a1f1be/Nemotron-3.5-Bolt-E4B-Q4_K_M.gguf?download=true",
+        "license": "OpenMDW-1.1",
+        "default_thinking": false,
+        "supports_thinking_toggle": true,
+        "context_tokens": 8192,
+        "profiles": {
+          "thinking": {
+            "temperature": 1,
+            "top_p": 0.95,
+            "top_k": 0,
+            "min_p": 0,
+            "presence_penalty": 0,
+            "repeat_penalty": 1
+          },
+          "instruct": {
+            "temperature": 1,
+            "top_p": 0.95,
+            "top_k": 0,
+            "min_p": 0,
+            "presence_penalty": 0,
+            "repeat_penalty": 1
+          }
+        },
+        "chat_template_kwargs": {
+          "conversational_mode": false
+        },
+        "preserve_reasoning": false,
+        "thinking_budget_tokens": 768,
+        "model_key": "nemotron8b",
+        "runtime_dependencies": {
+          "linux-x86_64": [
+            {
+              "filename": "cudart-llama-b11951-bin-ubuntu-cuda-12.8-x64.tar.gz",
+              "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11951/cudart-llama-b11951-bin-ubuntu-cuda-12.8-x64.tar.gz",
+              "sha256": "150f4d36ee4f97e85dbcb139e7fcbfeee03d4d74251c98076cdd4879d35c34eb",
+              "bytes": 594377552
+            }
+          ]
+        },
+        "device": "cuda",
+        "cuda_runtime_kind": "binary"
+      },
+      "dory4b": {
+        "format_version": 2,
+        "max_total_parameters": 10000000000,
+        "runtime": "llama.cpp",
+        "runtime_version": "dory-98a74c97ea09-cpu-cuda",
+        "runtime_assets": {
+          "linux-x86_64": {
+            "filename": "llama-b11951-bin-ubuntu-x64.tar.gz",
+            "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11951/llama-b11951-bin-ubuntu-x64.tar.gz",
+            "sha256": "2897031960458f9422cd7c7bd37bdc7098da41893cf735ecce4b951ef5e2c658",
+            "bytes": 22646994
+          },
+          "windows-x86_64": {
+            "filename": "llama-b11951-bin-win-cpu-x64.zip",
+            "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11951/llama-b11951-bin-win-cpu-x64.zip",
+            "sha256": "ac5edf9c936132fb16c9ff863db8b627c2a67621ff2e796ffd184585aea567ea",
+            "bytes": 24378362
+          },
+          "darwin-arm64": {
+            "filename": "llama-b11951-bin-macos-arm64.tar.gz",
+            "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11951/llama-b11951-bin-macos-arm64.tar.gz",
+            "sha256": "e75da9f2e4696d2bf54f53b75c3cf5a2b6984bfc846904db1349834f867fa447",
+            "bytes": 16440283
+          },
+          "darwin-x86_64": {
+            "filename": "llama-b11951-bin-macos-x64.tar.gz",
+            "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11951/llama-b11951-bin-macos-x64.tar.gz",
+            "sha256": "bd4555e5ff1e4393b3326859688b663dc788fe5e070186de0b2b0b1aadc715bf",
+            "bytes": 12177301
+          }
+        },
+        "model_id": "nvidia/NVIDIA-Nemotron-Labs-Dory1.0-4B-BF16",
+        "original_revision": "48e0c3faac0aaa8b93fc4e68256d7e58b183645e",
+        "training_model_id": "nvidia/NVIDIA-Nemotron-Labs-Dory1.0-4B-BF16",
+        "training_revision": "48e0c3faac0aaa8b93fc4e68256d7e58b183645e",
+        "total_parameters": 3975229440,
+        "quantization": "Q5_K_M",
+        "gguf_repository": "nvidia/NVIDIA-Nemotron-Labs-Dory1.0-4B-GGUF",
+        "gguf_revision": "df53755cb8741843af8e019e088819fbef17e29b",
+        "model_filename": "NVIDIA-Nemotron-Labs-Dory1.0-4B-Q5_K_M.gguf",
+        "model_bytes": 3673288864,
+        "model_sha256": "96080be49ffd67b916018b7bdef8c484762576fb52780e10ab98ac4978a660e0",
+        "model_url": "https://huggingface.co/nvidia/NVIDIA-Nemotron-Labs-Dory1.0-4B-GGUF/resolve/df53755cb8741843af8e019e088819fbef17e29b/NVIDIA-Nemotron-Labs-Dory1.0-4B-Q5_K_M.gguf?download=true",
+        "license": "OpenMDW-1.1",
+        "default_thinking": true,
+        "supports_thinking_toggle": true,
+        "context_tokens": 8192,
+        "profiles": {
+          "thinking": {
+            "temperature": 1.0,
+            "top_p": 0.95,
+            "top_k": 0,
+            "min_p": 0,
+            "presence_penalty": 0,
+            "repeat_penalty": 1
+          },
+          "instruct": {
+            "temperature": 1.0,
+            "top_p": 0.95,
+            "top_k": 0,
+            "min_p": 0,
+            "presence_penalty": 0,
+            "repeat_penalty": 1
+          }
+        },
+        "chat_template_kwargs": {},
+        "preserve_reasoning": false,
+        "thinking_budget_tokens": 768,
+        "runtime_source": {
+          "repository": "https://github.com/brianchmielNV/llama.cpp.git",
+          "revision": "98a74c97ea09ac72f6ceda1559808fc0a2f447ce"
+        },
+        "server_args": [
+          "--flash-attn",
+          "off",
+          "--no-context-shift",
+          "--batch-size",
+          "512",
+          "--ubatch-size",
+          "512",
+          "--cache-type-k",
+          "f16",
+          "--cache-type-v",
+          "f16",
+          "--override-kv",
+          "dory.num_loops=int:2,dory.recurrent_kv_cache_mode=str:per_loop"
+        ],
+        "aliases": [
+          "nvidia/NVIDIA-Nemotron-Labs-Dory1.0-4B-GGUF",
+          "Dory1.0-4B",
+          "Nemotron Labs Dory 1.0 (4B)"
+        ],
+        "model_key": "dory4b",
+        "device": "cuda",
+        "cuda_architectures": [
+          80,
+          89
+        ],
+        "cuda_runtime_kind": "source",
+        "cuda_flash_attention_quants": "f16-f16"
+      },
+      "granite8b": {
+        "format_version": 2,
+        "max_total_parameters": 10000000000,
+        "runtime": "llama.cpp",
+        "runtime_version": "b11951-cuda12.8",
+        "runtime_assets": {
+          "linux-x86_64": {
+            "filename": "llama-b11951-bin-ubuntu-cuda-12.8-x64.tar.gz",
+            "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11951/llama-b11951-bin-ubuntu-cuda-12.8-x64.tar.gz",
+            "sha256": "51a6dae48f9cae0af5dd4971df691a3cb1cf36bac459f89bcccd805edc6dba92",
+            "bytes": 182382782
+          }
+        },
+        "model_id": "ibm-granite/granite-4.2-8b",
+        "original_revision": "a7042144125ce5ae64f89610e8289647fc000b9a",
+        "training_model_id": "ibm-granite/granite-4.2-8b",
+        "training_revision": "a7042144125ce5ae64f89610e8289647fc000b9a",
+        "total_parameters": 8791592960,
+        "quantization": "Q4_K_M",
+        "gguf_repository": "ibm-granite/granite-4.2-8b-GGUF",
+        "gguf_revision": "93f3f6a8938ee922b784cf4e5b4203cd3428df8f",
+        "model_filename": "granite-4.2-8b-Q4_K_M.gguf",
+        "model_bytes": 5347917952,
+        "model_sha256": "16a9369d0805f80b7377d25d87f937a90c05dc04ad79173a52001e42c9aab311",
+        "model_url": "https://huggingface.co/ibm-granite/granite-4.2-8b-GGUF/resolve/93f3f6a8938ee922b784cf4e5b4203cd3428df8f/granite-4.2-8b-Q4_K_M.gguf?download=true",
+        "license": "Apache-2.0",
+        "default_thinking": true,
+        "supports_thinking_toggle": true,
+        "context_tokens": 8192,
+        "profiles": {
+          "thinking": {
+            "temperature": 1.0,
+            "top_p": 0.95,
+            "top_k": 0,
+            "min_p": 0,
+            "presence_penalty": 0,
+            "repeat_penalty": 1
+          },
+          "instruct": {
+            "temperature": 1.0,
+            "top_p": 0.95,
+            "top_k": 0,
+            "min_p": 0,
+            "presence_penalty": 0,
+            "repeat_penalty": 1
+          }
+        },
+        "chat_template_kwargs": {},
+        "preserve_reasoning": false,
+        "thinking_budget_tokens": 768,
+        "model_key": "granite8b",
+        "runtime_dependencies": {
+          "linux-x86_64": [
+            {
+              "filename": "cudart-llama-b11951-bin-ubuntu-cuda-12.8-x64.tar.gz",
+              "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11951/cudart-llama-b11951-bin-ubuntu-cuda-12.8-x64.tar.gz",
+              "sha256": "150f4d36ee4f97e85dbcb139e7fcbfeee03d4d74251c98076cdd4879d35c34eb",
+              "bytes": 594377552
+            }
+          ]
+        },
+        "device": "cuda",
+        "cuda_runtime_kind": "binary"
+      },
+      "lfm2.6b": {
+        "format_version": 2,
+        "max_total_parameters": 10000000000,
+        "runtime": "llama.cpp",
+        "runtime_version": "b11951-cuda12.8",
+        "runtime_assets": {
+          "linux-x86_64": {
+            "filename": "llama-b11951-bin-ubuntu-cuda-12.8-x64.tar.gz",
+            "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11951/llama-b11951-bin-ubuntu-cuda-12.8-x64.tar.gz",
+            "sha256": "51a6dae48f9cae0af5dd4971df691a3cb1cf36bac459f89bcccd805edc6dba92",
+            "bytes": 182382782
+          }
+        },
+        "model_id": "LiquidAI/LFM2.5-2.6B",
+        "original_revision": "b212e75975bbda9676a94d3cb7b2ca25b65fed48",
+        "training_model_id": "LiquidAI/LFM2.5-2.6B",
+        "training_revision": "b212e75975bbda9676a94d3cb7b2ca25b65fed48",
+        "total_parameters": 2697198592,
+        "quantization": "Q4_K_M",
+        "gguf_repository": "LiquidAI/LFM2.5-2.6B-GGUF",
+        "gguf_revision": "e7caca5d835a3901a8e0d63e94009429bafafdfc",
+        "model_filename": "LFM2.5-2.6B-Q4_K_M.gguf",
+        "model_bytes": 1674455040,
+        "model_sha256": "02a8b7e17487d326e46d68ce0ba24211e1b80a14c4cd0597fa73c1cd697f52ed",
+        "model_url": "https://huggingface.co/LiquidAI/LFM2.5-2.6B-GGUF/resolve/e7caca5d835a3901a8e0d63e94009429bafafdfc/LFM2.5-2.6B-Q4_K_M.gguf?download=true",
+        "license": "LFM-1.0",
+        "default_thinking": true,
+        "supports_thinking_toggle": false,
+        "context_tokens": 8192,
+        "profiles": {
+          "thinking": {
+            "temperature": 0.1,
+            "top_p": 1.0,
+            "top_k": 50,
+            "min_p": 0,
+            "presence_penalty": 0,
+            "repeat_penalty": 1.1
+          }
+        },
+        "chat_template_kwargs": {},
+        "preserve_reasoning": false,
+        "thinking_budget_tokens": 768,
+        "thinking_template_key": null,
+        "response_format": {
+          "type": "json_schema",
+          "json_schema": {
+            "name": "robot_program",
+            "strict": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "done": {
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "code",
+                "done"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "model_key": "lfm2.6b",
+        "runtime_dependencies": {
+          "linux-x86_64": [
+            {
+              "filename": "cudart-llama-b11951-bin-ubuntu-cuda-12.8-x64.tar.gz",
+              "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11951/cudart-llama-b11951-bin-ubuntu-cuda-12.8-x64.tar.gz",
+              "sha256": "150f4d36ee4f97e85dbcb139e7fcbfeee03d4d74251c98076cdd4879d35c34eb",
+              "bytes": 594377552
+            }
+          ]
+        },
+        "device": "cuda",
+        "cuda_runtime_kind": "binary"
+      }
+    },
+    "prompt_cache": false,
+    "device": "cuda",
+    "ready": false
+  }
+}

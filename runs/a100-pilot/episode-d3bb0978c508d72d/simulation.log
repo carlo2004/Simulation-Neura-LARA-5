@@ -1,0 +1,15 @@
+
+Modell generiert Block 1/1 ...
+[Inferenz] Prompt verarbeiten / auf erstes Token warten | 0.0 s
+[Inferenz] Gesamt inkl. Prompt: 3.4 Token/s | Prompt: 3669.5 Token/s | 1 Ausgabetoken | 1.0 s
+[Inferenz] Ausgabe: 108.6 Token/s | Prompt: 3669.5 Token/s | 110 Ausgabetoken | 2.0 s
+[Inferenz] Ausgabe: 108.4 Token/s | Prompt: 3669.5 Token/s | 219 Ausgabetoken | 2.9 s
+[Inferenz] Ausgabe: 108.3 Token/s | Prompt: 3669.5 Token/s | 327 Ausgabetoken | 4.0 s
+[Inferenz] Ausgabe: 108.2 Token/s | Prompt: 3669.5 Token/s | 437 Ausgabetoken | 5.1 s
+[Inferenz] Ausgabe: 108.1 Token/s | Prompt: 3669.5 Token/s | 545 Ausgabetoken | 6.1 s
+[Inferenz] Ausgabe: 108.0 Token/s | Prompt: 3669.5 Token/s | 653 Ausgabetoken | 7.1 s
+[Inferenz] Ausgabe: 107.7 Token/s | Prompt: 3669.5 Token/s | 837 Ausgabetoken | 8.1 s | Laden: 0.0 s | Erstes Token: 0.30 s
+Feedback: TCP=[0.4, -0.12, 0.26], Fingerkontakt=[]
+Ausfuehrungsfehler: UnicodeEncodeError: 'charmap' codec can't encode character '\u202f' in position 26: character maps to <undefined>
+Zielabweichung: 0.04999999999999999 m
+FAIL evaluated

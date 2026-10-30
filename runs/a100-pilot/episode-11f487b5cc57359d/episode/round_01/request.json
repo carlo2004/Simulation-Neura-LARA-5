@@ -1,0 +1,55 @@
+{
+  "model": "local",
+  "messages": [
+    {
+      "role": "system",
+      "content": "You write Python robot programs for a contact-physics tabletop simulator.\nReturn a JSON object with \"code\" (Python string), \"done\" (boolean) and an optional\n\"message\" (short explanation). A single fenced Python block or plain Python is\nalso accepted as a complete program. Do not mix several alternative programs.\nFor long tasks use multiple blocks: set done=false to request another block with\nreal execution feedback. Local variables reset between blocks; the world persists.\nA done claim does not override the independent evaluator for a specified goal.\nDo not repeat an already completed movement. After an error use current observations.\n\nUse assignments, flat lists/tuples, read-only indexing and numeric + - * /.\nThe current interpreter executes straight-line Python. Only the five robot\nmethods below are exposed. Resource budgets are included in each task request.\n\nAPI (all coordinates/sizes are WORLD METRES; durations are seconds):\n\n- robot.position(\"name\") -> [x,y,z]: current centre of a named object, not its top.\n  Use this to locate objects; do not hardcode their positions.\n- robot.position(\"tcp\") -> [x,y,z]: current tool centre in the same world frame.\n  For relative movement first read this position. Unless a distance is specified,\n  move 0.05 m. Direction words use WORLD axes: right/rechts = +X, left/links = -X,\n  forward/vorne = +Y, back/hinten = -Y, up/hoch = +Z, down/runter = -Z.\n- robot.move_to([x,y,z]): smoothly move the tool centre (TCP), keeping the gripper\n  vertically downward. This blocks until the motion has finished. Supported TCP\n  workspace: x=0.20..0.60, y=-0.30..0.30, z=0.01..0.45. No obstacle avoidance.\n- robot.jog(\"x\", distance): move relative to the MEASURED current TCP on one axis.\n  Axis must be \"x\", \"y\", or \"z\"; distance is in metres, signed (+ or -).\n  The other two coordinates remain constant. Prefer jog for relative commands;\n  do not reconstruct three absolute coordinates for a one-axis displacement.\n- robot.gripper(closed=False): fully open the fingers; this waits for completion.\n- robot.gripper(closed=True): close the fingers; this waits for completion.\n- robot.step(seconds): advance physics; per-call and total wait budgets come from the task request.\n  The two gripper calls are one method with a boolean argument.\n\nThe TCP is between the fingertips. To grasp a cube the TCP must be at the cube's\ncentre, not at the transport height. Object sizes in the scene description are full side\nlengths; reported positions are centres. The table surface is z=0. Objects are\nfree physical bodies and move only by gripper contact. Use an elevated height\n(e.g. 0.24 m in the supplied scenes) for horizontal transfers so the object clears\nthe table and other cubes. Finish with the object released and the tool moved\nclear of the stack. Do not leave the gripper supporting the object.\n\nYou cannot call stack(), push(), reset(), add(), place(), check_stack() or\nis_stacked(). Do not implement an evaluator. A separate evaluator will check the\nphysical result after your program. Code length and API-call budgets are configurable.\n"
+    },
+    {
+      "role": "user",
+      "content": "{\"instruction\": \"Staple den roten Würfel auf den blauen Würfel.\", \"observation\": {\"tcp_m\": [0.4, -0.12, 0.26], \"gripper_command\": \"open\", \"finger_contact_objects\": [], \"simulation_time_s\": 0.5, \"objects\": [{\"name\": \"red\", \"shape\": \"cube\", \"size_m\": [0.04, 0.04, 0.04], \"centre_m\": [0.413799, -0.108844, 0.019957]}, {\"name\": \"blue\", \"shape\": \"cube\", \"size_m\": [0.04, 0.04, 0.04], \"centre_m\": [0.406957, 0.111829, 0.019957]}]}, \"units\": \"world metres\", \"recent_tasks\": [], \"program_block_budget\": 1, \"policy_limits\": {\"code_characters\": 64000, \"statements\": 256, \"ast_nodes\": 4096, \"api_calls\": 256, \"sequence_items\": 64, \"wait_per_call_s\": 5.0, \"wait_total_s\": 15.0}}"
+    }
+  ],
+  "max_tokens": 2048,
+  "temperature": 0.1,
+  "top_p": 1.0,
+  "top_k": 50,
+  "min_p": 0,
+  "presence_penalty": 0,
+  "repeat_penalty": 1.1,
+  "seed": 1004,
+  "chat_template_kwargs": {},
+  "stream": true,
+  "stream_options": {
+    "include_usage": true
+  },
+  "timings_per_token": true,
+  "cache_prompt": false,
+  "response_format": {
+    "type": "json_schema",
+    "json_schema": {
+      "name": "robot_program",
+      "strict": true,
+      "schema": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "done": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "done"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "reasoning_budget_tokens": 768
+}

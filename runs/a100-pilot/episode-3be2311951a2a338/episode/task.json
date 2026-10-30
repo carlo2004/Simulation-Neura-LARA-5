@@ -1,0 +1,137 @@
+{
+  "instruction": "Staple den roten W\u00fcrfel auf den blauen W\u00fcrfel.",
+  "goal": {
+    "type": "stack",
+    "source": "red",
+    "target": "blue"
+  },
+  "success": false,
+  "status": "budget_exhausted",
+  "mode": "closed_loop_feedback",
+  "max_rounds": 1,
+  "protocol_version": 2,
+  "policy_limits": {
+    "code_characters": 64000,
+    "statements": 256,
+    "ast_nodes": 4096,
+    "api_calls": 256,
+    "sequence_items": 64,
+    "wait_per_call_s": 5.0,
+    "wait_total_s": 15.0
+  },
+  "software": {
+    "version": "3.6.0",
+    "python": "3.13.2",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "recorded_at_utc": "2026-10-30T17:34:20.007790+00:00",
+    "git_commit": "50f214fb913985c5639cbc766f1bca36ad771012",
+    "tracked_changes": false
+  },
+  "physics_during_inference": "paused; viewer remains responsive",
+  "model_observation_decimal_places": 6,
+  "model": {
+    "format_version": 2,
+    "max_total_parameters": 10000000000,
+    "runtime": "llama.cpp",
+    "runtime_version": "b11951-cuda12.8",
+    "runtime_assets": {
+      "linux-x86_64": {
+        "filename": "llama-b11951-bin-ubuntu-cuda-12.8-x64.tar.gz",
+        "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11951/llama-b11951-bin-ubuntu-cuda-12.8-x64.tar.gz",
+        "sha256": "51a6dae48f9cae0af5dd4971df691a3cb1cf36bac459f89bcccd805edc6dba92",
+        "bytes": 182382782
+      }
+    },
+    "model_id": "ibm-granite/granite-4.2-8b",
+    "original_revision": "a7042144125ce5ae64f89610e8289647fc000b9a",
+    "training_model_id": "ibm-granite/granite-4.2-8b",
+    "training_revision": "a7042144125ce5ae64f89610e8289647fc000b9a",
+    "total_parameters": 8791592960,
+    "quantization": "Q4_K_M",
+    "gguf_repository": "ibm-granite/granite-4.2-8b-GGUF",
+    "gguf_revision": "93f3f6a8938ee922b784cf4e5b4203cd3428df8f",
+    "model_filename": "granite-4.2-8b-Q4_K_M.gguf",
+    "model_bytes": 5347917952,
+    "model_sha256": "16a9369d0805f80b7377d25d87f937a90c05dc04ad79173a52001e42c9aab311",
+    "model_url": "https://huggingface.co/ibm-granite/granite-4.2-8b-GGUF/resolve/93f3f6a8938ee922b784cf4e5b4203cd3428df8f/granite-4.2-8b-Q4_K_M.gguf?download=true",
+    "license": "Apache-2.0",
+    "default_thinking": true,
+    "supports_thinking_toggle": true,
+    "context_tokens": 8192,
+    "profiles": {
+      "thinking": {
+        "temperature": 1.0,
+        "top_p": 0.95,
+        "top_k": 0,
+        "min_p": 0,
+        "presence_penalty": 0,
+        "repeat_penalty": 1
+      },
+      "instruct": {
+        "temperature": 1.0,
+        "top_p": 0.95,
+        "top_k": 0,
+        "min_p": 0,
+        "presence_penalty": 0,
+        "repeat_penalty": 1
+      }
+    },
+    "chat_template_kwargs": {},
+    "preserve_reasoning": false,
+    "thinking_budget_tokens": 768,
+    "model_key": "granite8b",
+    "runtime_dependencies": {
+      "linux-x86_64": [
+        {
+          "filename": "cudart-llama-b11951-bin-ubuntu-cuda-12.8-x64.tar.gz",
+          "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11951/cudart-llama-b11951-bin-ubuntu-cuda-12.8-x64.tar.gz",
+          "sha256": "150f4d36ee4f97e85dbcb139e7fcbfeee03d4d74251c98076cdd4879d35c34eb",
+          "bytes": 594377552
+        }
+      ]
+    },
+    "device": "cuda",
+    "cuda_runtime_kind": "binary"
+  },
+  "initial_observation": {
+    "tcp_m": [
+      0.39999999999999997,
+      -0.11999999999999983,
+      0.2600000000000002
+    ],
+    "gripper_command": "open",
+    "finger_contact_objects": [],
+    "simulation_time_s": 0.5000000000000003,
+    "objects": [
+      {
+        "name": "red",
+        "shape": "cube",
+        "size_m": [
+          0.04,
+          0.04,
+          0.04
+        ],
+        "centre_m": [
+          0.38944513619161253,
+          -0.11652104138771328,
+          0.019957398275961748
+        ]
+      },
+      {
+        "name": "blue",
+        "shape": "cube",
+        "size_m": [
+          0.04,
+          0.04,
+          0.04
+        ],
+        "centre_m": [
+          0.39009057467157005,
+          0.1263752084211578,
+          0.019957398275961748
+        ]
+      }
+    ]
+  },
+  "rounds": []
+}

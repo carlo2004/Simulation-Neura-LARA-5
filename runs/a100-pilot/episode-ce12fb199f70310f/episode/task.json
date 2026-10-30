@@ -1,0 +1,142 @@
+{
+  "instruction": "Bewege den Greifer um 5 cm nach rechts, ohne die H\u00f6he zu ver\u00e4ndern.",
+  "goal": {
+    "type": "move",
+    "target_m": [
+      0.44999999999999996,
+      -0.11999999999999983,
+      0.2600000000000002
+    ]
+  },
+  "success": false,
+  "status": "budget_exhausted",
+  "mode": "closed_loop_feedback",
+  "max_rounds": 1,
+  "protocol_version": 2,
+  "policy_limits": {
+    "code_characters": 64000,
+    "statements": 256,
+    "ast_nodes": 4096,
+    "api_calls": 256,
+    "sequence_items": 64,
+    "wait_per_call_s": 5.0,
+    "wait_total_s": 15.0
+  },
+  "software": {
+    "version": "3.6.0",
+    "python": "3.13.2",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "recorded_at_utc": "2026-10-30T17:30:32.558658+00:00",
+    "git_commit": "50f214fb913985c5639cbc766f1bca36ad771012",
+    "tracked_changes": false
+  },
+  "physics_during_inference": "paused; viewer remains responsive",
+  "model_observation_decimal_places": 6,
+  "model": {
+    "format_version": 2,
+    "max_total_parameters": 10000000000,
+    "runtime": "llama.cpp",
+    "runtime_version": "b11951-cuda12.8",
+    "runtime_assets": {
+      "linux-x86_64": {
+        "filename": "llama-b11951-bin-ubuntu-cuda-12.8-x64.tar.gz",
+        "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11951/llama-b11951-bin-ubuntu-cuda-12.8-x64.tar.gz",
+        "sha256": "51a6dae48f9cae0af5dd4971df691a3cb1cf36bac459f89bcccd805edc6dba92",
+        "bytes": 182382782
+      }
+    },
+    "model_id": "nvidia/NVIDIA-Nemotron-3.5-Bolt-E4B-4GB",
+    "original_revision": "1db54d5b12533ff1bcaa8e42cf4c667988a1f1be",
+    "training_model_id": "nvidia/NVIDIA-Nemotron-3.5-Bolt-E4B-BF16",
+    "training_revision": "49843eed8db1f1c616c47af75cfd36e07aec0667",
+    "total_parameters": 7996156490,
+    "quantization": "Q4_K_M",
+    "gguf_repository": "nvidia/NVIDIA-Nemotron-3.5-Bolt-E4B-4GB",
+    "gguf_revision": "1db54d5b12533ff1bcaa8e42cf4c667988a1f1be",
+    "model_filename": "Nemotron-3.5-Bolt-E4B-Q4_K_M.gguf",
+    "model_bytes": 6180446208,
+    "model_sha256": "c8af2b8aea10a690a1d9491db744a9446660173cb38fc489612b556615a69612",
+    "model_url": "https://huggingface.co/nvidia/NVIDIA-Nemotron-3.5-Bolt-E4B-4GB/resolve/1db54d5b12533ff1bcaa8e42cf4c667988a1f1be/Nemotron-3.5-Bolt-E4B-Q4_K_M.gguf?download=true",
+    "license": "OpenMDW-1.1",
+    "default_thinking": false,
+    "supports_thinking_toggle": true,
+    "context_tokens": 8192,
+    "profiles": {
+      "thinking": {
+        "temperature": 1,
+        "top_p": 0.95,
+        "top_k": 0,
+        "min_p": 0,
+        "presence_penalty": 0,
+        "repeat_penalty": 1
+      },
+      "instruct": {
+        "temperature": 1,
+        "top_p": 0.95,
+        "top_k": 0,
+        "min_p": 0,
+        "presence_penalty": 0,
+        "repeat_penalty": 1
+      }
+    },
+    "chat_template_kwargs": {
+      "conversational_mode": false
+    },
+    "preserve_reasoning": false,
+    "thinking_budget_tokens": 768,
+    "model_key": "nemotron8b",
+    "runtime_dependencies": {
+      "linux-x86_64": [
+        {
+          "filename": "cudart-llama-b11951-bin-ubuntu-cuda-12.8-x64.tar.gz",
+          "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11951/cudart-llama-b11951-bin-ubuntu-cuda-12.8-x64.tar.gz",
+          "sha256": "150f4d36ee4f97e85dbcb139e7fcbfeee03d4d74251c98076cdd4879d35c34eb",
+          "bytes": 594377552
+        }
+      ]
+    },
+    "device": "cuda",
+    "cuda_runtime_kind": "binary"
+  },
+  "initial_observation": {
+    "tcp_m": [
+      0.39999999999999997,
+      -0.11999999999999983,
+      0.2600000000000002
+    ],
+    "gripper_command": "open",
+    "finger_contact_objects": [],
+    "simulation_time_s": 0.5000000000000003,
+    "objects": [
+      {
+        "name": "red",
+        "shape": "cube",
+        "size_m": [
+          0.04,
+          0.04,
+          0.04
+        ],
+        "centre_m": [
+          0.4,
+          -0.11999999999990067,
+          0.019957398275961748
+        ]
+      },
+      {
+        "name": "blue",
+        "shape": "cube",
+        "size_m": [
+          0.04,
+          0.04,
+          0.04
+        ],
+        "centre_m": [
+          0.4,
+          0.1199999999999015,
+          0.019957398275961748
+        ]
+      }
+    ]
+  },
+  "rounds": []
+}

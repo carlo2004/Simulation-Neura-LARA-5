@@ -1,0 +1,13 @@
+
+Modell generiert Block 1/1 ...
+[Inferenz] Prompt verarbeiten / auf erstes Token warten | 0.0 s
+[Inferenz] Gesamt inkl. Prompt: 7.8 Token/s | Prompt: 8276.9 Token/s | 1 Ausgabetoken | 1.0 s
+[Inferenz] Ausgabe: 186.5 Token/s | Prompt: 8276.9 Token/s | 188 Ausgabetoken | 2.0 s
+[Inferenz] Ausgabe: 186.5 Token/s | Prompt: 8276.9 Token/s | 375 Ausgabetoken | 2.9 s
+[Inferenz] Ausgabe: 186.2 Token/s | Prompt: 8276.9 Token/s | 561 Ausgabetoken | 4.0 s
+[Inferenz] Ausgabe: 185.3 Token/s | Prompt: 8276.9 Token/s | 816 Ausgabetoken | 4.5 s | Laden: 0.0 s | Erstes Token: 0.13 s
+Modell: Moving gripper 5 cm to the right (positive X) while keeping height and Y constant using relative jog movement.
+Programm: 1 Zeilen; vollstaendig im Protokoll.
+Feedback: TCP=[0.45, -0.12, 0.26], Fingerkontakt=[]
+Zielabweichung: 2.6707138509448495e-07 m
+PASS evaluated

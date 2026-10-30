@@ -1,0 +1,17 @@
+
+Modell generiert Block 1/1 ...
+[Inferenz] Prompt verarbeiten / auf erstes Token warten | 0.0 s
+[Inferenz] Gesamt inkl. Prompt: 1.9 Token/s | Prompt: 3977.7 Token/s | 1 Ausgabetoken | 1.0 s
+[Inferenz] Ausgabe: 113.1 Token/s | Prompt: 3977.7 Token/s | 115 Ausgabetoken | 2.0 s
+[Inferenz] Ausgabe: 113.7 Token/s | Prompt: 3977.7 Token/s | 230 Ausgabetoken | 3.0 s
+[Inferenz] Ausgabe: 114.2 Token/s | Prompt: 3977.7 Token/s | 346 Ausgabetoken | 4.0 s
+[Inferenz] Ausgabe: 114.9 Token/s | Prompt: 3977.7 Token/s | 464 Ausgabetoken | 5.0 s
+[Inferenz] Ausgabe: 115.4 Token/s | Prompt: 3977.7 Token/s | 582 Ausgabetoken | 6.1 s
+[Inferenz] Ausgabe: 115.5 Token/s | Prompt: 3977.7 Token/s | 698 Ausgabetoken | 7.1 s
+[Inferenz] Ausgabe: 115.4 Token/s | Prompt: 3977.7 Token/s | 814 Ausgabetoken | 8.1 s
+[Inferenz] Ausgabe: 115.5 Token/s | Prompt: 3977.7 Token/s | 923 Ausgabetoken | 8.5 s | Laden: 0.0 s | Erstes Token: 0.52 s
+Modell: Red cube picked up and placed on blue cube. TCP moved clear of stack.
+Programm: 5 Zeilen; vollstaendig im Protokoll.
+Feedback: TCP=[0.414, 0.1327, 0.26], Fingerkontakt=[]
+Physik: red auf blue: 0/20; Greifer frei=True
+FAIL evaluated

@@ -1,0 +1,156 @@
+{
+  "instruction": "Staple den roten W\u00fcrfel auf den blauen W\u00fcrfel.",
+  "goal": {
+    "type": "stack",
+    "source": "red",
+    "target": "blue"
+  },
+  "success": false,
+  "status": "budget_exhausted",
+  "mode": "closed_loop_feedback",
+  "max_rounds": 1,
+  "protocol_version": 2,
+  "policy_limits": {
+    "code_characters": 64000,
+    "statements": 256,
+    "ast_nodes": 4096,
+    "api_calls": 256,
+    "sequence_items": 64,
+    "wait_per_call_s": 5.0,
+    "wait_total_s": 15.0
+  },
+  "software": {
+    "version": "3.6.0",
+    "python": "3.13.2",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "recorded_at_utc": "2026-10-30T17:37:13.264454+00:00",
+    "git_commit": "50f214fb913985c5639cbc766f1bca36ad771012",
+    "tracked_changes": false
+  },
+  "physics_during_inference": "paused; viewer remains responsive",
+  "model_observation_decimal_places": 6,
+  "model": {
+    "format_version": 2,
+    "max_total_parameters": 10000000000,
+    "runtime": "llama.cpp",
+    "runtime_version": "b11951-cuda12.8",
+    "runtime_assets": {
+      "linux-x86_64": {
+        "filename": "llama-b11951-bin-ubuntu-cuda-12.8-x64.tar.gz",
+        "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11951/llama-b11951-bin-ubuntu-cuda-12.8-x64.tar.gz",
+        "sha256": "51a6dae48f9cae0af5dd4971df691a3cb1cf36bac459f89bcccd805edc6dba92",
+        "bytes": 182382782
+      }
+    },
+    "model_id": "LiquidAI/LFM2.5-2.6B",
+    "original_revision": "b212e75975bbda9676a94d3cb7b2ca25b65fed48",
+    "training_model_id": "LiquidAI/LFM2.5-2.6B",
+    "training_revision": "b212e75975bbda9676a94d3cb7b2ca25b65fed48",
+    "total_parameters": 2697198592,
+    "quantization": "Q4_K_M",
+    "gguf_repository": "LiquidAI/LFM2.5-2.6B-GGUF",
+    "gguf_revision": "e7caca5d835a3901a8e0d63e94009429bafafdfc",
+    "model_filename": "LFM2.5-2.6B-Q4_K_M.gguf",
+    "model_bytes": 1674455040,
+    "model_sha256": "02a8b7e17487d326e46d68ce0ba24211e1b80a14c4cd0597fa73c1cd697f52ed",
+    "model_url": "https://huggingface.co/LiquidAI/LFM2.5-2.6B-GGUF/resolve/e7caca5d835a3901a8e0d63e94009429bafafdfc/LFM2.5-2.6B-Q4_K_M.gguf?download=true",
+    "license": "LFM-1.0",
+    "default_thinking": true,
+    "supports_thinking_toggle": false,
+    "context_tokens": 8192,
+    "profiles": {
+      "thinking": {
+        "temperature": 0.1,
+        "top_p": 1.0,
+        "top_k": 50,
+        "min_p": 0,
+        "presence_penalty": 0,
+        "repeat_penalty": 1.1
+      }
+    },
+    "chat_template_kwargs": {},
+    "preserve_reasoning": false,
+    "thinking_budget_tokens": 768,
+    "thinking_template_key": null,
+    "response_format": {
+      "type": "json_schema",
+      "json_schema": {
+        "name": "robot_program",
+        "strict": true,
+        "schema": {
+          "type": "object",
+          "properties": {
+            "code": {
+              "type": "string"
+            },
+            "done": {
+              "type": "boolean"
+            },
+            "message": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "code",
+            "done"
+          ],
+          "additionalProperties": false
+        }
+      }
+    },
+    "model_key": "lfm2.6b",
+    "runtime_dependencies": {
+      "linux-x86_64": [
+        {
+          "filename": "cudart-llama-b11951-bin-ubuntu-cuda-12.8-x64.tar.gz",
+          "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11951/cudart-llama-b11951-bin-ubuntu-cuda-12.8-x64.tar.gz",
+          "sha256": "150f4d36ee4f97e85dbcb139e7fcbfeee03d4d74251c98076cdd4879d35c34eb",
+          "bytes": 594377552
+        }
+      ]
+    },
+    "device": "cuda",
+    "cuda_runtime_kind": "binary"
+  },
+  "initial_observation": {
+    "tcp_m": [
+      0.39999999999999997,
+      -0.11999999999999983,
+      0.2600000000000002
+    ],
+    "gripper_command": "open",
+    "finger_contact_objects": [],
+    "simulation_time_s": 0.5000000000000003,
+    "objects": [
+      {
+        "name": "red",
+        "shape": "cube",
+        "size_m": [
+          0.04,
+          0.04,
+          0.04
+        ],
+        "centre_m": [
+          0.4137988279058487,
+          -0.10884408938932282,
+          0.019957398275961748
+        ]
+      },
+      {
+        "name": "blue",
+        "shape": "cube",
+        "size_m": [
+          0.04,
+          0.04,
+          0.04
+        ],
+        "centre_m": [
+          0.40695715884210054,
+          0.11182867222814007,
+          0.019957398275961748
+        ]
+      }
+    ]
+  },
+  "rounds": []
+}

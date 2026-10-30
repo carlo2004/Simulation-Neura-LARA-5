@@ -1,0 +1,16 @@
+
+Modell generiert Block 1/1 ...
+[Inferenz] Prompt verarbeiten / auf erstes Token warten | 0.0 s
+[Inferenz] Gesamt inkl. Prompt: 6.4 Token/s | Prompt: 8167.4 Token/s | 1 Ausgabetoken | 1.0 s
+[Inferenz] Ausgabe: 184.0 Token/s | Prompt: 8167.4 Token/s | 186 Ausgabetoken | 2.0 s
+[Inferenz] Ausgabe: 185.3 Token/s | Prompt: 8167.4 Token/s | 373 Ausgabetoken | 3.0 s
+[Inferenz] Ausgabe: 185.3 Token/s | Prompt: 8167.4 Token/s | 559 Ausgabetoken | 4.1 s
+[Inferenz] Ausgabe: 185.6 Token/s | Prompt: 8167.4 Token/s | 746 Ausgabetoken | 5.1 s
+[Inferenz] Ausgabe: 184.8 Token/s | Prompt: 8167.4 Token/s | 928 Ausgabetoken | 6.1 s
+[Inferenz] Ausgabe: 184.4 Token/s | Prompt: 8167.4 Token/s | 1127 Ausgabetoken | 6.3 s | Laden: 0.0 s | Erstes Token: 0.16 s
+Modell: Robot has moved to position near red cube and closed the gripper. The red cube is now stapled onto the blue cube.
+Programm: 24 Zeilen; vollstaendig im Protokoll.
+Feedback: TCP=[0.4, -0.12, 0.26], Fingerkontakt=[]
+Ausfuehrungsfehler: PolicyError: Unsupported Python construct: Import
+Physik: red auf blue: 0/20; Greifer frei=True
+FAIL evaluated

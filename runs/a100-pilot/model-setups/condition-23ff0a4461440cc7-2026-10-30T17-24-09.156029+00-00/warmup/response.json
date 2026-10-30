@@ -1,0 +1,31 @@
+{
+  "choices": [
+    {
+      "finish_reason": "length",
+      "message": {
+        "role": "assistant",
+        "content": "",
+        "reasoning_content": "Alright, the user is asking me to return a JSON object with specific keys and values. The keys are \"code\" and \"done\", and the values need to be filled in appropriately. The user hasn't provided any specific values for these keys, but the instruction says to return this structure with \"done\""
+      }
+    }
+  ],
+  "usage": {
+    "completion_tokens": 64,
+    "prompt_tokens": 141,
+    "total_tokens": 205,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    }
+  },
+  "timings": {
+    "cache_n": 0,
+    "prompt_n": 141,
+    "prompt_ms": 132.123,
+    "prompt_per_token_ms": 0.9370425531914893,
+    "prompt_per_second": 1067.1873935650872,
+    "predicted_n": 64,
+    "predicted_ms": 557.742,
+    "predicted_per_token_ms": 8.853047619047619,
+    "predicted_per_second": 112.95545252105813
+  }
+}

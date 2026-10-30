@@ -1,0 +1,145 @@
+{
+  "error": null,
+  "observation": {
+    "tcp_m": [
+      0.41575478060679033,
+      0.13519540726736698,
+      0.04817407847733615
+    ],
+    "gripper_command": "closed",
+    "finger_contact_objects": [
+      "blue"
+    ],
+    "simulation_time_s": 15.640000000001892,
+    "objects": [
+      {
+        "name": "red",
+        "shape": "cube",
+        "size_m": [
+          0.04,
+          0.04,
+          0.04
+        ],
+        "centre_m": [
+          0.3991226645057625,
+          -0.06929478093690848,
+          0.01995739827596301
+        ]
+      },
+      {
+        "name": "blue",
+        "shape": "cube",
+        "size_m": [
+          0.04,
+          0.04,
+          0.04
+        ],
+        "centre_m": [
+          0.4206287514350148,
+          0.1299781269507664,
+          0.013527070508353237
+        ]
+      }
+    ]
+  },
+  "evaluation": {
+    "success": false,
+    "goal": {
+      "type": "stack",
+      "source": "red",
+      "target": "blue"
+    },
+    "stack_checks": [
+      {
+        "source": "red",
+        "target": "blue",
+        "success": false,
+        "stable_checks": 0,
+        "checks": 20,
+        "tool_clear": true,
+        "diagnostics": {
+          "xy_error_m": 0.20043004663228095,
+          "height_error_m": 0.03356967223239023,
+          "shapes_ok": true,
+          "centered": false,
+          "height_ok": false,
+          "stationary": false,
+          "touching": false,
+          "supported": false,
+          "valid": false
+        }
+      }
+    ]
+  },
+  "actions": [
+    {
+      "method": "gripper",
+      "args": [],
+      "kwargs": {
+        "closed": true
+      },
+      "time_s": 0.5000000000000003,
+      "status": "ok"
+    },
+    {
+      "method": "move_to",
+      "args": [
+        [
+          0.389445,
+          -0.116521,
+          0.04
+        ]
+      ],
+      "kwargs": {},
+      "time_s": 1.2000000000000008,
+      "status": "ok"
+    },
+    {
+      "method": "gripper",
+      "args": [],
+      "kwargs": {
+        "closed": false
+      },
+      "time_s": 5.639999999999601,
+      "status": "ok"
+    },
+    {
+      "method": "move_to",
+      "args": [
+        [
+          0.390091,
+          0.126375,
+          0.08
+        ]
+      ],
+      "kwargs": {},
+      "time_s": 6.339999999999524,
+      "status": "ok"
+    },
+    {
+      "method": "gripper",
+      "args": [],
+      "kwargs": {
+        "closed": true
+      },
+      "time_s": 11.300000000000443,
+      "status": "ok"
+    },
+    {
+      "method": "move_to",
+      "args": [
+        [
+          0.390091,
+          0.126375,
+          0.02
+        ]
+      ],
+      "kwargs": {},
+      "time_s": 12.000000000000677,
+      "status": "ok"
+    }
+  ],
+  "local_variables_reset": true,
+  "remaining_blocks": 0,
+  "model_declared_done": false
+}

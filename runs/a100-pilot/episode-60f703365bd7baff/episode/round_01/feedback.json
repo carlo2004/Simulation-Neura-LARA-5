@@ -1,0 +1,60 @@
+{
+  "error": "UnicodeEncodeError: 'charmap' codec can't encode character '\\u202f' in position 27: character maps to <undefined>",
+  "observation": {
+    "tcp_m": [
+      0.39999999999999997,
+      -0.11999999999999983,
+      0.2600000000000002
+    ],
+    "gripper_command": "open",
+    "finger_contact_objects": [],
+    "simulation_time_s": 0.9000000000000007,
+    "objects": [
+      {
+        "name": "red",
+        "shape": "cube",
+        "size_m": [
+          0.04,
+          0.04,
+          0.04
+        ],
+        "centre_m": [
+          0.4,
+          -0.11999999999990067,
+          0.019957398275963014
+        ]
+      },
+      {
+        "name": "blue",
+        "shape": "cube",
+        "size_m": [
+          0.04,
+          0.04,
+          0.04
+        ],
+        "centre_m": [
+          0.4,
+          0.1199999999999015,
+          0.019957398275963014
+        ]
+      }
+    ]
+  },
+  "evaluation": {
+    "success": false,
+    "goal": {
+      "type": "move",
+      "target_m": [
+        0.44999999999999996,
+        -0.11999999999999983,
+        0.2600000000000002
+      ]
+    },
+    "tcp_error_m": 0.04999999999999999,
+    "tolerance_m": 0.004
+  },
+  "actions": [],
+  "local_variables_reset": true,
+  "remaining_blocks": 0,
+  "model_declared_done": true
+}

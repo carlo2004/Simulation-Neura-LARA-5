@@ -1,0 +1,31 @@
+{
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "message": {
+        "role": "assistant",
+        "content": "{\"code\": \"robot.gripper(True)\\nrobot.move_to([0.402435, -0.129157, 0.019957])\\nrobot.gripper(False)\\nrobot.move_to([0.413958, 0.132719, 0.019957])\\nrobot.gripper(True)\\nrobot.move_to([0.413958, 0.132719, 0.24])\\nrobot.gripper(False)\\nrobot.move_to([0.413958, 0.132719, 0.45])\", \"done\": true, \"message\": \"Pick up red cube and place it on blue cube\"}",
+        "reasoning_content": ""
+      }
+    }
+  ],
+  "usage": {
+    "completion_tokens": 192,
+    "prompt_tokens": 1093,
+    "total_tokens": 1285,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    }
+  },
+  "timings": {
+    "cache_n": 0,
+    "prompt_n": 1093,
+    "prompt_ms": 285.208,
+    "prompt_per_token_ms": 0.26094053064958833,
+    "prompt_per_second": 3832.290819331856,
+    "predicted_n": 192,
+    "predicted_ms": 2202.487,
+    "predicted_per_token_ms": 11.531345549738221,
+    "predicted_per_second": 86.7201486319783
+  }
+}

@@ -1,0 +1,101 @@
+{
+  "error": "PolicyError: Undefined variable: blue_centre",
+  "observation": {
+    "tcp_m": [
+      0.4321291510969014,
+      -0.1386924828850722,
+      0.055306479045114265
+    ],
+    "gripper_command": "closed",
+    "finger_contact_objects": [
+      "red"
+    ],
+    "simulation_time_s": 8.219999999999414,
+    "objects": [
+      {
+        "name": "red",
+        "shape": "cube",
+        "size_m": [
+          0.04,
+          0.04,
+          0.04
+        ],
+        "centre_m": [
+          0.43090263655833094,
+          -0.139117497427629,
+          0.01851032105962329
+        ]
+      },
+      {
+        "name": "blue",
+        "shape": "cube",
+        "size_m": [
+          0.04,
+          0.04,
+          0.04
+        ],
+        "centre_m": [
+          0.4139575332118334,
+          0.1327192920502054,
+          0.019957398275963014
+        ]
+      }
+    ]
+  },
+  "evaluation": {
+    "success": false,
+    "goal": {
+      "type": "stack",
+      "source": "red",
+      "target": "blue"
+    },
+    "stack_checks": [
+      {
+        "source": "red",
+        "target": "blue",
+        "success": false,
+        "stable_checks": 0,
+        "checks": 20,
+        "tool_clear": false,
+        "diagnostics": {
+          "xy_error_m": 0.27236441882345785,
+          "height_error_m": 0.04144707721633972,
+          "shapes_ok": true,
+          "centered": false,
+          "height_ok": false,
+          "stationary": true,
+          "touching": false,
+          "supported": true,
+          "valid": false
+        }
+      }
+    ]
+  },
+  "actions": [
+    {
+      "method": "gripper",
+      "args": [],
+      "kwargs": {
+        "closed": true
+      },
+      "time_s": 0.5000000000000003,
+      "status": "ok"
+    },
+    {
+      "method": "move_to",
+      "args": [
+        [
+          0.402435,
+          -0.129157,
+          0.019957
+        ]
+      ],
+      "kwargs": {},
+      "time_s": 1.2000000000000008,
+      "status": "ok"
+    }
+  ],
+  "local_variables_reset": true,
+  "remaining_blocks": 0,
+  "model_declared_done": true
+}

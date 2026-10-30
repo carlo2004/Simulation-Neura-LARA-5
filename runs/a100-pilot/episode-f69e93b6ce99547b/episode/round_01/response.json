@@ -1,0 +1,31 @@
+{
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "message": {
+        "role": "assistant",
+        "content": "{\"code\": \"robot.jog(\\\"x\\\", 0.05)\", \"done\": true}",
+        "reasoning_content": "The user wants me to move the gripper 5cm to the right without changing the height.\n\nFrom the observation:\n- TCP is at [0.4, -0.12, 0.26]\n- Right is +X direction\n- 5cm = 0.05m\n- I should use jog(\"x\", 0.05) to move 5cm in the +X direction\n\nThe gripper is currently open (gripper_command: \"open\"), but that's fine - I just need to move the TCP.\n\nI'll write a simple program that:\n1. Uses jog(\"x\", 0.05) to move 5cm to the right\n2. No height change needed (jog only affects the specified axis)\n\nThis is a simple single-block task."
+      }
+    }
+  ],
+  "usage": {
+    "completion_tokens": 200,
+    "prompt_tokens": 1037,
+    "total_tokens": 1237,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    }
+  },
+  "timings": {
+    "cache_n": 0,
+    "prompt_n": 1037,
+    "prompt_ms": 409.782,
+    "prompt_per_token_ms": 0.39516104146576664,
+    "prompt_per_second": 2530.6138385775853,
+    "predicted_n": 200,
+    "predicted_ms": 1631.147,
+    "predicted_per_token_ms": 8.196718592964825,
+    "predicted_per_second": 122.00004046232498
+  }
+}

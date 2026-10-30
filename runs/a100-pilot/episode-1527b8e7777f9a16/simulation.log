@@ -1,0 +1,16 @@
+
+Modell generiert Block 1/1 ...
+[Inferenz] Prompt verarbeiten / auf erstes Token warten | 0.0 s
+[Inferenz] Gesamt inkl. Prompt: 3.1 Token/s | Prompt: 3620.3 Token/s | 1 Ausgabetoken | 1.0 s
+[Inferenz] Ausgabe: 117.5 Token/s | Prompt: 3620.3 Token/s | 119 Ausgabetoken | 2.0 s
+[Inferenz] Ausgabe: 117.4 Token/s | Prompt: 3620.3 Token/s | 237 Ausgabetoken | 3.0 s
+[Inferenz] Ausgabe: 117.7 Token/s | Prompt: 3620.3 Token/s | 356 Ausgabetoken | 4.0 s
+[Inferenz] Ausgabe: 116.8 Token/s | Prompt: 3620.3 Token/s | 470 Ausgabetoken | 5.0 s
+[Inferenz] Ausgabe: 116.0 Token/s | Prompt: 3620.3 Token/s | 583 Ausgabetoken | 6.0 s
+[Inferenz] Ausgabe: 115.3 Token/s | Prompt: 3620.3 Token/s | 696 Ausgabetoken | 7.1 s
+[Inferenz] Ausgabe: 114.9 Token/s | Prompt: 3620.3 Token/s | 828 Ausgabetoken | 7.5 s | Laden: 0.0 s | Erstes Token: 0.33 s
+Modell: Moved TCP 5 cm to the right without changing height.
+Programm: 1 Zeilen; vollstaendig im Protokoll.
+Feedback: TCP=[0.45, -0.12, 0.26], Fingerkontakt=[]
+Zielabweichung: 2.670715555066412e-07 m
+PASS evaluated

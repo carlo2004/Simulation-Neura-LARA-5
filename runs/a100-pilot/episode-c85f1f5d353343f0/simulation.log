@@ -1,0 +1,14 @@
+
+Modell generiert Block 1/1 ...
+[Inferenz] Prompt verarbeiten / auf erstes Token warten | 0.0 s
+[Inferenz] Gesamt inkl. Prompt: 1.7 Token/s | Prompt: 2599.9 Token/s | 1 Ausgabetoken | 1.0 s
+[Inferenz] Ausgabe: 122.5 Token/s | Prompt: 2599.9 Token/s | 124 Ausgabetoken | 2.0 s
+[Inferenz] Ausgabe: 122.6 Token/s | Prompt: 2599.9 Token/s | 247 Ausgabetoken | 3.0 s
+[Inferenz] Ausgabe: 122.7 Token/s | Prompt: 2599.9 Token/s | 370 Ausgabetoken | 4.0 s
+[Inferenz] Ausgabe: 122.6 Token/s | Prompt: 2599.9 Token/s | 493 Ausgabetoken | 5.0 s
+[Inferenz] Ausgabe: 122.4 Token/s | Prompt: 2599.9 Token/s | 615 Ausgabetoken | 6.0 s
+[Inferenz] Ausgabe: 122.3 Token/s | Prompt: 2599.9 Token/s | 742 Ausgabetoken | 6.7 s | Laden: 0.0 s | Erstes Token: 0.59 s
+Programm: 12 Zeilen; vollstaendig im Protokoll.
+Feedback: TCP=[0.5, -0.1, 0.3], Fingerkontakt=[]
+Physik: red auf blue: 0/20; Greifer frei=True
+FAIL evaluated
