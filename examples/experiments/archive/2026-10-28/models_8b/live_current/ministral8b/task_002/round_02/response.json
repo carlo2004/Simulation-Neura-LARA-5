@@ -1,0 +1,31 @@
+{
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "message": {
+        "role": "assistant",
+        "content": "```json\n{\n  \"code\": \"\",\n  \"done\": true,\n  \"message\": \"Task complete: TCP moved 5 cm to the left.\"\n}\n```",
+        "reasoning_content": "Okay, the previous move was executed successfully, and the new TCP position is [0.4, -0.12, 0.26]. The task was to move the gripper 5 cm to the left, and the move was indeed 5 cm (from 0.449997 to 0.4, which is a difference of 0.049997, approximately 5 cm).\n\nSince the task is complete (the TCP has moved to the desired position), I should set \"done\" to true and provide a message confirming the action.\n\nHere's the updated JSON response:\n\n```json\n{\n  \"code\": \"\",\n  \"done\": true,\n  \"message\": \"Task complete: TCP moved 5 cm to the left.\"\n}\n```"
+      }
+    }
+  ],
+  "usage": {
+    "completion_tokens": 201,
+    "prompt_tokens": 2342,
+    "total_tokens": 2543,
+    "prompt_tokens_details": {
+      "cached_tokens": 2026
+    }
+  },
+  "timings": {
+    "cache_n": 2026,
+    "prompt_n": 316,
+    "prompt_ms": 10481.625,
+    "prompt_per_token_ms": 33.169699367088604,
+    "prompt_per_second": 30.147997090145854,
+    "predicted_n": 201,
+    "predicted_ms": 207304.175,
+    "predicted_per_token_ms": 1036.520875,
+    "predicted_per_second": 0.9647659049799648
+  }
+}

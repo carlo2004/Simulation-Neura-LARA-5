@@ -1,0 +1,47 @@
+{
+  "model_id": "Qwen/Qwen3.5-4B",
+  "original_revision": "851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a",
+  "total_parameters": 4659865088,
+  "model_sha256": "00fe7986ff5f6b463e62455821146049db6f9313603938a70800d1fb69ef11a4",
+  "quantization": "Q4_K_M",
+  "runtime": "llama.cpp",
+  "runtime_version": "b11951",
+  "thinking": false,
+  "temperature": 0.7,
+  "top_p": 0.8,
+  "top_k": 20,
+  "min_p": 0.0,
+  "presence_penalty": 1.5,
+  "repeat_penalty": 1.0,
+  "seed": 42,
+  "threads": 8,
+  "context_tokens": 4096,
+  "max_output_tokens": 768,
+  "prompt_sha256": "c527dc583d646e8e620963aafa43be380b90e15dc2ba6acbe0a56d1e4d840470",
+  "device": "CPU",
+  "inference": "Local llama.cpp subprocess; temporary loopback HTTP; no hosted API",
+  "prompt_format": "GGUF chat template / Jinja",
+  "constrained_decoding": false,
+  "usage": {
+    "completion_tokens": 115,
+    "prompt_tokens": 644,
+    "total_tokens": 759,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    }
+  },
+  "timings": {
+    "cache_n": 0,
+    "prompt_n": 644,
+    "prompt_ms": 8135.4,
+    "prompt_per_token_ms": 12.632608695652173,
+    "prompt_per_second": 79.16021338840132,
+    "predicted_n": 115,
+    "predicted_ms": 8691.583,
+    "predicted_per_token_ms": 76.24195614035088,
+    "predicted_per_second": 13.116137762246533
+  },
+  "finish_reason": "stop",
+  "generation_seconds": 22.081908963000387,
+  "runtime_returncode": 0
+}

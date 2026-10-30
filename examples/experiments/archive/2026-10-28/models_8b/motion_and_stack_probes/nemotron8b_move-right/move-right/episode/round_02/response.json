@@ -1,0 +1,31 @@
+{
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "message": {
+        "role": "assistant",
+        "content": "{\"code\": \"robot.move_to([0.45, -0.12, 0.26])\", \"done\": false, \"message\": \"Move TCP to the target position 0.45 m in X, maintaining Z and Y\"}",
+        "reasoning_content": ""
+      }
+    }
+  ],
+  "usage": {
+    "completion_tokens": 58,
+    "prompt_tokens": 1719,
+    "total_tokens": 1777,
+    "prompt_tokens_details": {
+      "cached_tokens": 1137
+    }
+  },
+  "timings": {
+    "cache_n": 1137,
+    "prompt_n": 582,
+    "prompt_ms": 8753.352,
+    "prompt_per_token_ms": 15.040123711340208,
+    "prompt_per_second": 66.48881479917635,
+    "predicted_n": 58,
+    "predicted_ms": 5185.066,
+    "predicted_per_token_ms": 90.96607017543859,
+    "predicted_per_second": 10.993109827338746
+  }
+}

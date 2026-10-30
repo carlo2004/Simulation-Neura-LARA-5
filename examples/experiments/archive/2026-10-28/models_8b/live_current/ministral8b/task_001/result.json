@@ -1,0 +1,519 @@
+{
+  "instruction": "Bewege den Greifer 5 cm nach rechts.",
+  "goal": null,
+  "success": null,
+  "status": "model_finished",
+  "mode": "closed_loop_feedback",
+  "max_rounds": 4,
+  "physics_during_inference": "paused; viewer remains responsive",
+  "model_observation_decimal_places": 6,
+  "model": {
+    "format_version": 2,
+    "max_total_parameters": 10000000000,
+    "runtime": "llama.cpp",
+    "runtime_version": "b11951",
+    "runtime_assets": {
+      "linux-x86_64": {
+        "filename": "llama-b11951-bin-ubuntu-x64.tar.gz",
+        "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11951/llama-b11951-bin-ubuntu-x64.tar.gz",
+        "sha256": "2897031960458f9422cd7c7bd37bdc7098da41893cf735ecce4b951ef5e2c658",
+        "bytes": 22646994
+      },
+      "windows-x86_64": {
+        "filename": "llama-b11951-bin-win-cpu-x64.zip",
+        "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11951/llama-b11951-bin-win-cpu-x64.zip",
+        "sha256": "ac5edf9c936132fb16c9ff863db8b627c2a67621ff2e796ffd184585aea567ea",
+        "bytes": 24378362
+      },
+      "darwin-arm64": {
+        "filename": "llama-b11951-bin-macos-arm64.tar.gz",
+        "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11951/llama-b11951-bin-macos-arm64.tar.gz",
+        "sha256": "e75da9f2e4696d2bf54f53b75c3cf5a2b6984bfc846904db1349834f867fa447",
+        "bytes": 16440283
+      },
+      "darwin-x86_64": {
+        "filename": "llama-b11951-bin-macos-x64.tar.gz",
+        "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11951/llama-b11951-bin-macos-x64.tar.gz",
+        "sha256": "bd4555e5ff1e4393b3326859688b663dc788fe5e070186de0b2b0b1aadc715bf",
+        "bytes": 12177301
+      }
+    },
+    "model_id": "mistralai/Ministral-3-8B-Reasoning-2512",
+    "original_revision": "81eaece1948f3875421d9a45bc55487d10e2d894",
+    "training_model_id": "mistralai/Ministral-3-8B-Reasoning-2512",
+    "training_revision": "81eaece1948f3875421d9a45bc55487d10e2d894",
+    "total_parameters": 8918026240,
+    "quantization": "Q4_K_M",
+    "gguf_repository": "mistralai/Ministral-3-8B-Reasoning-2512-GGUF",
+    "gguf_revision": "4413bc9b7b091ddad28101650d1395f5e045a328",
+    "model_filename": "Ministral-3-8B-Reasoning-2512-Q4_K_M.gguf",
+    "model_bytes": 5198910368,
+    "model_sha256": "894aa3645ef8708a81dbe201c26105ce37c4c741252c89c5a78f81b49ac438c6",
+    "model_url": "https://huggingface.co/mistralai/Ministral-3-8B-Reasoning-2512-GGUF/resolve/4413bc9b7b091ddad28101650d1395f5e045a328/Ministral-3-8B-Reasoning-2512-Q4_K_M.gguf?download=true",
+    "license": "Apache-2.0",
+    "default_thinking": true,
+    "supports_thinking_toggle": false,
+    "context_tokens": 8192,
+    "profiles": {
+      "thinking": {
+        "temperature": 0.7,
+        "top_p": 0.95,
+        "top_k": 40,
+        "min_p": 0.0,
+        "presence_penalty": 0.0,
+        "repeat_penalty": 1.0
+      },
+      "instruct": {
+        "temperature": 0.7,
+        "top_p": 0.95,
+        "top_k": 40,
+        "min_p": 0.0,
+        "presence_penalty": 0.0,
+        "repeat_penalty": 1.0
+      }
+    },
+    "chat_template_kwargs": {},
+    "preserve_reasoning": true,
+    "system_prompt_file": "model_prompts/ministral_system.txt",
+    "system_prompt_sha256": "aba1efaff0bdc73f4a864139e2c07dce8fc1e3df7b5d5c2b2623df6816697156",
+    "thinking_budget_tokens": 768,
+    "model_key": "ministral8b"
+  },
+  "initial_observation": {
+    "tcp_m": [
+      0.3999999999999998,
+      -0.11999999999999995,
+      0.2600000000000003
+    ],
+    "gripper_command": "open",
+    "finger_contact_objects": [],
+    "simulation_time_s": 0.5000000000000003,
+    "objects": [
+      {
+        "name": "red",
+        "shape": "cube",
+        "size_m": [
+          0.04,
+          0.04,
+          0.04
+        ],
+        "centre_m": [
+          0.4,
+          -0.11999999999990067,
+          0.019957398275961748
+        ]
+      },
+      {
+        "name": "blue",
+        "shape": "cube",
+        "size_m": [
+          0.04,
+          0.04,
+          0.04
+        ],
+        "centre_m": [
+          0.4,
+          0.1199999999999015,
+          0.019957398275961748
+        ]
+      }
+    ]
+  },
+  "rounds": [
+    {
+      "round": 1,
+      "stage": "evaluated",
+      "actions": [
+        {
+          "method": "jog",
+          "args": [
+            "x",
+            0.05
+          ],
+          "kwargs": {},
+          "time_s": 0.5000000000000003,
+          "status": "ok"
+        }
+      ],
+      "generation": {
+        "model_id": "mistralai/Ministral-3-8B-Reasoning-2512",
+        "original_revision": "81eaece1948f3875421d9a45bc55487d10e2d894",
+        "total_parameters": 8918026240,
+        "model_sha256": "894aa3645ef8708a81dbe201c26105ce37c4c741252c89c5a78f81b49ac438c6",
+        "quantization": "Q4_K_M",
+        "runtime": "llama.cpp",
+        "runtime_version": "b11951",
+        "training_model_id": "mistralai/Ministral-3-8B-Reasoning-2512",
+        "training_revision": "81eaece1948f3875421d9a45bc55487d10e2d894",
+        "model_key": "ministral8b",
+        "thinking": true,
+        "temperature": 0.7,
+        "top_p": 0.95,
+        "top_k": 40,
+        "min_p": 0.0,
+        "presence_penalty": 0.0,
+        "repeat_penalty": 1.0,
+        "seed": 42,
+        "threads": 8,
+        "context_tokens": 8192,
+        "max_output_tokens": 2048,
+        "prompt_sha256": "0f2b55cf54e2cf763f8e37e48dba53162ac454d070b2df3c87b2225b09419061",
+        "device": "CPU",
+        "inference": "Local subprocess; temporary loopback HTTP; no hosted API",
+        "prompt_format": "GGUF native chat template / Jinja",
+        "constrained_decoding": false,
+        "reasoning_budget_tokens": 768,
+        "model_load_seconds": 14.208411853000143,
+        "finish_reason": "stop",
+        "usage": {
+          "completion_tokens": 836,
+          "prompt_tokens": 1154,
+          "total_tokens": 1990,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        "timings": {
+          "cache_n": 0,
+          "prompt_n": 1154,
+          "prompt_ms": 23979.706,
+          "prompt_per_token_ms": 20.77964124783362,
+          "prompt_per_second": 48.12402620782757,
+          "predicted_n": 836,
+          "predicted_ms": 102278.901,
+          "predicted_per_token_ms": 122.48970179640719,
+          "predicted_per_second": 8.163951624783298
+        },
+        "generation_seconds": 140.48087250200115
+      },
+      "feedback": {
+        "error": null,
+        "observation": {
+          "tcp_m": [
+            0.4499974300210504,
+            -0.12000003939241254,
+            0.25999817035800943
+          ],
+          "gripper_command": "open",
+          "finger_contact_objects": [],
+          "simulation_time_s": 1.9400000000000015,
+          "objects": [
+            {
+              "name": "red",
+              "shape": "cube",
+              "size_m": [
+                0.04,
+                0.04,
+                0.04
+              ],
+              "centre_m": [
+                0.4,
+                -0.11999999999990067,
+                0.019957398275963014
+              ]
+            },
+            {
+              "name": "blue",
+              "shape": "cube",
+              "size_m": [
+                0.04,
+                0.04,
+                0.04
+              ],
+              "centre_m": [
+                0.4,
+                0.1199999999999015,
+                0.019957398275963014
+              ]
+            }
+          ]
+        },
+        "evaluation": {
+          "success": null,
+          "goal": null,
+          "stack_checks": []
+        },
+        "actions": [
+          {
+            "method": "jog",
+            "args": [
+              "x",
+              0.05
+            ],
+            "kwargs": {},
+            "time_s": 0.5000000000000003,
+            "status": "ok"
+          }
+        ],
+        "local_variables_reset": true,
+        "remaining_blocks": 3,
+        "model_declared_done": false
+      },
+      "model_declared_done": false
+    },
+    {
+      "round": 2,
+      "stage": "evaluated",
+      "actions": [],
+      "generation": {
+        "model_id": "mistralai/Ministral-3-8B-Reasoning-2512",
+        "original_revision": "81eaece1948f3875421d9a45bc55487d10e2d894",
+        "total_parameters": 8918026240,
+        "model_sha256": "894aa3645ef8708a81dbe201c26105ce37c4c741252c89c5a78f81b49ac438c6",
+        "quantization": "Q4_K_M",
+        "runtime": "llama.cpp",
+        "runtime_version": "b11951",
+        "training_model_id": "mistralai/Ministral-3-8B-Reasoning-2512",
+        "training_revision": "81eaece1948f3875421d9a45bc55487d10e2d894",
+        "model_key": "ministral8b",
+        "thinking": true,
+        "temperature": 0.7,
+        "top_p": 0.95,
+        "top_k": 40,
+        "min_p": 0.0,
+        "presence_penalty": 0.0,
+        "repeat_penalty": 1.0,
+        "seed": 43,
+        "threads": 8,
+        "context_tokens": 8192,
+        "max_output_tokens": 2048,
+        "prompt_sha256": "8ec0c6b8aa90b894e57e658fe948353793b5f0891ba34645d5c11af66cf4397b",
+        "device": "CPU",
+        "inference": "Local subprocess; temporary loopback HTTP; no hosted API",
+        "prompt_format": "GGUF native chat template / Jinja",
+        "constrained_decoding": false,
+        "reasoning_budget_tokens": 768,
+        "model_load_seconds": 0.0,
+        "finish_reason": "stop",
+        "usage": {
+          "completion_tokens": 296,
+          "prompt_tokens": 2296,
+          "total_tokens": 2592,
+          "prompt_tokens_details": {
+            "cached_tokens": 1989
+          }
+        },
+        "timings": {
+          "cache_n": 1989,
+          "prompt_n": 307,
+          "prompt_ms": 7887.192,
+          "prompt_per_token_ms": 25.691179153094463,
+          "prompt_per_second": 38.92386542637735,
+          "predicted_n": 296,
+          "predicted_ms": 41329.371,
+          "predicted_per_token_ms": 140.0995627118644,
+          "predicted_per_second": 7.137781022604966
+        },
+        "generation_seconds": 49.22790856199936
+      },
+      "feedback": {
+        "error": "ValueError: Expected JSON with code:string, done:boolean and optional message:string",
+        "observation": {
+          "tcp_m": [
+            0.44999751622264883,
+            -0.12000003613449939,
+            0.2599982101657742
+          ],
+          "gripper_command": "open",
+          "finger_contact_objects": [],
+          "simulation_time_s": 2.139999999999986,
+          "objects": [
+            {
+              "name": "red",
+              "shape": "cube",
+              "size_m": [
+                0.04,
+                0.04,
+                0.04
+              ],
+              "centre_m": [
+                0.4,
+                -0.11999999999990067,
+                0.019957398275963014
+              ]
+            },
+            {
+              "name": "blue",
+              "shape": "cube",
+              "size_m": [
+                0.04,
+                0.04,
+                0.04
+              ],
+              "centre_m": [
+                0.4,
+                0.1199999999999015,
+                0.019957398275963014
+              ]
+            }
+          ]
+        },
+        "evaluation": {
+          "success": null,
+          "goal": null,
+          "stack_checks": []
+        },
+        "actions": [],
+        "local_variables_reset": true,
+        "remaining_blocks": 2,
+        "model_declared_done": false
+      },
+      "model_declared_done": false
+    },
+    {
+      "round": 3,
+      "stage": "evaluated",
+      "actions": [],
+      "generation": {
+        "model_id": "mistralai/Ministral-3-8B-Reasoning-2512",
+        "original_revision": "81eaece1948f3875421d9a45bc55487d10e2d894",
+        "total_parameters": 8918026240,
+        "model_sha256": "894aa3645ef8708a81dbe201c26105ce37c4c741252c89c5a78f81b49ac438c6",
+        "quantization": "Q4_K_M",
+        "runtime": "llama.cpp",
+        "runtime_version": "b11951",
+        "training_model_id": "mistralai/Ministral-3-8B-Reasoning-2512",
+        "training_revision": "81eaece1948f3875421d9a45bc55487d10e2d894",
+        "model_key": "ministral8b",
+        "thinking": true,
+        "temperature": 0.7,
+        "top_p": 0.95,
+        "top_k": 40,
+        "min_p": 0.0,
+        "presence_penalty": 0.0,
+        "repeat_penalty": 1.0,
+        "seed": 44,
+        "threads": 8,
+        "context_tokens": 8192,
+        "max_output_tokens": 2048,
+        "prompt_sha256": "b8eeeec31784c7bfa57db09e7d35ccadb04d1be0dca95a437457193d346731bb",
+        "device": "CPU",
+        "inference": "Local subprocess; temporary loopback HTTP; no hosted API",
+        "prompt_format": "GGUF native chat template / Jinja",
+        "constrained_decoding": false,
+        "reasoning_budget_tokens": 768,
+        "model_load_seconds": 0.0,
+        "finish_reason": "stop",
+        "usage": {
+          "completion_tokens": 340,
+          "prompt_tokens": 2876,
+          "total_tokens": 3216,
+          "prompt_tokens_details": {
+            "cached_tokens": 2591
+          }
+        },
+        "timings": {
+          "cache_n": 2591,
+          "prompt_n": 285,
+          "prompt_ms": 7186.063,
+          "prompt_per_token_ms": 25.214256140350876,
+          "prompt_per_second": 39.66010317471473,
+          "predicted_n": 340,
+          "predicted_ms": 45881.776,
+          "predicted_per_token_ms": 135.34447197640117,
+          "predicted_per_second": 7.38855444479743
+        },
+        "generation_seconds": 53.07885703699867
+      },
+      "feedback": {
+        "error": null,
+        "observation": {
+          "tcp_m": [
+            0.4499974971969773,
+            -0.12000003820224667,
+            0.25999821056402683
+          ],
+          "gripper_command": "open",
+          "finger_contact_objects": [],
+          "simulation_time_s": 2.339999999999964,
+          "objects": [
+            {
+              "name": "red",
+              "shape": "cube",
+              "size_m": [
+                0.04,
+                0.04,
+                0.04
+              ],
+              "centre_m": [
+                0.4,
+                -0.11999999999990067,
+                0.019957398275963014
+              ]
+            },
+            {
+              "name": "blue",
+              "shape": "cube",
+              "size_m": [
+                0.04,
+                0.04,
+                0.04
+              ],
+              "centre_m": [
+                0.4,
+                0.1199999999999015,
+                0.019957398275963014
+              ]
+            }
+          ]
+        },
+        "evaluation": {
+          "success": null,
+          "goal": null,
+          "stack_checks": []
+        },
+        "actions": [],
+        "local_variables_reset": true,
+        "remaining_blocks": 1,
+        "model_declared_done": true
+      },
+      "model_declared_done": true
+    }
+  ],
+  "evaluation": {
+    "success": null,
+    "goal": null,
+    "stack_checks": []
+  },
+  "wall_seconds": 243.0821814460014,
+  "final_observation": {
+    "tcp_m": [
+      0.4499974971969773,
+      -0.12000003820224667,
+      0.25999821056402683
+    ],
+    "gripper_command": "open",
+    "finger_contact_objects": [],
+    "simulation_time_s": 2.339999999999964,
+    "objects": [
+      {
+        "name": "red",
+        "shape": "cube",
+        "size_m": [
+          0.04,
+          0.04,
+          0.04
+        ],
+        "centre_m": [
+          0.4,
+          -0.11999999999990067,
+          0.019957398275963014
+        ]
+      },
+      {
+        "name": "blue",
+        "shape": "cube",
+        "size_m": [
+          0.04,
+          0.04,
+          0.04
+        ],
+        "centre_m": [
+          0.4,
+          0.1199999999999015,
+          0.019957398275963014
+        ]
+      }
+    ]
+  }
+}

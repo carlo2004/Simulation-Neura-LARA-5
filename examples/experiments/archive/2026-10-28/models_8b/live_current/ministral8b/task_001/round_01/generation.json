@@ -1,0 +1,51 @@
+{
+  "model_id": "mistralai/Ministral-3-8B-Reasoning-2512",
+  "original_revision": "81eaece1948f3875421d9a45bc55487d10e2d894",
+  "total_parameters": 8918026240,
+  "model_sha256": "894aa3645ef8708a81dbe201c26105ce37c4c741252c89c5a78f81b49ac438c6",
+  "quantization": "Q4_K_M",
+  "runtime": "llama.cpp",
+  "runtime_version": "b11951",
+  "training_model_id": "mistralai/Ministral-3-8B-Reasoning-2512",
+  "training_revision": "81eaece1948f3875421d9a45bc55487d10e2d894",
+  "model_key": "ministral8b",
+  "thinking": true,
+  "temperature": 0.7,
+  "top_p": 0.95,
+  "top_k": 40,
+  "min_p": 0.0,
+  "presence_penalty": 0.0,
+  "repeat_penalty": 1.0,
+  "seed": 42,
+  "threads": 8,
+  "context_tokens": 8192,
+  "max_output_tokens": 2048,
+  "prompt_sha256": "0f2b55cf54e2cf763f8e37e48dba53162ac454d070b2df3c87b2225b09419061",
+  "device": "CPU",
+  "inference": "Local subprocess; temporary loopback HTTP; no hosted API",
+  "prompt_format": "GGUF native chat template / Jinja",
+  "constrained_decoding": false,
+  "reasoning_budget_tokens": 768,
+  "model_load_seconds": 14.208411853000143,
+  "finish_reason": "stop",
+  "usage": {
+    "completion_tokens": 836,
+    "prompt_tokens": 1154,
+    "total_tokens": 1990,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    }
+  },
+  "timings": {
+    "cache_n": 0,
+    "prompt_n": 1154,
+    "prompt_ms": 23979.706,
+    "prompt_per_token_ms": 20.77964124783362,
+    "prompt_per_second": 48.12402620782757,
+    "predicted_n": 836,
+    "predicted_ms": 102278.901,
+    "predicted_per_token_ms": 122.48970179640719,
+    "predicted_per_second": 8.163951624783298
+  },
+  "generation_seconds": 140.48087250200115
+}

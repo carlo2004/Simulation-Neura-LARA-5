@@ -1,0 +1,49 @@
+{
+  "model_id": "mistralai/Ministral-3-8B-Reasoning-2512",
+  "original_revision": "81eaece1948f3875421d9a45bc55487d10e2d894",
+  "total_parameters": 8918026240,
+  "model_sha256": "894aa3645ef8708a81dbe201c26105ce37c4c741252c89c5a78f81b49ac438c6",
+  "quantization": "Q4_K_M",
+  "runtime": "llama.cpp",
+  "runtime_version": "b11951",
+  "model_key": "ministral8b",
+  "thinking": true,
+  "temperature": 0.7,
+  "top_p": 0.95,
+  "top_k": 40,
+  "min_p": 0.0,
+  "presence_penalty": 0.0,
+  "repeat_penalty": 1.0,
+  "seed": 42,
+  "threads": 8,
+  "context_tokens": 8192,
+  "max_output_tokens": 2048,
+  "prompt_sha256": "4ae211fcb2608a6896f2bb8ca02bebc7fd6e22b957c5c1cc82bd6c501a20b8d7",
+  "device": "CPU",
+  "inference": "Local subprocess; temporary loopback HTTP; no hosted API",
+  "prompt_format": "GGUF native chat template / Jinja",
+  "constrained_decoding": false,
+  "reasoning_budget_tokens": 768,
+  "model_load_seconds": 14.07242128100006,
+  "finish_reason": "stop",
+  "usage": {
+    "completion_tokens": 850,
+    "prompt_tokens": 1191,
+    "total_tokens": 2041,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    }
+  },
+  "timings": {
+    "cache_n": 0,
+    "prompt_n": 1191,
+    "prompt_ms": 25473.853,
+    "prompt_per_token_ms": 21.3886255247691,
+    "prompt_per_second": 46.75382243903189,
+    "predicted_n": 850,
+    "predicted_ms": 100769.745,
+    "predicted_per_token_ms": 118.69227915194345,
+    "predicted_per_second": 8.425147845715001
+  },
+  "generation_seconds": 140.3266835129998
+}
