@@ -16,8 +16,7 @@ WORLD units are metres: right +X, forward +Y, up +Z.
 TCP is between the fingertips. Objects move only through physical contact.
 To grasp, lower the open gripper to the object centre before closing.
 Object sizes are full side lengths. Use current positions for object tasks.
-Table surface is z=0. Use z=0.24 m for horizontal transport in these scenes.
-Release the object and
-move the TCP clear when the task is complete.
+Table surface is z=0. For pick-and-place, use z=0.24 m for horizontal transport.
+After placing, release the object and move the TCP clear.
 TCP bounds: x 0.20..0.60, y -0.30..0.30, z 0.01..0.45.
 Stay inside the supplied call and wait budgets.
