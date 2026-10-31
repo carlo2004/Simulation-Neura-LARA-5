@@ -7,6 +7,16 @@ __pycache__/
 .DS_Store
 Thumbs.db
 runs/
+training-runs/
+checkpoints/
+adapters/
+datasets/
+wandb/
+mlruns/
+tensorboard/
+*.safetensors
+*.gguf
+*.tfevents.*
 output/
 *.log
 .env

@@ -166,30 +166,30 @@ erscheinen separat. Die Modellquote verwendet nur bewertete Episoden.
 Unsicherheitsintervalle stehen in JSON unter der angegebenen Bernoulli-Annahme.
 Der kleine Pilot rechtfertigt keine starke statistische Siegerbehauptung.
 
-## GitHub-Upload
+## Upload nach Hugging Face
 
-Auf dem **lokalen Rechner** die GitHub CLI `gh` installieren und einmal mit
-`gh auth login` anmelden. Colab benötigt keine GitHub-Schreibberechtigung.
-
-Automatisch nach dem Lauf veröffentlichen:
-
-```powershell
-.\.venv\Scripts\python.exe -m stacklab experiment pilot --server-url http://127.0.0.1:8765 --output runs/l4-pilot --publish carlo2004/Simulation-Neura-LARA-5
-```
-
-Oder einen vorhandenen Lauf später hochladen:
+Der lokale Runner veröffentlicht neue Rohdaten im Dataset
+[`Carlo0001/neura-lara5-cube-stacking-sim-v1`](https://huggingface.co/datasets/Carlo0001/neura-lara5-cube-stacking-sim-v1).
+Dafür einmal `.\.venv\Scripts\hf.exe auth login` auf dem lokalen Rechner ausführen.
+Colab braucht für diese Aufteilung keine Schreibanmeldung. Code bleibt auf GitHub.
 
 ```powershell
-.\.venv\Scripts\python.exe -m stacklab experiment publish runs/l4-pilot --repository carlo2004/Simulation-Neura-LARA-5
+.\.venv\Scripts\python.exe -m stacklab experiment pilot --server-url http://127.0.0.1:8765 --output runs/l4-pilot --publish
 ```
 
-Ein eigener Release `benchmark-<Plan-Prüfsumme>` enthält den lesbaren Vergleich,
-Manifest, CSV/JSON und das vollständige ZIP mit Videos und Datei-/Archiv-
-Prüfsummen. Exportiert werden nur die Aufzeichnungen des Benchmarks. Release-
-Anhänge vermeiden große Videos in der Quellcode-Historie. Eine veröffentlichte
-Plan-ID wird nicht überschrieben. Bei Uploadfehlern bleiben lokale Daten erhalten.
+Einen vorhandenen Lauf erst prüfen und später hochladen:
 
-Für A100 einen eigenen Ordner und Release verwenden. Anschließend die beiden
-Release-Links zur Analyse schicken. Damit lassen sich Fehlerarten, Zuverlässigkeit,
-Geschwindigkeit und der nächste sinnvolle Versuch anhand der echten Daten prüfen.
-Hier werden keine vorab erfundenen Modellmesswerte als Ergebnisse eingetragen.
+```powershell
+.\.venv\Scripts\python.exe -m stacklab experiment publish runs/l4-pilot --dry-run
+.\.venv\Scripts\python.exe -m stacklab experiment publish runs/l4-pilot
+```
+
+Jeder Inhaltsstand erhält eine Snapshot-ID und einen festen Hub-Commit. Das ZIP
+enthält die Rohaufzeichnungen einschließlich optionaler Videos; lesbare Tabellen
+und JSONL-Episoden stehen daneben. Alle Dateien besitzen Prüfsummen. Bei einem
+Uploadfehler bleiben die lokalen Dateien erhalten. Für A100 einen neuen
+Versuchsordner mit denselben eingefrorenen Bedingungen verwenden.
+
+Die Ausgabe und `hub-receipt.json` nennen den exakten Snapshot-Link. Die beiden
+Links können im Chat über den Hugging-Face-Connector gelesen werden.
+[Anmeldung, Speicherformat und geprüfter Download](huggingface.md).

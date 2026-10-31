@@ -43,10 +43,8 @@ def run_case(name, args, directory, *, case=None):
     generation_seed = args.seed if generation_seed is None else generation_seed
     directory.mkdir(parents=True, exist_ok=True)
     write_json(directory/'scene.json', config.to_dict())
-    user = dict(instruction=args.instruction or case['instruction'],
-                objects=[dict(name=s.name, shape=s.shape, full_size_m=s.dimensions()) for s in config.object_specs()],
-                units='metres', table_z=0, suggested_transport_z=config.hover_z_m)
-    result = dict(case=name, instruction=user['instruction'], source=source, target=target,
+    instruction = args.instruction or case['instruction']
+    result = dict(case=name, instruction=instruction, source=source, target=target,
                   success=False, stage='generation', seed=generation_seed,
                   scene_seed=config.seed, generation_seed=generation_seed)
     print('Generate: '+name, flush=True)
@@ -60,7 +58,7 @@ def run_case(name, args, directory, *, case=None):
             command += ['--source', source, '--target', target]
         command += ['--feedback-rounds', str(args.feedback_rounds), '--model', lock(args.model)['model_key'],
                     '--device', getattr(args, 'device', 'cpu'),
-                    '--instruction', user['instruction'], '--max-tokens', str(args.max_tokens),
+                    '--instruction', instruction, '--max-tokens', str(args.max_tokens),
                     '--threads', str(args.threads), '--seed', str(generation_seed),
                     '--generation-timeout', str(args.generation_timeout),
                     '--execution-timeout', str(args.execution_timeout),
@@ -152,6 +150,10 @@ def main(argv=None):
                 runtime = 'source build' if c.get('runtime_source') else c['runtime_version']
                 print(f'{name:14} {c["total_parameters"]/1e9:.2f}B total | {c["quantization"]} | '
                       f'{c["model_bytes"]/1e9:.2f} GB | {status} | {runtime} | {c["model_id"]}')
+                tokenizer = c.get('tokenizer')
+                if tokenizer:
+                    print(f'  Tokenizer: {tokenizer["tokenizer_class"]} ({tokenizer["algorithm"]}) | '
+                          f'{tokenizer["repository"]}@{tokenizer["revision"][:12]} | GGUF / llama.cpp')
             return 0
         if args.command == 'setup':
             if args.all and args.model:

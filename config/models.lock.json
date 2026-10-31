@@ -62,6 +62,16 @@
           "presence_penalty": 0,
           "repeat_penalty": 1
         }
+      },
+      "tokenizer": {
+        "repository": "Qwen/Qwen3.5-4B",
+        "revision": "851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a",
+        "tokenizer_class": "Qwen2Tokenizer",
+        "algorithm": "BPE",
+        "base_vocab_size": 248044,
+        "tokenizer_json_sha256": "5f9e4d4901a92b997e463c1f46055088b6cca5ca61a6522d1b9f64c4bb81cb42",
+        "tokenizer_config_sha256": "316230d6a809701f4db5ea8f8fc862bc3a6f3229c937c174e674ff3ca0a64ac8",
+        "inference_source": "Tokenizer embedded in the SHA-256-verified GGUF; executed by llama.cpp"
       }
     },
     "qwen9b": {
@@ -101,7 +111,17 @@
       },
       "chat_template_kwargs": {},
       "preserve_reasoning": false,
-      "thinking_budget_tokens": 768
+      "thinking_budget_tokens": 768,
+      "tokenizer": {
+        "repository": "Qwen/Qwen3.5-9B",
+        "revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+        "tokenizer_class": "Qwen2Tokenizer",
+        "algorithm": "BPE",
+        "base_vocab_size": 248044,
+        "tokenizer_json_sha256": "5f9e4d4901a92b997e463c1f46055088b6cca5ca61a6522d1b9f64c4bb81cb42",
+        "tokenizer_config_sha256": "316230d6a809701f4db5ea8f8fc862bc3a6f3229c937c174e674ff3ca0a64ac8",
+        "inference_source": "Tokenizer embedded in the SHA-256-verified GGUF; executed by llama.cpp"
+      }
     },
     "ministral8b": {
       "model_id": "mistralai/Ministral-3-8B-Reasoning-2512",
@@ -142,7 +162,17 @@
       "preserve_reasoning": true,
       "system_prompt_file": "config/prompts/ministral_system.txt",
       "system_prompt_sha256": "aba1efaff0bdc73f4a864139e2c07dce8fc1e3df7b5d5c2b2623df6816697156",
-      "thinking_budget_tokens": 768
+      "thinking_budget_tokens": 768,
+      "tokenizer": {
+        "repository": "mistralai/Ministral-3-8B-Reasoning-2512",
+        "revision": "81eaece1948f3875421d9a45bc55487d10e2d894",
+        "tokenizer_class": "LlamaTokenizerFast",
+        "algorithm": "BPE",
+        "base_vocab_size": 131072,
+        "tokenizer_json_sha256": "577575622324b2e099e2648be26bdeb5e5815ffe66d7004e9e3ddbf421db6bf1",
+        "tokenizer_config_sha256": "f3a437d1214f6b61c8eae19d1256b0ebbf567793f6dcc1f63f4a30b829f85235",
+        "inference_source": "Tokenizer embedded in the SHA-256-verified GGUF; executed by llama.cpp"
+      }
     },
     "nemotron8b": {
       "model_id": "nvidia/NVIDIA-Nemotron-3.5-Bolt-E4B-4GB",
@@ -183,7 +213,17 @@
         "conversational_mode": false
       },
       "preserve_reasoning": false,
-      "thinking_budget_tokens": 768
+      "thinking_budget_tokens": 768,
+      "tokenizer": {
+        "repository": "nvidia/NVIDIA-Nemotron-3.5-Bolt-E4B-BF16",
+        "revision": "49843eed8db1f1c616c47af75cfd36e07aec0667",
+        "tokenizer_class": "GemmaTokenizer",
+        "algorithm": "BPE",
+        "base_vocab_size": 262144,
+        "tokenizer_json_sha256": "cc8d3a0ce36466ccc1278bf987df5f71db1719b9ca6b4118264f45cb627bfe0f",
+        "tokenizer_config_sha256": "b3da1b7227c5d35fd905ad13200a08be63cb346b2d1bd4f6d58878c9783d5de1",
+        "inference_source": "Tokenizer embedded in the SHA-256-verified GGUF; executed by llama.cpp"
+      }
     },
     "dory4b": {
       "model_id": "nvidia/NVIDIA-Nemotron-Labs-Dory1.0-4B-BF16",
@@ -247,7 +287,17 @@
         "nvidia/NVIDIA-Nemotron-Labs-Dory1.0-4B-GGUF",
         "Dory1.0-4B",
         "Nemotron Labs Dory 1.0 (4B)"
-      ]
+      ],
+      "tokenizer": {
+        "repository": "nvidia/NVIDIA-Nemotron-Labs-Dory1.0-4B-BF16",
+        "revision": "48e0c3faac0aaa8b93fc4e68256d7e58b183645e",
+        "tokenizer_class": "PreTrainedTokenizerFast",
+        "algorithm": "BPE",
+        "base_vocab_size": 131072,
+        "tokenizer_json_sha256": "623c34567aebb18582765289fbe23d901c62704d6518d71866e0e58db892b5b7",
+        "tokenizer_config_sha256": "10f93eabcb9b1602fbb991d6308e787ce1df28ee9cd7a1c6d1e8c3f338b957bc",
+        "inference_source": "Tokenizer embedded in the SHA-256-verified GGUF; executed by llama.cpp"
+      }
     },
     "granite8b": {
       "model_id": "ibm-granite/granite-4.2-8b",
@@ -286,7 +336,17 @@
       },
       "chat_template_kwargs": {},
       "preserve_reasoning": false,
-      "thinking_budget_tokens": 768
+      "thinking_budget_tokens": 768,
+      "tokenizer": {
+        "repository": "ibm-granite/granite-4.2-8b",
+        "revision": "a7042144125ce5ae64f89610e8289647fc000b9a",
+        "tokenizer_class": "GPT2Tokenizer",
+        "algorithm": "BPE",
+        "base_vocab_size": 100352,
+        "tokenizer_json_sha256": "883975314d58743726347caaf2c32ac89afd5ad57222cffbc4f052f2ab27b2d7",
+        "tokenizer_config_sha256": "2007f26df166ed10a2d6fa881c1c8f3cdd151e451469f59b274897f14449835f",
+        "inference_source": "Tokenizer embedded in the SHA-256-verified GGUF; executed by llama.cpp"
+      }
     },
     "lfm2.6b": {
       "model_id": "LiquidAI/LFM2.5-2.6B",
@@ -344,6 +404,16 @@
             "additionalProperties": false
           }
         }
+      },
+      "tokenizer": {
+        "repository": "LiquidAI/LFM2.5-2.6B",
+        "revision": "b212e75975bbda9676a94d3cb7b2ca25b65fed48",
+        "tokenizer_class": "TokenizersBackend",
+        "algorithm": "BPE",
+        "base_vocab_size": 124893,
+        "tokenizer_json_sha256": "695be7802a0e4b8a81048f0ff5ebb7fc811a0ba5a6be63dbb24deb5a81096f41",
+        "tokenizer_config_sha256": "11f1de897317b489dd09199284528382eeb17f566398b16e2039bb2266d26b09",
+        "inference_source": "Tokenizer embedded in the SHA-256-verified GGUF; executed by llama.cpp"
       }
     }
   }

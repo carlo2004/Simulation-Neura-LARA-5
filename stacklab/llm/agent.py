@@ -14,23 +14,10 @@ from stacklab.evaluation import evaluate, observe, physics_state
 from stacklab.policy import ExecutionLimits, Interpreter, PolicyCancelled, validate
 from stacklab.llm.responses import parse_reply
 from stacklab.llm.metrics import summarize
+from stacklab.llm.context import PromptContext, model_json
 
 def system_prompt():
-    return (ROOT/'config/prompts/robot_api.md').read_text(encoding='utf-8')
-
-
-def model_json(value):
-    # Micrometre precision is ample for a millimetre-scale task. Keep full precision
-    # in the physics logs, but avoid long floating-point tails in model messages.
-    def compact(item):
-        if isinstance(item, float):
-            return round(item, 6)
-        if isinstance(item, dict):
-            return {key: compact(v) for key, v in item.items()}
-        if isinstance(item, (list, tuple)):
-            return [compact(v) for v in item]
-        return item
-    return json.dumps(compact(value), ensure_ascii=False)
+    return PromptContext().system_prompt
 
 
 def hold(robot):
@@ -44,6 +31,7 @@ class Agent:
     def __init__(self, robot, client, *, max_rounds=4, max_tokens=2048, thinking=None, seed=42,
                  generation_timeout=600, execution_timeout=120, on_event=None, tick=None, thinking_budget=None, policy_limits=None):
         self.policy_limits = policy_limits or ExecutionLimits.load()
+        self.context = PromptContext()
         self.robot, self.client = robot, client
         self.max_rounds, self.max_tokens, self.thinking = max_rounds, max_tokens, thinking
         self.seed = seed
@@ -113,14 +101,17 @@ class Agent:
         write_json(directory/'scene.json', self.robot.config.to_dict())
         write_json(directory/'initial_physics.json', physics_state(self.robot))
         initial = observe(self.robot)
-        request = dict(instruction=instruction, observation=initial, units='world metres',
-                       recent_tasks=self.recent_tasks[-3:], program_block_budget=self.max_rounds, policy_limits=asdict(self.policy_limits))
-        first = dict(role='user', content=model_json(request))
-        system = dict(role='system', content=system_prompt())
+        context = self.context.assemble(self.robot, instruction, initial,
+                    dict(recent_tasks=self.recent_tasks[-3:], program_block_budget=self.max_rounds,
+                         policy_limits=asdict(self.policy_limits)))
+        write_json(directory/'context.json', context)
+        prefix = context['messages']
         history = []
         report = dict(instruction=instruction, goal=goal, success=False if goal else None,
                       status='budget_exhausted', mode='closed_loop_feedback', max_rounds=self.max_rounds,
-                      protocol_version=2, policy_limits=asdict(self.policy_limits), software=software_provenance(),
+                      protocol_version=3, context_source_hashes=context['source_hashes'],
+                      context_order=context['order'], few_shot_count=len(self.context.few_shot),
+                      policy_limits=asdict(self.policy_limits), software=software_provenance(),
                       physics_during_inference='paused; viewer remains responsive',
                       model_observation_decimal_places=6,
                       model=self.client.config, initial_observation=initial, rounds=[])
@@ -139,7 +130,7 @@ class Agent:
                     path = directory/f'round_{index:02d}'
                     self.on_event('generating', dict(round=index, maximum=self.max_rounds))
                     # Retain the task plus the latest two feedback exchanges, not unbounded chat.
-                    messages = [system, first, *history[-4:]]
+                    messages = [*prefix, *history[-4:]]
                     item = dict(round=index, stage='generation', actions=[], execution_outcome='not_generated')
                     report['rounds'].append(item)
                     try:

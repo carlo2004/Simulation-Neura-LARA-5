@@ -75,6 +75,8 @@ def scene_xml(c, *, visuals=True):
     return E.tostring(root, encoding='unicode')
 
 class Simulation:
+    TCP_BOUNDS = ((.20, .60), (-.30, .30), (.01, .45))
+
     def __init__(self, config=None, video=None, gui=False, show_settings=False, axes=False, stackviz=None, visuals=True):
         self.config = (config or Config()).validate()
         self.visuals = bool(visuals)
@@ -294,7 +296,8 @@ class Simulation:
     @staticmethod
     def validate_tcp(xyz):
         xyz = np.asarray(xyz, dtype=float)
-        if xyz.shape != (3,) or not np.isfinite(xyz).all() or not (.20 <= xyz[0] <= .60 and abs(xyz[1]) <= .30 and .01 <= xyz[2] <= .45):
+        if (xyz.shape != (3,) or not np.isfinite(xyz).all()
+                or not all(low <= value <= high for value, (low, high) in zip(xyz, Simulation.TCP_BOUNDS))):
             raise ValueError('TCP outside supported workspace')
         return xyz
 

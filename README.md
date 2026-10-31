@@ -73,8 +73,15 @@ Für wiederholbare Entwicklungspiloten gibt es `stacklab experiment plan`, `run`
 **Alle Modelle auf L4 und A100 vergleichen:** Der [automatische Remote-Pilot](docs/remote-benchmark.md)
 führt standardmäßig zehn Episoden pro Modell und GPU aus, mit lokaler Simulation,
 automatischem Modellwechsel auf Colab, kompakten Bewegungsdaten, Rohdaten und vorläufiger Rangliste.
-GitHub Releases können die vollständigen Archive samt Prüfsummen übernehmen.
+[Hugging Face](docs/huggingface.md) übernimmt neue Datenstände samt Prüfsummen und
+festgelegter Hub-Revision; Code und Konfigurationen bleiben in GitHub.
 Der [schlanke Standardmodus](docs/slim-benchmark.md) erzeugt Videos erst bei Bedarf
 und bietet eine lokale HTML-Sichtung mit Auftrag, Modellantwort, Code und Zeiten.
 
 Modellgewichte liegen standardmäßig im lokalen Cache. Mit `STACKLAB_CACHE_DIR` kann ein anderer Datenträger gewählt werden; `STACKLAB_RUN_DIR` steuert den Ergebnisordner. Das Projekt wird aus diesem Checkout mit editierbarer Installation betrieben.
+
+Der [Modellkontext](docs/context.md) trennt Systemregeln, World Info, aktuelle
+Beobachtungen, Budgets, optionale Few-Shot-Beispiele und Nutzerauftrag. Die
+Systemregeln enthalten keine Zahlenliterale. Die Reihenfolge der Kontextblöcke
+ist konfigurierbar. [Alle Modellkarten](docs/models.md) nennen den verwendeten
+Tokenizer mit Herstellerrevision und Prüfsummen.

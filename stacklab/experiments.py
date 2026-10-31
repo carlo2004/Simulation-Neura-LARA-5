@@ -53,7 +53,8 @@ def source_hashes():
     paths = set((ROOT/'stacklab').rglob('*.py'))
     for directory in ('config/prompts', 'assets/robots/lara5'):
         paths.update(p for p in (ROOT/directory).rglob('*') if p.is_file())
-    return {p.relative_to(ROOT).as_posix(): sha256(p) for p in sorted(paths)}
+    from stacklab.llm.context import context_source_hashes
+    return {**{p.relative_to(ROOT).as_posix(): sha256(p) for p in sorted(paths)}, **context_source_hashes()}
 
 
 def create_plan(directory, *, models, cases, scene_seeds, generation_seeds, blocks,

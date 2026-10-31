@@ -36,4 +36,9 @@ Umgebung, beobachtete Paketstände und Modellprovenienz stehen jeweils daneben. 
 
 Entfernt wurden doppelte Klartextkopien von Prompts/Antworten und reine technische Vorversuche. Kanonische JSON-Anfragen und -Antworten bleiben erhalten. Frühere abgeschnittene Antworten, Schema-Experimente, der native Completion-Absturz sowie frühere Stapel-/Abbruchproben sind vollständig im [unveränderten Stand 9e21335](https://github.com/carlo2004/Simulation-Neura-LARA-5/tree/9e21335661a5d267259ad0f6b8069e5a7a533950/test_results) nachlesbar. [Entscheidungen](../docs/history/README.md) fasst ihre Bedeutung zusammen.
 
-Neue Durchläufe schreiben nach `runs/`. Nur für die Arbeit relevante abgeschlossene Versuche gezielt mit Provenienz übernehmen. Vor dem Originalmodell-/Finetuning-Vergleich API, Budgets, Seeds und unabhängige Metriken einfrieren und ein getrenntes Testset festlegen.
+Neue Durchläufe schreiben nach `runs/` und werden über die
+[HF-Pipeline](../docs/huggingface.md) mit Provenienz und Prüfsummen archiviert.
+Neue Rohdaten oder Trainingsläufe nicht in dieses Git-Verzeichnis übernehmen.
+Vor dem Originalmodell-/Finetuning-Vergleich API, Budgets, Seeds und unabhängige
+Metriken einfrieren und ein getrenntes Testset festlegen. Die historischen
+Referenzen oben bleiben unverändert, bis eine gesonderte Migration geprüft ist.

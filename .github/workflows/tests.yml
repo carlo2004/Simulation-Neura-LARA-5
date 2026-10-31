@@ -66,6 +66,8 @@ jobs:
           cache: pip
       - name: Install, diagnose and test the local environment
         run: python bootstrap.py --test
+      - name: Check model cards against tokenizer and model locks
+        run: python tools/model_cards.py --check
       - name: Contact-physics scenarios
         if: matrix.os == 'ubuntu-latest' && matrix.python == '3.13'
         env:

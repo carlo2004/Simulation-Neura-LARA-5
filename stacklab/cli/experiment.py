@@ -8,6 +8,7 @@ import subprocess
 from stacklab.cli.benchmark import CASES
 from stacklab.experiments import create_plan, run_plan, write_report
 from stacklab.llm.catalog import model_keys
+from huggingface_hub.errors import HfHubHTTPError, LocalTokenNotFoundError
 
 
 def main(argv=None):
@@ -49,13 +50,20 @@ def main(argv=None):
                        help='Encode video during the trial; default off in slim, on in full mode')
     pilot.add_argument('--gui', action='store_true', help='Watch the local viewer; use identically on both GPUs')
     pilot.add_argument('--backup-dir', type=Path)
-    pilot.add_argument('--publish', metavar='OWNER/REPO', help='Publish evidence as a GitHub Release after the run')
+    pilot.add_argument('--publish', nargs='?', const='', metavar='HF_DATASET',
+                       help='Publish to the Hugging Face dataset after the run; default from config/huggingface.json')
     comparison = sub.add_parser('compare', help='Compare matching L4/A100 plans without rerunning inference')
     comparison.add_argument('directories', type=Path, nargs='+')
     comparison.add_argument('--output', type=Path, required=True)
-    publication = sub.add_parser('publish', help='Upload recorded raw data/video and reports as a GitHub Release')
+    publication = sub.add_parser('publish', help='Upload an immutable evidence snapshot to a Hugging Face dataset')
     publication.add_argument('directory', type=Path)
-    publication.add_argument('--repository', required=True)
+    publication.add_argument('--repository', help='Hugging Face dataset owner/name; default from config/huggingface.json')
+    publication.add_argument('--dry-run', action='store_true', help='Show exact snapshot inventory without network or upload')
+    fetch = sub.add_parser('fetch', help='Download and verify a snapshot at a pinned Hugging Face commit')
+    fetch.add_argument('snapshot_id')
+    fetch.add_argument('--revision', required=True, help='Full Hub commit SHA from hub-receipt.json')
+    fetch.add_argument('--repository')
+    fetch.add_argument('--output', type=Path, required=True)
     review = sub.add_parser('review', help='Build an offline HTML report with prompts, code, timing and optional videos')
     review.add_argument('directory', type=Path)
     review.add_argument('--include-reasoning', action='store_true', help='Include actual model-provided reasoning, folded by default')
@@ -70,7 +78,8 @@ def main(argv=None):
         child.add_argument('directory', type=Path)
         if command == 'run':
             child.add_argument('--backup-dir', type=Path, help='Checkpoint after each episode, e.g. a mounted Drive folder')
-            child.add_argument('--publish', metavar='OWNER/REPO')
+            child.add_argument('--publish', nargs='?', const='', metavar='HF_DATASET',
+                               help='Publish to the configured Hugging Face dataset on completion')
         if command == 'backup':
             child.add_argument('--output', type=Path, required=True, help='Destination folder outside the experiment')
     args = parser.parse_args(argv)
@@ -93,7 +102,11 @@ def main(argv=None):
             return 0
         if args.command == 'publish':
             from stacklab.publication import publish_experiment
-            print(publish_experiment(args.directory, args.repository))
+            print(publish_experiment(args.directory, args.repository, dry_run=args.dry_run))
+            return 0
+        if args.command == 'fetch':
+            from stacklab.publication import fetch_experiment
+            print(fetch_experiment(args.snapshot_id, args.revision, args.output, args.repository))
             return 0
         if args.command == 'backup':
             from stacklab.backup import backup_experiment
@@ -114,9 +127,9 @@ def main(argv=None):
             report = run_plan(args.output, backup_dir=args.backup_dir)
             from stacklab.review import write_review
             print('Review: '+str(write_review(args.output, report=report)), flush=True)
-            if args.publish:
+            if args.publish is not None:
                 from stacklab.publication import publish_experiment
-                print(publish_experiment(args.output, args.publish))
+                print(publish_experiment(args.output, args.publish or None))
             print('Pilot finished. Observed ranking: '+str(args.output.resolve()/'ranking.md'), flush=True)
             return 0 if report['complete'] else 1
         if args.command == 'plan':
@@ -133,9 +146,9 @@ def main(argv=None):
         report = run_plan(args.directory, backup_dir=args.backup_dir) if args.command == 'run' else write_report(args.directory)
         from stacklab.review import write_review
         write_review(args.directory, report=report)
-        if args.command == 'run' and args.publish:
+        if args.command == 'run' and args.publish is not None:
             from stacklab.publication import publish_experiment
-            print(publish_experiment(args.directory, args.publish))
+            print(publish_experiment(args.directory, args.publish or None))
         success = sum(g['success'] for g in report['groups'])
         print(f'{success}/{report["planned"]} planned episodes physically successful; '
               f'complete={report["complete"]}; report: {args.directory.resolve()}/report.md')
@@ -145,7 +158,8 @@ def main(argv=None):
     except KeyboardInterrupt:
         print('Interrupted; existing evidence was preserved. Run again to process only pending episodes.', file=sys.stderr)
         return 130
-    except (ValueError, OSError, RuntimeError, KeyError, subprocess.CalledProcessError) as error:
+    except (ValueError, OSError, RuntimeError, KeyError, subprocess.CalledProcessError,
+            HfHubHTTPError, LocalTokenNotFoundError) as error:
         print('Error: '+str(error), file=sys.stderr)
         return 2
 
