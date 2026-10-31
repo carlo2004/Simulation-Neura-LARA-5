@@ -1,2 +1,2 @@
 """LARA 5 simulation and local code-policy experiments."""
-__version__ = "3.9.0"
+__version__ = "3.10.0"

@@ -54,7 +54,7 @@ class StudyModel:
 
 
 class StudyDesignTests(unittest.TestCase):
-    def test_notebook_is_a_pinned_a100_collector_without_motion_probes_or_uploads(self):
+    def test_notebook_checks_hf_before_models_and_keeps_tokens_out_of_code_and_outputs(self):
         notebook = json.loads((study.ROOT/'notebooks/colab_stack_study_v2.ipynb').read_text(encoding='utf-8'))
         code = []
         for cell in notebook['cells']:
@@ -64,8 +64,17 @@ class StudyDesignTests(unittest.TestCase):
                 self.assertEqual(cell['outputs'], [])
                 code.append(source)
         text = '\n'.join(code)
-        for forbidden in ('move-right', 'move-forward', 'benchmark --case', 'upload_folder', 'HF_TOKEN', '--publish'):
+        for forbidden in ('move-right', 'move-forward', 'benchmark --case', 'upload_folder', '--publish'):
             self.assertNotIn(forbidden, text)
+        self.assertIn('userdata.get("HF_TOKEN")', text)
+        self.assertIn('getpass(', text)
+        self.assertIn('"hub-check"', text)
+        self.assertIn('"--hub-repo"', text)
+        self.assertIn('"hub-upload-export"', text)
+        self.assertLess(text.index('"hub-check"'), text.index('for model in MODELS:'))
+        self.assertLess(text.index('"hub-upload-export"'), text.index('runtime.unassign()'))
+        self.assertIn('export_verified and hub_export_verified', text)
+        self.assertNotRegex(text, r'hf_[A-Za-z0-9]{20,}')
         self.assertIn('"A100"', text)
         self.assertIn('runtime.unassign()', text)
         self.assertIn('snapshot["archive"]["sha256"]', text)
@@ -263,6 +272,43 @@ class StudyCollectionTests(unittest.TestCase):
             resumed = study.collect(restored, self.url, checkpoint_dir=self.checkpoint, max_hours=1)
         self.assertEqual(StudyModel.scored_calls, 4)  # 1 original + 3 previously unstarted slots.
         self.assertEqual(sum(r['status'] == 'incomplete' for r in resumed), 1)
+        self.assertTrue(all(r['attempt_count'] == 1 for r in resumed))
+
+    def test_hf_acknowledges_the_start_before_physics_and_the_zip_afterwards(self):
+        events = []
+        def backup(folder):
+            markers = list(Path(folder).glob('batches/*/starts/*.json'))
+            archives = list(Path(folder).glob('batches/*/episode-*.zip'))
+            events.append((len(markers), len(archives), StudyModel.scored_calls))
+        self.collect(max_episodes=1, on_checkpoint=backup)
+        self.assertIn((1, 0, 0), events)
+        self.assertIn((1, 1, 1), events)
+
+    def test_failed_remote_start_backup_prevents_any_scored_model_or_physics_run(self):
+        def unavailable(folder):
+            if list(Path(folder).glob('batches/*/starts/*.json')):
+                raise RuntimeError('CONTROLLED HF unavailable')
+        with self.assertRaisesRegex(RuntimeError, 'HF unavailable'):
+            self.collect(max_episodes=1, on_checkpoint=unavailable)
+        self.assertEqual(StudyModel.scored_calls, 0)
+        rows = study.write_index(self.directory)
+        self.assertEqual(sum(r['attempt_count'] for r in rows), 1)
+
+    def test_restore_from_hf_after_losing_both_vm_and_drive_keeps_finished_trials(self):
+        from test_hub_checkpoints import FakeHub
+        from stacklab.hub_checkpoints import HubCheckpoints
+        backup = HubCheckpoints('fixture/declared-study', api=FakeHub(self.root/'hub-cache'))
+        first = self.collect(max_episodes=1, on_checkpoint=backup.push)
+        # Both the VM's work and its Drive mirror are now unavailable.
+        recovered = self.root/'hf-recovered-checkpoints'
+        backup.restore(recovered)
+        restored = self.root/'hf-recovered-study'
+        study.restore(restored, recovered)
+        self.assertEqual(study.write_index(restored), first)
+        with redirect_stdout(io.StringIO()):
+            resumed = study.collect(restored, self.url, checkpoint_dir=recovered,
+                                    max_hours=1, on_checkpoint=backup.push)
+        self.assertEqual(StudyModel.scored_calls, 4)
         self.assertTrue(all(r['attempt_count'] == 1 for r in resumed))
 
 

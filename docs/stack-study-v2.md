@@ -2,7 +2,7 @@
 
 [Notebook direkt in Colab öffnen](https://colab.research.google.com/github/carlo2004/Simulation-Neura-LARA-5/blob/main/notebooks/colab_stack_study_v2.ipynb).
 
-Der Lauf erzeugt Daten für die anschließende manuelle Modellauswahl: **sechs Modelle × 32 Startlagen × ein Generierungsseed = 192 geplante Modell-Episoden**. Die einzige Aufgabe lautet „Staple den roten Würfel auf den blauen Würfel.“ Es gibt keine Bewegungsaufgabe, keine zusätzlichen gescorten Wiederholungen und keinen automatischen HF-/GitHub-Upload.
+Der Lauf erzeugt Daten für die anschließende manuelle Modellauswahl: **sechs Modelle × 32 Startlagen × ein Generierungsseed = 192 geplante Modell-Episoden**. Die einzige Aufgabe lautet „Staple den roten Würfel auf den blauen Würfel.“ Das Notebook sichert jeden Versuch automatisch nach Drive und HF. Die sechs Stunden sind eine Obergrenze; die Sicherung beginnt schon vor dem ersten Versuch. Es gibt keine Bewegungsaufgabe und keine zusätzlichen gescorten Wiederholungen.
 
 ## Was verglichen wird
 
@@ -52,40 +52,33 @@ Es werden konfigurierte Modellsysteme verglichen. Hersteller-Samplingprofile, na
 ## In Colab starten
 
 1. Das Notebook öffnen und unter **Laufzeit → Laufzeittyp ändern → A100** auswählen.
-2. Die voreingestellte Commit-Revision und das Protokoll beibehalten. `MAX_HOURS` begrenzt die laufende Erhebung zwischen Episoden; voreingestellt sind sechs Stunden.
-3. Zellen der Reihe nach ausführen und Drive verbinden. Der Paketstand kommt aus `requirements-study.txt`. Ein neues Notebook-Python außerhalb 3.12/3.13 bekommt eine eigene Python-3.12-Umgebung.
-4. Nur die sechs gewählten Modelle werden installiert. Vor der Erhebung lädt der Server jedes Modell und prüft die echte vollständige GPU-Auslagerung. Diese Infrastrukturchecks steuern keinen Roboter und zählen nicht als weitere Simulationen.
-5. Die Sammelzelle laufen lassen. Neue Episode, tatsächlicher Programmblock, Physikfeedback und native Geschwindigkeit bleiben im Protokoll erkennbar.
+2. Die voreingestellte Commit-Revision und das Protokoll beibehalten. `MAX_HOURS=6` begrenzt die Sammlung zwischen Episoden. Du musst nicht sechs Stunden am Stück behalten, damit Daten gesichert werden.
+3. Links über das Schlüsselsymbol das Colab-Secret **`HF_TOKEN`** hinzufügen und den Notebook-Zugriff aktivieren. Der Token braucht Schreibzugriff auf `HF_REPOSITORY`. Alternativ fragt das Notebook ihn verdeckt ab. Standardziel ist das bestehende Projekt-Dataset `Carlo0001/neura-lara5-cube-stacking-sim-v1`. Ein bestehendes Dataset behält seine Sichtbarkeit; ein fehlendes wird privat erstellt.
+4. Zellen der Reihe nach ausführen und Drive verbinden. Vor Modell-Downloads erfolgen automatischer HF-Login und ein echter Schreib-/Lese-/Löschtest mit einer kleinen Testdatei. Bei fehlendem Schreibzugriff stoppt dieser Schritt. Danach werden HF-Checkpoints wiederhergestellt und der Plan gesichert. Pakete kommen aus `requirements-study.txt`; ein Notebook-Python außerhalb 3.12/3.13 bekommt eine eigene Python-3.12-Umgebung.
+5. Nur die sechs gewählten Modelle werden installiert. Vor der Erhebung lädt der Server jedes Modell und prüft die echte vollständige GPU-Auslagerung. Diese Infrastrukturchecks steuern keinen Roboter und zählen nicht als weitere Simulationen.
+6. Die Sammelzelle laufen lassen. Neue Episode, tatsächlicher Programmblock, Physikfeedback, native Geschwindigkeit und bestätigte HF-Backups bleiben im Protokoll erkennbar.
 
-Das Notebook führt Modell und Simulation auf Colab aus. SSH und ein lokales Simulationsfenster werden für diesen Lauf nicht benötigt. Modelle, Inferenz-Cache und Arbeitsdateien bleiben auf der VM. Für die Daten gibt es pro abgeschlossener Episode ein eigenes unveränderliches ZIP-Checkpoint in Drive; nicht nach jeder Episode eine neue Kopie des gesamten Datensatzes.
+Modell und Simulation laufen auf Colab. SSH und ein lokales Simulationsfenster werden für diese Sammlung nicht benötigt. Für die Daten gibt es pro abgeschlossener Episode ein eigenes unveränderliches ZIP-Checkpoint auf Drive und HF. Bereits bestätigte Dateien werden übersprungen; es wird nicht nach jeder Episode der gesamte wachsende Datensatz erneut hochgeladen. Der Token liegt nur im Colab-Prozess/der VM-Anmeldung und wird nicht als Aufzeichnung, Notebook-Ausgabe oder Git-Credential gespeichert.
 
-Nach Abschluss, geplantem Zeitstopp oder einem abgefangenen Fehler versucht die Sammelzelle einen lokalen, checksummierten Export. Erst wenn dessen Drive-Kopie geprüft wurde, gibt `AUTO_RELEASE_GPU=True` die Colab-VM frei. Bei einem fehlgeschlagenen Export bleibt die VM offen, damit lokale Daten gerettet werden können. Die Freigabe kann bei einem harten Sitzungsabbruch nicht garantiert werden; vorhandene fertige Einzelcheckpoints bleiben in Drive.
+Nach Abschluss, geplantem Zeitstopp oder einem abgefangenen Fehler erzeugt die Sammelzelle zusätzlich einen gesamten, checksummierten Export. Erst wenn die Drive-Kopie geprüft und der HF-Export bestätigt wurde, gibt `AUTO_RELEASE_GPU=True` die VM frei. Bei fehlgeschlagenem Export bleibt sie offen, damit Daten gerettet werden können. Bei einem harten Sitzungsabbruch kann die Zelle nicht mehr exportieren; zuvor bestätigte Einzelcheckpoints liegen dann bereits außerhalb der VM auf Drive und HF.
 
-Die erste Runtime-Einrichtung kann bei älterer GLIBC einen CUDA-Quellbuild benötigen. Die Laufzeit des gesamten Tests hängt von den tatsächlich erzeugten Antworten und der Anzahl benötigter Blöcke ab. Es ist keine feste A100-Geschwindigkeit oder feste CU-Abrechnung angenommen. Die Erhebung kann nach dem Zeitstopp mit demselben Ordner fortgesetzt werden; der erste sichtbare Zeitwert stammt aus der tatsächlichen Ausführung.
+Die erste Einrichtung kann bei älterer GLIBC einen CUDA-Quellbuild benötigen. Die Dauer hängt von tatsächlich erzeugten Antworten und benötigten Blöcken ab; feste A100-Geschwindigkeit oder CU-Abrechnung sind nicht angenommen.
 
 ## Unterbrechen und fortsetzen
 
-Der Drive-Ordner lautet standardmäßig:
+Der neue Drive-Ordner heißt standardmäßig `MyDrive/LARA-Stack-Lab/stack-study-v2-32-hf/`. Er enthält `study.json`, `feasibility.json`, `sessions/`, `batches/<batch>/context.zip`, `batches/<batch>/starts/`, `batches/<batch>/episode-….zip` und `exports/`.
 
-```text
-MyDrive/LARA-Stack-Lab/stack-study-v2-32/
-  study.json
-  feasibility.json
-  sessions/
-  batches/
-    batch-…/
-      context.zip
-      starts/episode-….json
-      episode-….zip
-  exports/
-    stack-study-v2-export-…/
-```
+Nach einer neuen Colab-Laufzeit das gleiche gepinnte Notebook mit **demselben Drive-Ordner, `HF_REPOSITORY` und `HF_PREFIX`** ausführen. Login und Schreibtest laufen erneut. Fehlende Checkpoints werden anhand eines festen HF-Commits heruntergeladen und vor dem Wiederherstellen per SHA-256 geprüft. Abweichende unveränderliche Versuchsdaten werden nicht überschrieben. Unterschiedliche Sitzungs-Metadaten bleiben bei Bedarf als beide Varianten erhalten.
 
-Nach einer neuen Colab-Laufzeit das gleiche gepinnte Notebook mit **demselben Drive-Ordner** ausführen. Einzelarchive werden auf Inhalt und Prüfsummen geprüft. Die ursprünglichen Batch-Manifeste behalten ihre damalige GPU-UUID, Treiber und Software. Noch ungestartete Slots bekommen neue Batch-Manifeste für die aktuelle A100-Sitzung. So wird ein neues Gerät nicht rückwirkend in einen alten Versuchsplan geschrieben.
+Der neue Ordner trennt diese Version vom älteren Notebook ohne HF-Sicherung. Einen bereits mit der alten Version begonnenen Lauf mit seinem damaligen gepinnten Notebook weiterführen; Aufzeichnungen unterschiedlicher Implementierungsstände werden nicht still vermischt.
 
-Vor dem Start jeder Simulation wird eine Startmarkierung gesichert. Ein bereits begonnener Versuch wird nicht erneut gestartet. Bei einem harten Abbruch können die noch nicht gesicherten Ausgaben der zuletzt laufenden Episode fehlen; ihre Startmarkierung bleibt als unvollständiger Versuch erhalten. Alle vorangehenden Checkpoints bleiben erhalten. Ein abgefangener Abbruch versucht auch Teilprotokolle zu sichern. Startfehler vor den gewerteten Versuchen und Infrastrukturfehler werden sichtbar erfasst. Sie werden nicht als Roboter-Misserfolg ausgegeben.
+Die ursprünglichen Batch-Manifeste behalten ihre damalige GPU-UUID, Treiber und Software. Noch ungestartete Slots bekommen neue Batch-Manifeste für die aktuelle A100-Sitzung. Ein neues Gerät wird nicht rückwirkend in einen alten Plan geschrieben.
 
-**192 ist die Zahl der geplanten Versuchseinheiten.** Falls technische Ausfälle oder Abbrüche auftreten, bleiben dafür Einträge mit unbekanntem physischem Ergebnis erhalten. Der Export behauptet dann nicht, alle 192 seien auswertbar. Modell-/Token-/aktive Generierungsbudgetfehler zählen als Misserfolg; reine Transportfehler bleiben davon getrennt. Weitere technische Wiederholungen würden einen separat benannten neuen Versuch benötigen.
+**Vor jeder Simulation** wird ihre Startmarkierung auf Drive gespeichert und der HF-Commit bestätigt. **Nach jeder Episode** wird ihr vollständiges Archiv bestätigt, bevor die nächste Simulation startet. Bei einem harten Abbruch können die noch nicht gesicherten Ausgaben der laufenden Episode fehlen; die Startmarkierung bleibt als unvollständiger Versuch erhalten und verhindert eine versehentliche Wiederholung. Vorangehende bestätigte Checkpoints bleiben erhalten. Ein abgefangener Abbruch versucht auch Teilprotokolle zu sichern. Infrastrukturfehler werden sichtbar erfasst und nicht als Roboter-Misserfolg ausgegeben.
+
+HF-Übertragungen haben drei begrenzte Versuche. Danach stoppt die Sammlung; lokale/Drive-Daten bleiben erhalten. Das wiederholt nur die Übertragung, keinen Modellversuch. Datei und `checkpoint-index.json` werden gemeinsam in einem HF-Commit veröffentlicht. Ein verlorenes HTTP-Acknowledgement verursacht so keine doppelte Modell-Ausführung. Nach Behebung eines HF-Ausfalls dieselben Einstellungen verwenden. Immer nur eine aktive Colab-Sammlung pro Studienordner.
+
+**192 ist die Zahl der geplanten Versuchseinheiten.** Technische Ausfälle und Abbrüche bleiben mit unbekanntem physischem Ergebnis erhalten; der Export behauptet dann nicht, alle 192 seien auswertbar. Modell-/Token-/aktive Generierungsbudgetfehler zählen als Misserfolg; reine Transportfehler bleiben getrennt. Weitere technische Wiederholungen benötigen einen separat benannten neuen Versuch.
 
 ## Datensatz für die manuelle Auswertung
 
@@ -109,18 +102,23 @@ Nach Unterbrechungen können frühere Batch-Pläne ungestartete Slots enthalten.
 
 Die 20 Stabilitätsproben über zwei Simulationssekunden und mehrere Programmblöcke gehören zur selben Episode. Sie erhöhen die Stichprobe nicht. Mit 32 gepaarten Startlagen je Modell ist dies ein erster überschaubarer Vergleich. Kleine Erfolgsunterschiede erlauben noch keine sichere allgemeine Bestenliste; neue Bestätigungs- und spätere Fine-Tuning-Tests brauchen unbenutzte Startlagen. Erfolgscode und Diagnose bleiben getrennt von einer späteren manuellen Fehlerursachen-Einordnung.
 
-## Später selbst lokal auf HF hochladen
+## Automatische HF-Ablage
 
-Den neuesten **gesamten Exportordner** aus Drive lokal herunterladen. Der Token wird nur in deinem lokalen Terminal verwendet. Beispielsweise mit der vorhandenen HF-CLI:
+Standardpfad im Dataset ist **`backups/stack-study-v2-32-hf/`**:
 
-```bash
-hf auth login
-hf upload DEINNAME/DEINDATASET PFAD_ZUM_EXPORT experiments/stack-v2/DEINE_SNAPSHOT_ID --repo-type dataset
-```
+| Pfad | Inhalt |
+|---|---|
+| `checkpoint-index.json` | Prüfsummen und Größen aller bestätigten Checkpoint-Dateien |
+| `study.json`, `feasibility.json` | Eingefrorener Plan und Machbarkeitsprüfung |
+| `sessions/` | Sitzungsdaten und Erfolgsbelege des HF-Schreibtests |
+| `batches/<batch>/context.zip` | Ursprünglicher Plan und Modell-/GPU-Metadaten |
+| `batches/<batch>/starts/` | Vor der Ausführung bestätigte Startmarkierungen |
+| `batches/<batch>/episode-….zip` | Unveränderliche Einzelversuche mit vollständigen Rohdaten |
+| `exports/<snapshot_id>/` | Gesamtexport mit `trials.csv`, `snapshot.json` und `evidence.zip` |
 
-`DEINE_SNAPSHOT_ID` stammt aus `snapshot.json`; dadurch bleiben verschiedene Exporte auseinander. Unter Windows ist die Projekt-CLI `.\.venv\Scripts\hf.exe`, unter Linux/macOS `.venv/bin/hf`. Das Notebook und die Vorbereitung führen diesen Upload nicht aus. Für eine leere Zielablage kann die HF-CLI das Dataset anlegen; Zugriffsrechte und Sichtbarkeit wählst du selbst.
+Die Testdatei wird nach dem Schreiben/Lesen aus dem aktuellen HF-Baum gelöscht; ihre kleinen Test-Commits bleiben in der Repository-Historie. Der Schreibtest führt keine Simulation aus. Es werden ausschließlich festgelegte Checkpoint-Dateien bzw. der kuratierte Export hochgeladen: keine Gewichte, Anmeldedateien oder allgemeinen VM-Verzeichnisse.
 
-Die vorbereitete Sammlung ist ein eigener exportierter Studiendatensatz. Der vorhandene Einzelplan-Befehl `experiment publish` erwartet einen normalen Plan und ist nicht der Upload-Einstieg für diese gesamte Sammlung.
+Nach hartem Abbruch muss noch kein Gesamtexport existieren. Er lässt sich aus den Einzelcheckpoints wieder erzeugen. Wiederherstellen und lokaler Export benötigen keine neue Modellantwort. Ein zusätzlicher manueller Upload ist für dieses Notebook nicht erforderlich. Der bisherige Einzelplan-Befehl `experiment publish` bleibt vom Studien-Backup getrennt.
 
 ## Ohne Notebook / technische Prüfung
 
@@ -140,4 +138,4 @@ In einem zweiten Terminal auf derselben Maschine:
 
 Für ausgewählte Episoden lassen sich später lokal mit `experiment replay` Videos aus den aufgezeichneten Posen rendern. Dabei werden weder das Modell noch die Physikbewertung erneut ausgeführt.
 
-Geprüft werden Szenenvielfalt, Paarung und exakte Fallzahlen, vollständige physische Kontrollen, A100-/Offload-Anforderungen, Kontextwechsel, Stoppen/Fortsetzen über verschiedene GPU-Identitäten, unveränderliche Checkpoints, Korruptionserkennung und ein Export ohne HF-Zugriff. Software-Fixtures sind als solche gekennzeichnet. Ein echter neuer A100-Modelllauf wird erst durch deine Ausführung gestartet; es sind keine solchen Ergebnisse vorab eingetragen.
+Geprüft werden Szenenvielfalt, Paarung und exakte Fallzahlen, physische Kontrollen, A100-/Offload-Anforderungen, Kontextwechsel, Stoppen/Fortsetzen, unveränderliche Checkpoints und Korruptionserkennung. HF-Tests prüfen Schreibtest/Cleanup, fehlende Berechtigungen, inkrementelle Uploads, verlorene Commit-Antworten, Wiederherstellen nach Verlust von VM und Drive und Stoppen vor ungesicherter Simulation. API-/Modell-Fixtures sind als solche gekennzeichnet. Der echte Schreibtest mit deinem Token und der neue A100-Modelllauf starten erst durch deine Notebook-Ausführung; dafür sind keine Ergebnisse vorab eingetragen.

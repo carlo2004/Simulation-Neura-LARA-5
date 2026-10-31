@@ -423,7 +423,7 @@ def model_order(settings, block):
     return order if block % 2 else list(reversed(order))
 
 
-def collect(directory, server_url, *, checkpoint_dir=None, max_hours=6., max_episodes=None):
+def collect(directory, server_url, *, checkpoint_dir=None, max_hours=6., max_episodes=None, on_checkpoint=None):
     directory = Path(directory).resolve()
     study = load_study(directory)
     if study['settings'] != spec() or study['bank_sha256'] != load_bank()['bank_sha256']:
@@ -440,6 +440,8 @@ def collect(directory, server_url, *, checkpoint_dir=None, max_hours=6., max_epi
         raise ValueError('A complete independent stacking feasibility check is required')
     if not math.isfinite(max_hours) or max_hours <= 0 or max_episodes is not None and max_episodes < 1:
         raise ValueError('Use positive wall-time and episode limits')
+    if on_checkpoint is not None and checkpoint_dir is None:
+        raise ValueError('A checkpoint folder is required for remote backups')
     check_server(study, RemoteControl(server_url).info())
     rows = write_index(directory)
     by_id = {r['trial_id']:r for r in rows}
@@ -453,6 +455,8 @@ def collect(directory, server_url, *, checkpoint_dir=None, max_hours=6., max_epi
         write_json(session_file, session)
         if checkpoint_dir:
             write_json(Path(checkpoint_dir)/'sessions'/session_file.name, session)
+            if on_checkpoint:
+                on_checkpoint(checkpoint_dir)
     save_session()
     current = None
 
@@ -464,6 +468,13 @@ def collect(directory, server_url, *, checkpoint_dir=None, max_hours=6., max_epi
         completed += 1
         if checkpoint_dir:
             checkpoint_batch(path.parent, checkpoint_dir)
+            if on_checkpoint:
+                on_checkpoint(checkpoint_dir)
+
+    def starting_episode(path):
+        checkpoint_start(path, checkpoint_dir)
+        if on_checkpoint:
+            on_checkpoint(checkpoint_dir)  # Acknowledged before the physics worker is started.
 
     try:
         session['preflight'] = []
@@ -517,7 +528,7 @@ def collect(directory, server_url, *, checkpoint_dir=None, max_hours=6., max_epi
                     write_json(current/'manifest.json', dict(content, plan_sha256=exp.digest(content)))
                     report = exp.run_plan(current, on_episode=completed_episode, should_stop=stop,
                         on_model_ready=lambda info: check_server(study, info),
-                        on_episode_start=(lambda path: checkpoint_start(path, checkpoint_dir)) if checkpoint_dir else None)
+                        on_episode_start=starting_episode if checkpoint_dir else None)
                     if checkpoint_dir:
                         checkpoint_batch(current, checkpoint_dir)
                     rows = write_index(directory)
