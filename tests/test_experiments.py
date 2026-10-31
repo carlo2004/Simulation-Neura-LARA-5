@@ -132,6 +132,16 @@ class ExperimentTests(unittest.TestCase):
         self.assertEqual(group['infrastructure_error'], 1)
         self.assertEqual(group['scored'], 0)
 
+    def test_native_generation_budget_timeout_is_a_scored_resource_failure(self):
+        plan = self.plan()
+        self.result(plan['episodes'][0], status='error', success=False, error='TimeoutError: native limit',
+                    generation=dict(generation_budget_exhausted=True, transport_complete=True,
+                                    performance=dict(request_seconds=60)))
+        group = exp.write_report(self.directory)['groups'][0]
+        self.assertEqual(group['infrastructure_error'], 0)
+        self.assertEqual(group['model_failure'], 1)
+        self.assertEqual(group['scored'], 1)
+
     def test_partial_worker_metrics_survive_a_missing_parent_result(self):
         plan = self.plan()
         episode = plan['episodes'][0]

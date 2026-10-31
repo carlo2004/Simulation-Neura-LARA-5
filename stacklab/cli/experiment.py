@@ -20,8 +20,13 @@ def publish(directory, repository, args):
 
 
 def main(argv=None):
+    argv = list(sys.argv[1:] if argv is None else argv)
+    if argv and argv[0] == 'stack-study':
+        from stacklab.cli.stack_study import main as stack_study_main
+        return stack_study_main(argv[1:])
     parser = argparse.ArgumentParser(description='Reproducible development comparisons with local physics')
     sub = parser.add_subparsers(dest='command', required=True)
+    sub.add_parser('stack-study', help='Paired stack-only A100 collection; use stack-study --help')
     plan = sub.add_parser('plan', help='Freeze cases, models, seeds and budgets before execution')
     plan.add_argument('--output', type=Path, required=True, help='New empty experiment directory')
     plan.add_argument('--models', nargs='+', required=True)

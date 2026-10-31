@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "name": "a100-red-on-blue-v2",
+  "split": "model_selection",
+  "models": ["qwen4b", "qwen9b", "ministral8b", "nemotron8b", "granite8b", "lfm2.6b"],
+  "excluded_models": {
+    "dory4b": {
+      "reason": "Excluded from this practical fine-tuning shortlist: experimental looped normalized-GPT, custom runtime and no validated A100 LoRA/QLoRA recipe in this project. This is not a claim that the model is inherently untrainable.",
+      "source": "https://huggingface.co/nvidia/NVIDIA-Nemotron-Labs-Dory1.0-4B-BF16",
+      "checked_date": "2026-10-31"
+    }
+  },
+  "instruction": "Staple den roten Würfel auf den blauen Würfel.",
+  "scene_blocks": 4,
+  "layout_seed": 20261031,
+  "directions": ["east", "north", "west", "south"],
+  "distances_m": {"near": [0.10, 0.14], "far": [0.20, 0.26]},
+  "generation_repetitions": 1,
+  "max_program_blocks": 4,
+  "max_tokens": 3072,
+  "thinking": true,
+  "thinking_budget": 1024,
+  "context_tokens": 16384,
+  "generation_timeout": 240,
+  "execution_timeout": 180,
+  "threads": 2,
+  "recording": "slim",
+  "motion_fps": 10,
+  "gpu_family": "A100",
+  "quantization": "Q4_K_M",
+  "technical_attempt_limit": 1,
+  "primary_attempt_rule": "One attempt per planned trial; no automatic retries. Preserve technical, cancelled and partial attempts without replacing them or inventing scores.",
+  "sampling": "Frozen native manufacturer profiles; compare configured systems, not an isolated weights-only ablation.",
+  "invariants": "Two equal 40-mm axis-aligned cubes, same mass/friction/robot/controller/API/context layout, no examples or oracle solution in the model prompt. Only initial XY positions and generation seeds vary."
+}

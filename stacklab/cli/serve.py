@@ -16,6 +16,7 @@ def main(argv=None):
     parser.add_argument('--model', help='Model alias; must already be installed')
     parser.add_argument('--device', choices=['cpu', 'cuda'], default='cpu')
     parser.add_argument('--threads', type=int, default=min(8, os.cpu_count() or 1))
+    parser.add_argument('--context-tokens', type=int, help='Explicit context capacity for every served model')
     parser.add_argument('--port', type=int, default=8765, help='Loopback port forwarded by SSH')
     parser.add_argument('--load-timeout', type=int, default=180)
     parser.add_argument('--allow-model-switch', action='store_true', help='Allow benchmark-controlled catalog model changes')
@@ -32,7 +33,8 @@ def main(argv=None):
         if output.exists() and any(output.iterdir()):
             raise ValueError('Choose a new output directory')
         output.mkdir(parents=True, exist_ok=True)
-        client = LocalModel(args.model, threads=args.threads, device=args.device)
+        overrides = dict(context_tokens=args.context_tokens) if args.context_tokens is not None else {}
+        client = LocalModel(args.model, threads=args.threads, device=args.device, **overrides)
         # Reserve the requested port before loading a potentially large model.
         with InferenceServer(client, output, args.port, allow_model_switch=args.allow_model_switch,
                              install_missing=args.install_missing, load_timeout=args.load_timeout) as server:

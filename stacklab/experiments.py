@@ -60,7 +60,8 @@ def source_hashes():
 def create_plan(directory, *, models, cases, scene_seeds, generation_seeds, blocks,
                 max_tokens=2048, threads=8, thinking=None, thinking_budget=None,
                 generation_timeout=600, execution_timeout=180, device='cpu', video=False,
-                server_url=None, paired_seeds=False, gui=False, recording='full', motion_fps=0):
+                server_url=None, paired_seeds=False, gui=False, recording='full', motion_fps=0,
+                case_definitions=None, metadata=None):
     directory = Path(directory).resolve()
     if directory.exists() and any(directory.iterdir()):
         raise ValueError('Choose a new empty experiment directory; existing evidence is preserved')
@@ -93,11 +94,25 @@ def create_plan(directory, *, models, cases, scene_seeds, generation_seeds, bloc
         device = info.get('device', 'cpu')
         threads = info['threads']
     definitions = []
-    for name in cases:
-        for seed in scene_seeds:
-            case = case_definition(name, seed)
-            case['case_id'] = 'case-'+digest(case)[:16]
-            definitions.append(case)
+    if case_definitions is None:
+        case_definitions = [case_definition(name, seed) for name in cases for seed in scene_seeds]
+    elif paired_seeds:
+        raise ValueError('Resolved case banks use their explicit generation seeds, not paired-seeds')
+    from stacklab.config import Config
+    for original in case_definitions:
+        case = json.loads(json.dumps(original))
+        case.pop('case_id', None)
+        config = Config(**case['config']).validate()
+        if case['initial_object_positions'] != config.scene() or case['scene_seed'] != config.seed:
+            raise ValueError('Case bank scene does not match its resolved configuration')
+        custom_seeds = case.get('generation_seeds')
+        if custom_seeds is not None and (not custom_seeds or len(set(custom_seeds)) != len(custom_seeds)
+                or any(type(s) is not int or s not in generation_seeds for s in custom_seeds)):
+            raise ValueError('Case generation seeds must be unique members of the declared seed pool')
+        case['case_id'] = 'case-'+digest(case)[:16]
+        definitions.append(case)
+    if not definitions:
+        raise ValueError('Case bank must not be empty')
     if len({c['case_id'] for c in definitions}) != len(definitions):
         raise ValueError('Duplicate cases')
     conditions = []
@@ -131,7 +146,8 @@ def create_plan(directory, *, models, cases, scene_seeds, generation_seeds, bloc
     episodes = []
     # Interleave conditions per case/seed. Each worker starts a fresh model process and scene.
     for case in definitions:
-        seeds = [generation_seeds[scene_seeds.index(case['scene_seed'])]] if paired_seeds else generation_seeds
+        seeds = (case['generation_seeds'] if 'generation_seeds' in case else
+                 [generation_seeds[scene_seeds.index(case['scene_seed'])]] if paired_seeds else generation_seeds)
         for seed in seeds:
             for condition in conditions:
                 item = dict(case_id=case['case_id'], condition_id=condition['condition_id'], generation_seed=seed)
@@ -148,6 +164,9 @@ def create_plan(directory, *, models, cases, scene_seeds, generation_seeds, bloc
         plan.update(remote=remote, loading='One verified remote model load and one unscored warm-up attempt per model group',
                     model_memory='Fresh messages and local scene per episode; server prompt cache disabled',
                     note='Development pilot; fixed paired cases. Observed model ranking is provisional, not a held-out result.')
+    if metadata is not None:
+        plan['metadata'] = metadata
+        plan['split'] = metadata.get('split', plan['split'])
     plan['paired_seeds'] = paired_seeds
     plan['comparison_sha256'] = digest(dict(source_hashes=plan['source_hashes'],
         policy_limits=plan['policy_limits'], cases=definitions, episodes=[
@@ -210,7 +229,8 @@ def verify_environment(plan):
     return installations
 
 
-def run_plan(directory, backup_dir=None):
+def run_plan(directory, backup_dir=None, *, on_episode=None, should_stop=None, on_model_ready=None,
+             on_episode_start=None):
     directory = Path(directory).resolve()
     plan = load_plan(directory)
     installations = verify_environment(plan)
@@ -232,6 +252,8 @@ def run_plan(directory, backup_dir=None):
     finished = False
     try:
         for index, episode in enumerate(episodes, 1):
+            if should_stop is not None and should_stop():
+                break
             path = directory/episode['episode_id']
             if path.exists():
                 # An interrupted attempt is evidence too. Never re-run or overwrite it implicitly.
@@ -249,6 +271,8 @@ def run_plan(directory, backup_dir=None):
                     if switch.get('error'):
                         raise RuntimeError(switch['error'])
                     info = switch['info']
+                    if on_model_ready:
+                        on_model_ready(info)
                     if (remote_identity(info) != remote['identity'] or
                             info['config'] != condition['model_config']):
                         raise RuntimeError('Remote model or environment changed while selecting the model')
@@ -283,6 +307,8 @@ def run_plan(directory, backup_dir=None):
                                    plan_sha256=plan['plan_sha256'], started_at_utc=utc_now()))
                         write_json(failed_path/'result.json', dict(error='Remote setup: '+str(error),
                                    execution=dict(status='error', success=False, rounds=[])))
+                        if on_episode:
+                            on_episode(failed_path)
                     write_report(directory)
                     if backup_dir is not None:
                         from stacklab.backup import backup_experiment
@@ -292,6 +318,8 @@ def run_plan(directory, backup_dir=None):
             path.mkdir()
             write_json(path/'manifest.json', dict(schema_version=SCHEMA, **episode,
                        plan_sha256=plan['plan_sha256'], started_at_utc=utc_now()))
+            if on_episode_start:
+                on_episode_start(path)
             args = SimpleNamespace(**{k: v for k, v in condition.items()
                                      if k not in ('condition_id', 'model_config', 'blocks', 'gui', 'visual_meshes')},
                                    seed=episode['generation_seed'], generation_seed=episode['generation_seed'],
@@ -303,6 +331,8 @@ def run_plan(directory, backup_dir=None):
             print(f'[{index}/{len(plan["episodes"])}] {condition["model"]} / {case["name"]} / '
                   f'{condition["blocks"]} blocks / scene {case["scene_seed"]} / generation {args.seed}', flush=True)
             run_case(case['name'], args, path, case=case)
+            if on_episode:
+                on_episode(path)
             write_report(directory)
             if backup_dir is not None:
                 from stacklab.backup import backup_experiment
@@ -361,7 +391,9 @@ def episode_result(directory, episode, condition, case, plan_sha256):
             generation = turns[-1].get('generation', {})
             timeout = str(execution.get('error', '')).startswith(('TimeoutError:', 'TimeoutError('))
             # Output truncation and an exhausted active request budget are model/resource failures.
-            if generation.get('transport_complete') is False:
+            if generation.get('generation_budget_exhausted') is True:
+                row.update(status='model_failure', goal_success=False)
+            elif generation.get('transport_complete') is False:
                 row['status'] = 'infrastructure_error'
             elif (generation.get('finish_reason') == 'length'
                     or timeout and generation.get('performance', {}).get('request_seconds') is not None):

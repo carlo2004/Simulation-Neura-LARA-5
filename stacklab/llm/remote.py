@@ -97,7 +97,9 @@ class RemoteModel:
                 raise RuntimeError('This remote client already has a running request')
             self._active = request_id
             self._last_cancel = 0.
-        timer = threading.Timer(timeout, self.cancel)
+        # Give the server time to return its native budget-timeout evidence.
+        # An absent final response still remains a transport failure.
+        timer = threading.Timer(timeout+2, self.cancel)
         timer.daemon = True
         timer.start()
         final = None

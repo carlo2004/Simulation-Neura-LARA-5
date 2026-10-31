@@ -31,11 +31,17 @@ class InferenceServer(ThreadingHTTPServer):
         self.device = getattr(client, 'device', 'cpu')
         self.install_missing = install_missing
         self.load_timeout = load_timeout
+        self.context_tokens = getattr(client, 'context_tokens', None)
+        self.info['inference_overrides'] = (dict(context_tokens=self.context_tokens)
+                                            if self.context_tokens is not None else {})
         self.info['capabilities'] = dict(model_switch=allow_model_switch, install_missing=install_missing)
         self.info['capabilities']['recordings'] = ['slim', 'full']
         if allow_model_switch:
             from stacklab.llm.catalog import lock, model_keys
             self.info['model_catalog'] = {key: lock(key, device=self.device) for key in model_keys()}
+            if self.context_tokens is not None:
+                for config in self.info['model_catalog'].values():
+                    config['context_tokens'] = self.context_tokens
             self.client.cache_prompt = False
             self.info['prompt_cache'] = False
         self.info['device'] = self.device
@@ -59,7 +65,8 @@ class InferenceServer(ThreadingHTTPServer):
         path.mkdir()
         result = dict(model=model, setup_seconds=0., load_seconds=None, error=None)
         try:
-            self.client = LocalModel(model, threads=self.info['threads'], device=self.device)
+            overrides = dict(context_tokens=self.context_tokens) if self.context_tokens is not None else {}
+            self.client = LocalModel(model, threads=self.info['threads'], device=self.device, **overrides)
             self.client.cache_prompt = False
             # Inventory describes the machine even when a selected model fails.
             # Do not retain a previous model's positive offload counters.

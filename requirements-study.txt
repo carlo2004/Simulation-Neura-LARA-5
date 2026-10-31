@@ -1,0 +1,10 @@
+# Reproduce the physics and recording environment of the prepared stack study.
+-r requirements.txt
+mujoco==3.3.7
+numpy==2.5.4
+scipy==1.18.1
+trimesh==4.9.0
+imageio==2.38.1
+imageio-ffmpeg==0.6.0
+Pillow==13.0.0
+huggingface_hub==1.33.0

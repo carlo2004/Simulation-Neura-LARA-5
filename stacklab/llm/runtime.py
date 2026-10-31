@@ -18,10 +18,15 @@ class GenerationCancelled(RuntimeError):
 
 
 class LocalModel:
-    def __init__(self, model=None, threads=8, device='cpu'):
+    def __init__(self, model=None, threads=8, device='cpu', context_tokens=None):
         if type(threads) is not int or threads < 1:
             raise ValueError('threads must be a positive integer')
         self.config = lock(model, device=device)
+        if context_tokens is not None:
+            if type(context_tokens) is not int or context_tokens < 1:
+                raise ValueError('context-tokens must be a positive integer')
+            self.config['context_tokens'] = context_tokens
+        self.context_tokens = context_tokens
         self.device = device
         self.hardware = None
         self.model = self.config.get('model_key', model)
@@ -160,6 +165,7 @@ class LocalModel:
         content, reasoning = [], []
         reply = dict(choices=[], usage=None)
         finish = None
+        request_in_flight = False
         try:
             progress(force=True)
             warm = self.process is not None and self.process.poll() is None
@@ -176,6 +182,7 @@ class LocalModel:
             request = urllib.request.Request(self.address+'/v1/chat/completions',
                         data=json.dumps(payload).encode('utf-8'), headers={'Content-Type': 'application/json'})
             remaining = max(1, timeout-(time.monotonic()-started))
+            request_in_flight = True
             with self.opener.open(request, timeout=remaining) as response, \
                     ((output/'stream.jsonl').open('w', encoding='utf-8') if record_stream else nullcontext(None)) as events:
                 for line in response:
@@ -218,6 +225,9 @@ class LocalModel:
         except BaseException as error:
             if cancelled and cancelled():
                 error = GenerationCancelled('Generation cancelled')
+            if isinstance(error, TimeoutError) and request_in_flight:
+                metadata['generation_budget_exhausted'] = True
+                self.cancel()  # A timed-out generation must not keep the next request queued.
             metadata['error'] = type(error).__name__+': '+str(error)
             raise error
         finally:
