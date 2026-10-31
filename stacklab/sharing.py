@@ -20,7 +20,7 @@ from stacklab.publication import (REPORT_FILES, dataset_repository, package_evid
 KINDS = {'experiment': 'experiments', 'playground': 'playground'}
 TASK_FILES = {'task.json', 'result.json', 'scene.json', 'context.json', 'initial_physics.json',
               'final_physics.json', 'trajectory.jsonl', 'motion.jsonl', 'execution.json',
-              'simulation.log', 'simulation.mp4', 'simulation.replay.json'}
+              'simulation.log', 'simulation.mp4', 'simulation.replay.json', 'manifest.json'}
 ROUND_FILES = {'request.json', 'response.json', 'generation.json', 'generated.py', 'feedback.json',
                'stream.jsonl', 'remote-server.json', 'remote-request.json', 'remote-stream.jsonl',
                'server-generation.json', 'inference.log', 'device.json'}
@@ -36,6 +36,12 @@ def read_json(path):
 
 def source_format(directory):
     if (directory/'manifest.json').is_file():
+        identity = read_json(directory/'manifest.json')
+        if (identity.get('schema_version') == 1 and 'episodes' not in identity
+                and all(isinstance(identity.get(k), str) and identity[k] for k in
+                        ('episode_id', 'case_id', 'condition_id', 'plan_sha256'))
+                and read_json(directory/'result.json').get('case') and (directory/'scene.json').is_file()):
+            return 'benchmark-task'  # A selected episode keeps its original plan identity.
         load_plan(directory)  # A corrupt frozen plan must never become an ungraded playground upload.
         return 'experiment'
     if (directory/'task.json').is_file():
@@ -297,18 +303,18 @@ def share_run(directory, repository=None, *, kind=None, title=None, note=None, t
             if use_direct and uploader == repository.split('/')[0]:
                 # Add navigation once, preserving the owner's existing card verbatim.
                 if api.file_exists(repo_id=repository, filename='README.md', repo_type='dataset', revision=head):
-                    card = Path(hf_hub_download(repository, 'README.md', repo_type='dataset', revision=head)).read_text(encoding='utf-8')
+                    card = Path(hf_hub_download(repository, 'README.md', repo_type='dataset', revision=head)).read_bytes()
                 else:
-                    card = (ROOT/'config/huggingface/README.md').read_text(encoding='utf-8')
-                if '<!-- stacklab:team-sharing -->' not in card:
+                    card = (ROOT/'config/huggingface/README.md').read_bytes()
+                if b'<!-- stacklab:team-sharing -->' not in card:
                     web = 'https://huggingface.co/datasets/'+repository+'/tree/main/'
-                    card += '\n<!-- stacklab:team-sharing -->\n## Teamversuche\n\n'
-                    card += '[Geplante Experimente]('+web+'experiments) · [Playground]('+web+'playground) · [Historische Daten]('+web+'legacy)\n\n'
-                    card += 'Pro Nutzer und Run gibt es einen eigenen Ordner mit Titel, Notiz und unveränderlichen Snapshots. '
-                    card += 'Jeder Snapshot besitzt eine lesbare Übersicht mit Auftrag, Code, Feedback und Tokenmessungen. '
-                    card += 'Noch nicht übernommene Teambeiträge stehen unter Community als StackLab-PRs.\n'
+                    navigation = '\n<!-- stacklab:team-sharing -->\n## Teamversuche\n\n'
+                    navigation += '[Geplante Experimente]('+web+'experiments) · [Playground]('+web+'playground) · [Historische Daten]('+web+'legacy)\n\n'
+                    navigation += 'Pro Nutzer und Run gibt es einen eigenen Ordner mit Titel, Notiz und unveränderlichen Snapshots. '
+                    navigation += 'Jeder Snapshot besitzt eine lesbare Übersicht mit Auftrag, Code, Feedback und Tokenmessungen. '
+                    navigation += 'Noch nicht übernommene Teambeiträge stehen unter Community als StackLab-PRs.\n'
                     card_path = Path(temp)/'hub-README.md'
-                    card_path.write_text(card, encoding='utf-8')
+                    card_path.write_bytes(card+navigation.encode('utf-8'))
                     operations.append(CommitOperationAdd(path_in_repo='README.md', path_or_fileobj=str(card_path)))
             try:
                 result = api.create_commit(repo_id=repository, repo_type='dataset', revision=revision,

@@ -166,6 +166,12 @@ class SharingTests(unittest.TestCase):
         second = sharing.share_run(self.make_task(self.root/'second-run'))
         self.assertEqual(self.tree(second)['README.md'], card)
 
+    def test_existing_crlf_card_is_preserved_byte_for_byte(self):
+        original = b'# Dataset card\r\n\r\nExisting CRLF bytes must stay identical.\r\n'
+        self.hub.trees['1'*40]['README.md'] = original
+        receipt = sharing.share_run(self.run)
+        self.assertTrue(self.tree(receipt)['README.md'].startswith(original))
+
     def test_teammate_uses_own_account_and_updates_the_same_open_hf_pr(self):
         self.hub.user = 'teammate'
         first = sharing.share_run(self.run)
@@ -240,6 +246,22 @@ class SharingTests(unittest.TestCase):
         write_json(probe/'scene.json', {'fixture':True})
         result = sharing.share_run(probe)
         self.assertEqual(result['kind'],'playground')
+
+    def test_one_interesting_episode_from_a_series_preserves_original_identity(self):
+        series = self.make_experiment()
+        plan = experiments.load_plan(series)
+        identity = dict(schema_version=1, **plan['episodes'][0], plan_sha256=plan['plan_sha256'])
+        episode = series/identity['episode_id']
+        episode.mkdir()
+        write_json(episode/'manifest.json', identity)
+        write_json(episode/'scene.json', {'fixture':True})
+        write_json(episode/'result.json', {'case':'move-right','instruction':'fixture',
+                   'execution':sharing.read_json(self.run/'result.json')})
+        receipt = sharing.share_run(episode)
+        self.assertEqual(receipt['kind'],'playground')
+        prefix = receipt['run_path']+'/snapshots/'+receipt['snapshot_id']
+        with zipfile.ZipFile(io.BytesIO(self.tree(receipt)[prefix+'/evidence.zip'])) as archive:
+            self.assertEqual(json.loads(archive.read('manifest.json')),identity)
 
     def test_listing_filters_category_user_and_includes_pending_contributions(self):
         owner = sharing.share_run(self.run)
