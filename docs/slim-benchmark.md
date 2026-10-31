@@ -137,7 +137,7 @@ funktionierenden Render-Unterbau; reine Datensammlung im schlanken Modus benöti
 keinen Renderer. Colabs GPU-Sitzung kann vor der nachträglichen Sichtung beendet
 werden.
 
-`--publish` sichert auch die Bewegungsdateien und `review.html`. Bereits erzeugte
+`--publish` sichert auch die Bewegungsdateien und `review.html` im [HF-Dataset](huggingface.md). Bereits erzeugte
 Videos werden ebenfalls in das Archiv übernommen. Später erzeugte Clips liegen
 zunächst lokal; ein schon veröffentlichter, unveränderlicher Release wird dadurch
 nicht still überschrieben.

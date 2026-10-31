@@ -1,5 +1,11 @@
 # Ergebnisse und Vergleichsdesign
 
+**Ergänzung, 31.10.2026:** Der [Modellkontext](context.md) trennt jetzt Systemregeln,
+World Info, Beobachtung, Budgets, optionale Beispiele und Nutzerauftrag. Der
+[HF-Export und -Download](huggingface.md) speichert unveränderliche Datenstände
+im Dataset-Repository statt neue Rohdaten nach GitHub zu übertragen. Ein
+fachlich geprüfter SFT-Export und Fine-Tuning bleiben eigene nächste Schritte.
+
 **Status: teilweise umgesetzt, 29.10.2026.** Der [Experiment-Runner](experiments.md) implementiert eingefrorene Entwicklungspläne, modellunabhängige Fall-IDs, Episoden-/Bedingungs-IDs, getrennte Seeds, mehrere Modelle/Blockbudgets, Wiederaufnahme offener Pläne und CSV-/JSON-/Markdown-Auswertungen. Er verwendet die bestehenden Rohprotokolle; ein gemeinsamer neuer Event-Recorder und Trainingsdatenexport sind weiterhin Vorschläge. Die folgenden Abschnitte unterscheiden heutigen Stand und Zielarchitektur. Frühere Referenz: [9a31361](https://github.com/carlo2004/Simulation-Neura-LARA-5/tree/9a313616c48c7d55fa33a604b77553d4aeaf232d).
 
 ## Forschungsfrage und Umfang
@@ -137,3 +143,12 @@ Die aktuelle Implementierung hat genaue Simulationskoordinaten, eine begrenzte A
 Eine Erweiterung der API oder des erlaubten Python-Umfangs sollte vor einem Hauptvergleich geschehen oder danach als eigene Ablation. Eine bequemere Aufgabe ist kein Beleg für ein intelligenteres Modell.
 
 Weitere Primärquellen: [veröffentlichter CaP-X-Code](https://github.com/capgym/cap-x), [CaP-RL-Einrichtung](https://github.com/capgym/cap-x/blob/main/docs/rl-training.md), [PEFT-Dokumentation zu quantisierten LoRA-Modellen](https://huggingface.co/docs/peft/main/en/developer_guides/quantization).
+
+## Gemeinsame Ablage im Team
+
+`stacklab share` trennt geplante Serien (`experiments`), freie Erkundungen
+(`playground`) und historische Archive (`legacy`). Hochladender HF-Nutzer, Run-ID,
+Titel, Notiz, Quellformat und unveränderliche Snapshots bleiben nachvollziehbar.
+Diese Ablagekategorie ist kein Trainings-/Testsplit. Auch geteilte interessante
+Fehlversuche werden nicht automatisch zu richtigen Trainingsantworten.
+[Teamablauf und Zugriffsrechte](huggingface.md).

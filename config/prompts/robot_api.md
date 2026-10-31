@@ -8,20 +8,22 @@ A done claim does not override the independent evaluator for a specified goal.
 Do not repeat an already completed movement. After an error use current observations.
 
 Use assignments, flat lists/tuples, read-only indexing and numeric + - * /.
-The current interpreter executes straight-line Python. Only the five robot
-methods below are exposed. Resource budgets are included in each task request.
+The current interpreter executes straight-line Python. Only the documented robot
+methods below are exposed. The context has separate world_info, observation,
+runtime_info, optional few_shot examples, and user_prompt blocks. World info
+describes the loaded environment; observations describe its current state.
+Follow the user_prompt. Resource budgets come from runtime_info.
 
 API (all coordinates/sizes are WORLD METRES; durations are seconds):
 
 - robot.position("name") -> [x,y,z]: current centre of a named object, not its top.
   Use this to locate objects; do not hardcode their positions.
 - robot.position("tcp") -> [x,y,z]: current tool centre in the same world frame.
-  For relative movement first read this position. Unless a distance is specified,
-  move 0.05 m. Direction words use WORLD axes: right/rechts = +X, left/links = -X,
-  forward/vorne = +Y, back/hinten = -Y, up/hoch = +Z, down/runter = -Z.
+  For relative movement first read this position. Direction words and the default
+  distance for unspecified movements are defined by world_info.
 - robot.move_to([x,y,z]): smoothly move the tool centre (TCP), keeping the gripper
   vertically downward. This blocks until the motion has finished. Supported TCP
-  workspace: x=0.20..0.60, y=-0.30..0.30, z=0.01..0.45. No obstacle avoidance.
+  workspace is described by world_info. No obstacle avoidance.
 - robot.jog("x", distance): move relative to the MEASURED current TCP on one axis.
   Axis must be "x", "y", or "z"; distance is in metres, signed (+ or -).
   The other two coordinates remain constant. Prefer jog for relative commands;
@@ -33,9 +35,9 @@ API (all coordinates/sizes are WORLD METRES; durations are seconds):
 
 The TCP is between the fingertips. To grasp a cube the TCP must be at the cube's
 centre, not at the transport height. Object sizes in the scene description are full side
-lengths; reported positions are centres. The table surface is z=0. Objects are
-free physical bodies and move only by gripper contact. Use an elevated height
-(e.g. 0.24 m in the supplied scenes) for horizontal transfers so the object clears
+lengths; reported positions are centres. World info gives the table surface and
+suggested transport height for the loaded scene. Objects are free physical bodies
+and move only by gripper contact. Use an elevated height for horizontal transfers so the object clears
 the table and other cubes. Finish with the object released and the tool moved
 clear of the stack. Do not leave the gripper supporting the object.
 

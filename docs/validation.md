@@ -21,6 +21,6 @@ Beim Stapeln werden Zentrierung, Höhe, Kontakte, Geschwindigkeiten und Freigabe
 
 Ein Agentenbericht mit `success: null` bedeutet: eine freie Anweisung wurde nicht semantisch durch ein vorgegebenes Ziel bewertet. `model_finished` ist eine Modellmeldung. Nur `verified_success` bezeichnet einen bestandenen vorgegebenen physikalischen Test.
 
-Neue Ergebnisse unter `runs/` werden nicht automatisch in Git aufgenommen. Relevante abgeschlossene Versuche gezielt mit Konfiguration, Softwarestand, Prompt, Modellrevision, Antwort und unabhängiger Messung nach `experiments/` übernehmen. Für einen Paper-Vergleich dieselbe API, Seeds, Budgets, Sampling-Profile und Metriken einfrieren. Unterschiedliche Entwicklungsbedingungen nicht zu einer gemeinsamen Erfolgsquote mischen.
+Neue Ergebnisse unter `runs/` werden nicht automatisch in Git aufgenommen. Relevante Versuche mit `stacklab share` auf HF teilen; Konfiguration, Softwarestand, Prompt, Modellrevision, Antwort und unabhängige Messung bleiben im Snapshot erhalten. Geplante Serien und Playground werden getrennt abgelegt. Für einen Paper-Vergleich dieselbe API, Seeds, Budgets, Sampling-Profile und Metriken einfrieren. Unterschiedliche Entwicklungsbedingungen nicht zu einer gemeinsamen Erfolgsquote mischen.
 
 Neue Agentenberichte enthalten Softwareversion, verfügbaren Git-Commit und Änderungsstatus, Python-/Systemangaben und die wirksamen Ausführungsbudgets. Fehlen Git oder Repositorymetadaten, bleiben die entsprechenden Felder `null`; die Simulation funktioniert weiter.

@@ -1,0 +1,8 @@
+{
+  "units": {"coordinates": "world metres", "durations": "seconds"},
+  "frame": "Origin at the robot base on the table; camera orientation does not change world axes.",
+  "directions": {"right/rechts": "+x", "left/links": "-x", "forward/vorne": "+y", "back/hinten": "-y", "up/hoch": "+z", "down/runter": "-z"},
+  "default_relative_distance_m": 0.05,
+  "positions": "Object positions and TCP positions are centres, not top surfaces. Object dimensions are full sizes.",
+  "contact_physics": "Objects move through real gripper contact; the gripper has no attachment constraint."
+}

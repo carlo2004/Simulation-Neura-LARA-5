@@ -129,7 +129,8 @@ class LocalModel:
         metadata = {k: config[k] for k in ('model_id', 'original_revision', 'total_parameters',
                     'model_sha256', 'quantization', 'runtime', 'runtime_version')}
         metadata.update(training_model_id=config.get('training_model_id', config['model_id']),
-                        training_revision=config.get('training_revision', config['original_revision']))
+                        training_revision=config.get('training_revision', config['original_revision']),
+                        tokenizer=config.get('tokenizer'))
         metadata.update(model_key=self.model, thinking=thinking, **sampling, seed=seed, threads=self.threads,
                         context_tokens=config.get('context_tokens', 4096), max_output_tokens=max_tokens,
                         prompt_sha256=hashlib.sha256(canonical.encode()).hexdigest(), device=self.device.upper(),

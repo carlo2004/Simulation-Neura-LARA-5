@@ -74,3 +74,23 @@ Vor dem ersten Modellstart prüft der Runner die Gewichte per SHA-256 und den lo
 Pro Episode gibt es eine frische Szene und kein vorheriges Modellgedächtnis. Während der Inferenz pausiert die Physik. Modellcode wird nicht repariert. Stabilitätsproben innerhalb einer Episode sind keine unabhängigen Wiederholungen; dieselben Szenen mit mehreren Generierungsseeds bleiben gruppierte Beobachtungen. Der Pilot erstellt bewusst noch keine Unsicherheitsintervalle oder Signifikanztests.
 
 `runs/` ist weiterhin nicht in Git und allein keine dauerhafte Sicherung. Relevante Rohdaten mit Prüfsummen gezielt archivieren; ausgewählte echte Entwicklungsproben stehen im [Versuchsindex](../experiments/README.md). Der weitergehende [Architekturplan](results.md) beschreibt unter anderem den noch offenen gemeinsamen Event-Recorder und den Trainingsdatenexport.
+
+## Kontext und dauerhafte Datenablage
+
+Die [Kontextkonfiguration](context.md) trennt Systemregeln, World Info, Beobachtung,
+Budgets, optionale Beispiele und den unveränderten Auftrag. Andere Kontextdateien
+oder eine andere Reihenfolge erfordern einen neuen eingefrorenen Plan.
+
+`stacklab experiment publish runs/NAME --dry-run` zeigt den vollständigen Export
+ohne Netzwerk. `stacklab experiment publish runs/NAME` lädt ihn nach der lokalen
+HF-Anmeldung ins konfigurierte Dataset. `run` und `pilot` unterstützen `--publish`
+für den Upload nach Abschluss. GitHub Releases werden dafür nicht mehr verwendet.
+[Format, Anmeldung und Wiederherstellung](huggingface.md).
+
+## Geteilte Experimente
+
+`experiment run --publish`, `pilot --publish` und `experiment publish` verwenden
+die benannte HF-Teamablage: pro Nutzer und Run-ID, mit lesbaren Detailberichten
+und unveränderlichen Snapshots. `--title`, `--note` und `--tags` beschreiben den
+Versuch. Freie Chats lassen sich mit `stacklab share runs/CHAT` im Bereich
+`playground` teilen. [Vollständiger Teamablauf](huggingface.md).

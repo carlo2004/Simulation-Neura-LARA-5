@@ -77,3 +77,15 @@ Dory verwendet auch unter CUDA seinen separaten Quellbuild. Neben Git/CMake/C++ 
 Softwaretests prüfen Gerätewahl, unveränderte Gewichte, Paket-/Binärhashes, CUDA- und Offloading-Prüfungen, GLIBC-Auswahl, Quellenbuild-Konfiguration, Notebook-Syntax sowie Sicherungen bei Abbrüchen und Schreibfehlern. Die echte CUDA-Paketinstallation wird zusätzlich ohne GPU gestartet; die CI kompiliert den normalen und Dorys CUDA-Quellpfad für beide Zielarchitekturen und prüft OSMesa-Video. Das ersetzt keinen Inferenztest auf einer echten L4/A100: Diesen führt das Notebook auf deiner zugeteilten Karte aus. Hier sind keine solchen GPU-Leistungswerte als vorab gemessen eingetragen.
 
 Quellen: [Colab-FAQ](https://research.google.com/colaboratory/faq.html), [llama.cpp b11951 und Paketprüfsummen](https://github.com/ggml-org/llama.cpp/releases/tag/b11951), [Dory-Modellkarte](https://huggingface.co/nvidia/NVIDIA-Nemotron-Labs-Dory1.0-4B-GGUF).
+
+## Daten auf Hugging Face veröffentlichen
+
+Im Notebook gibt es jetzt zusätzlich `PUBLISH_TO_HUB` und eine optionale
+Uploadzelle. Dafür den Dataset-Schreibtoken als Colab-Secret `HF_TOKEN` eintragen;
+der Token wird nur der lokalen Projektanwendung im Notebookprozess übergeben,
+nicht im Quellcode oder in den Versuchsdaten gespeichert. Der Upload schreibt
+ins konfigurierte Dataset statt nach GitHub und gibt Snapshot-ID und festen
+Hub-Commit aus. [Format und Download](huggingface.md).
+
+Systemregeln, World Info und Auftrag sind [getrennte Kontextbausteine](context.md).
+Für L4/A100-Vergleiche auch deren Dateien und Reihenfolge unverändert lassen.

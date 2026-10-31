@@ -1,0 +1,7 @@
+{
+  "schema_version": 1,
+  "system_prompt_file": "robot_api.md",
+  "world_info_file": "world_info.json",
+  "few_shot_file": "few_shot.json",
+  "order": ["world_info", "observation", "runtime_info", "few_shot", "user_prompt"]
+}

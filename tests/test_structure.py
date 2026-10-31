@@ -75,11 +75,13 @@ class StructureTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 parse_reply(raw)
 
-    def test_archived_evidence_matches_the_original_recorded_checksums(self):
-        root = ROOT/"experiments/archive/2026-10-28"
-        manifest = json.loads((root/"manifest.json").read_text(encoding="utf-8"))
-        self.assertTrue(manifest["files"])
-        for item in manifest["files"]:
-            with self.subTest(path=item["path"]):
-                content = (root/item["path"]).read_bytes()
-                self.assertEqual(hashlib.sha256(content).hexdigest(), item["sha256"])
+    def test_archived_evidence_has_a_pinned_verified_hub_location(self):
+        from tools.migrate_archives import load_plan
+        plan = load_plan(ROOT/'config/evidence-migration.json')
+        location = json.loads((ROOT/'experiments/archive-location.json').read_text(encoding='utf-8'))
+        self.assertEqual(location['plan_sha256'], plan['plan_sha256'])
+        self.assertEqual(location['source_commit'], plan['source_commit'])
+        self.assertEqual(location['canonical_files_verified'], len(plan['files']))
+        self.assertEqual(location['original_paths_preserved'], len(plan['files'])+len(plan['aliases']))
+        self.assertRegex(location['data_revision'], r'^[0-9a-f]{40}$')
+        self.assertRegex(location['verified_repository_revision'], r'^[0-9a-f]{40}$')

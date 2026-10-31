@@ -62,7 +62,7 @@ Die Geometrie und Kinematik stammen aus einer RoboDK-Quelldatei. Dynamik, Greife
 | `assets/` | Roboterdefinitionen, Quellen und erzeugte Geometrie |
 | `tests/`, `tools/` | Softwaretests und ausführbare Physikprüfungen |
 | `examples/` | Kleine Terminal- und Python-Beispiele |
-| `experiments/` | Ausgewählte tatsächliche Versuchsdaten mit Herkunft |
+| `experiments/` | Versuchsindex und geprüfte Verweise auf die Rohdaten in HF |
 | `docs/` | Bedienung, Architektur, Versuchsablauf, Entscheidungsgeschichte |
 | `runs/` | Neue Ergebnisse; nicht versioniert |
 
@@ -73,8 +73,30 @@ Für wiederholbare Entwicklungspiloten gibt es `stacklab experiment plan`, `run`
 **Alle Modelle auf L4 und A100 vergleichen:** Der [automatische Remote-Pilot](docs/remote-benchmark.md)
 führt standardmäßig zehn Episoden pro Modell und GPU aus, mit lokaler Simulation,
 automatischem Modellwechsel auf Colab, kompakten Bewegungsdaten, Rohdaten und vorläufiger Rangliste.
-GitHub Releases können die vollständigen Archive samt Prüfsummen übernehmen.
+[Hugging Face](docs/huggingface.md) übernimmt neue Datenstände samt Prüfsummen und
+festgelegter Hub-Revision; Code und Konfigurationen bleiben in GitHub.
 Der [schlanke Standardmodus](docs/slim-benchmark.md) erzeugt Videos erst bei Bedarf
 und bietet eine lokale HTML-Sichtung mit Auftrag, Modellantwort, Code und Zeiten.
 
 Modellgewichte liegen standardmäßig im lokalen Cache. Mit `STACKLAB_CACHE_DIR` kann ein anderer Datenträger gewählt werden; `STACKLAB_RUN_DIR` steuert den Ergebnisordner. Das Projekt wird aus diesem Checkout mit editierbarer Installation betrieben.
+
+Der [Modellkontext](docs/context.md) trennt Systemregeln, World Info, aktuelle
+Beobachtungen, Budgets, optionale Few-Shot-Beispiele und Nutzerauftrag. Die
+Systemregeln enthalten keine Zahlenliterale. Die Reihenfolge der Kontextblöcke
+ist konfigurierbar. [Alle Modellkarten](docs/models.md) nennen den verwendeten
+Tokenizer mit Herstellerrevision und Prüfsummen.
+
+## Einen Lauf mit dem Team teilen
+
+Nach eigener HF-Anmeldung genügt:
+
+```bash
+python -m stacklab share runs/mein-chat --title "Interessanter Greifer-Versuch"
+```
+
+Freie Versuche landen in `playground`, eingefrorene Vergleichsserien in
+`experiments`, jeweils unter dem eigenen HF-Namen und einer eindeutigen Run-ID.
+Der ausgegebene Link zeigt Auftrag, Code, Feedback und Tokenmessungen direkt auf
+HF. Beiträge ohne direktes Schreibrecht werden als HF-PR eingereicht.
+`python -m stacklab share list --pending` findet auch die offenen Teambeiträge.
+[Einrichtung und Teamablauf](docs/huggingface.md).

@@ -1,0 +1,15 @@
+{
+  "dataset_repository": "Carlo0001/neura-lara5-cube-stacking-sim-v1",
+  "data_revision": "0993b4b79f2d98f5b68bc45810a954573989c4b9",
+  "verified_repository_revision": "3c84d2ba2a0efde28e2f9f7901c0b4930788b2f8",
+  "source_commit": "40790e3addb62b5d9e1a9544b67bc4145a3e2f1c",
+  "plan_sha256": "7ae3ed9e3645677363b59edacceee24c62b295a6393bc2cd083b283365b6ec42",
+  "hub_path": "legacy/github-40790e3addb6-7ae3ed9e3645",
+  "original_paths_preserved": 491,
+  "canonical_files_verified": 251,
+  "bytes_verified": 33596782,
+  "verification_method": "Pinned Hub object metadata: original Git blob hashes for regular files; SHA-256 for LFS files; plus dataset post-download verification record",
+  "checked_inventory_sha256": "7641042804f6a5186a61014dcda65032b3f6887ccc7c90deb8ad0da7fe379a9f",
+  "verification_record_git_blob": "681e2fc6694c459cb3c0ee8969074e0075286c3b",
+  "dataset_access": "manual approval; each team member uses their own HF account"
+}

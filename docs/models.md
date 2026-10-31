@@ -10,15 +10,23 @@
 
 Die Modellaliase stehen im [Katalog](../config/models.lock.json). Er pinnt Revisionen, GGUF-Dateien, SHA-256, Runtime und Sampling. Gewichte und CPU-Runtime werden lokal geladen. Das Setup lädt ohne `--all` nur das gewählte Modell; es löscht keine anderen Gewichte.
 
-| Alias | Originalmodell | Ungefähre GGUF-Größe |
-|---|---|---:|
-| `qwen4b` | Qwen3.5-4B, frühere Baseline | 2,74 GB |
-| `qwen9b` | Qwen3.5-9B | 5,68 GB |
-| `ministral8b` | Ministral 3 8B Reasoning 2512 | 5,20 GB |
-| `nemotron8b` | NVIDIA Nemotron 3.5 Bolt E4B 4GB | 6,18 GB |
-| `dory4b` | NVIDIA Nemotron Labs Dory1.0-4B, zwei Loops | 3,67 GB |
-| `granite8b` | IBM Granite 4.2 8B | 5,35 GB |
-| `lfm2.6b` | LiquidAI LFM2.5-2.6B | 1,67 GB |
+| Alias / Modellkarte | Originalmodell | Ungefähre GGUF-Größe | Tokenizer-Klasse der Herstellerquelle |
+|---|---|---:|---|
+| [`qwen4b`](model-cards/qwen4b.md) | Qwen3.5-4B, frühere Baseline | 2,74 GB | `Qwen2Tokenizer` |
+| [`qwen9b`](model-cards/qwen9b.md) | Qwen3.5-9B | 5,68 GB | `Qwen2Tokenizer` |
+| [`ministral8b`](model-cards/ministral8b.md) | Ministral 3 8B Reasoning 2512 | 5,20 GB | `LlamaTokenizerFast` |
+| [`nemotron8b`](model-cards/nemotron8b.md) | NVIDIA Nemotron 3.5 Bolt E4B 4GB | 6,18 GB | `GemmaTokenizer` |
+| [`dory4b`](model-cards/dory4b.md) | NVIDIA Nemotron Labs Dory1.0-4B, zwei Loops | 3,67 GB | `PreTrainedTokenizerFast` |
+| [`granite8b`](model-cards/granite8b.md) | IBM Granite 4.2 8B | 5,35 GB | `GPT2Tokenizer` |
+| [`lfm2.6b`](model-cards/lfm2.6b.md) | LiquidAI LFM2.5-2.6B | 1,67 GB | `TokenizersBackend` |
+
+Jede Modellkarte verlinkt Tokenizerdefinition und -konfiguration mit festgelegter
+Revision und SHA-256. Diese Herstellerklassen werden bei der Inferenz nicht als
+Transformers-Objekte geladen: llama.cpp verwendet den im geprüften GGUF
+eingebetteten Tokenizer. Der Katalog dokumentiert beide Ebenen. Alle genannten
+Definitionen verwenden BPE; Vokabular und Vorverarbeitung unterscheiden sich.
+`stacklab models` und neue Generierungsprotokolle nennen diese Herkunft ebenfalls.
+Die Karten werden mit `python tools/model_cards.py` aus dem Katalog erzeugt.
 
 Die Modellgrößen beziehen sich auf die Originalparameter, nicht die quantisierte Dateigröße. Bolt hat etwa 8 Milliarden Gesamtparameter; E4B bezeichnet eine effektive Größe. Betrieb benötigt zusätzlich Arbeitsspeicher für Kontext und Runtime. Downloads prüfen freien Speicher und reservieren 512 MiB zusätzlich; ausreichend Platz für die Runtime einplanen.
 
@@ -40,7 +48,10 @@ Wiederholbare Texte statt interaktiver Eingabe:
 
 `--max-rounds` im Chat und `--feedback-rounds` im Benchmark bestimmen die Zahl der Programmblöcke. `--max-tokens`, `--thinking-budget`, `--threads` und die Timeouts steuern Ressourcen. `--help` ist die Referenz für Optionen.
 
-Der Agent erhält nur dokumentierte Einzelbefehle und echte Beobachtungen. Er bekommt kein fertiges Stapelprogramm als Beispiel. [API-Prompt](../config/prompts/robot_api.md) und [Versuchsdaten](../experiments/README.md) sind einsehbar.
+Der Agent erhält dokumentierte Einzelbefehle, getrennte World Info und echte
+Beobachtungen. Few-Shot-Beispiele sind vorbereitet, aber leer; es gibt kein
+voreingestelltes Stapelprogramm. [Kontextaufbau und Reihenfolge](context.md),
+[API-Prompt](../config/prompts/robot_api.md) und [Versuchsdaten](../experiments/README.md) sind einsehbar.
 
 ## Geschwindigkeit sehen
 
