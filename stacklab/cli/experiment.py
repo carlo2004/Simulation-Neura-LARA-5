@@ -83,8 +83,11 @@ def main(argv=None):
             return 0
         if args.command == 'replay':
             from stacklab.sim.recording import render_replay
-            print(render_replay(args.directory, args.output))
-            if (args.directory.parent/'manifest.json').is_file():
+            output = (args.output or args.directory/'simulation.mp4').resolve()
+            print(render_replay(args.directory, output))
+            print('Video: '+str(output))
+            if (output == (args.directory/'simulation.mp4').resolve()
+                    and (args.directory.parent/'manifest.json').is_file()):
                 from stacklab.review import write_review
                 print(write_review(args.directory.parent))
             return 0

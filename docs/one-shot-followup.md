@@ -11,6 +11,19 @@ Die vorhandenen A100-Rohdaten und ihre ursprüngliche Rangliste bleiben
 archivierte Ergebnisse von Version 3.6. Der neue Prompt ist noch kein
 Nachweis einer höheren Modellqualität.
 
+Offline-Videos übernehmen den gespeicherten Darstellungsmodus. Bei schlanken
+Aufzeichnungen wird die Kollisionsgeometrie schematisch gezeigt. Dafür werden
+nur tatsächlich verwendete Geometriedateien geprüft; nicht geladene visuelle
+Meshes werden nicht benötigt. Änderungen an XML, Parametern oder verwendeten
+Meshes verhindern die Wiedergabe weiterhin. Das Video spielt aufgezeichnete
+Positionen ab und bewertet die Physik nicht erneut.
+Alte Windows- und Linux-Aufzeichnungen werden auch mit ihren jeweils nativen
+Projektpfad-Trennzeichen erkannt; die Szenenprüfung vergleicht weiterhin dieselbe
+Geometrie und Konfiguration.
+Ein mit `experiment replay --output ...` außerhalb des Episodenordners gespeichertes
+Video aktualisiert keine vorhandenen Auswertungsdateien. Die HTML-Ansicht kann
+bei Bedarf mit `experiment review` neu erstellt werden.
+
 ## Lokal vorbereiten ohne Colab und ohne Modellaufruf
 
 Im Projektordner, unter Windows PowerShell:
