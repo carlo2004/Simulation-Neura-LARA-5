@@ -143,3 +143,12 @@ Die aktuelle Implementierung hat genaue Simulationskoordinaten, eine begrenzte A
 Eine Erweiterung der API oder des erlaubten Python-Umfangs sollte vor einem Hauptvergleich geschehen oder danach als eigene Ablation. Eine bequemere Aufgabe ist kein Beleg für ein intelligenteres Modell.
 
 Weitere Primärquellen: [veröffentlichter CaP-X-Code](https://github.com/capgym/cap-x), [CaP-RL-Einrichtung](https://github.com/capgym/cap-x/blob/main/docs/rl-training.md), [PEFT-Dokumentation zu quantisierten LoRA-Modellen](https://huggingface.co/docs/peft/main/en/developer_guides/quantization).
+
+## Gemeinsame Ablage im Team
+
+`stacklab share` trennt geplante Serien (`experiments`), freie Erkundungen
+(`playground`) und historische Archive (`legacy`). Hochladender HF-Nutzer, Run-ID,
+Titel, Notiz, Quellformat und unveränderliche Snapshots bleiben nachvollziehbar.
+Diese Ablagekategorie ist kein Trainings-/Testsplit. Auch geteilte interessante
+Fehlversuche werden nicht automatisch zu richtigen Trainingsantworten.
+[Teamablauf und Zugriffsrechte](huggingface.md).

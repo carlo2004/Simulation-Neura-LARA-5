@@ -86,3 +86,11 @@ ohne Netzwerk. `stacklab experiment publish runs/NAME` lädt ihn nach der lokale
 HF-Anmeldung ins konfigurierte Dataset. `run` und `pilot` unterstützen `--publish`
 für den Upload nach Abschluss. GitHub Releases werden dafür nicht mehr verwendet.
 [Format, Anmeldung und Wiederherstellung](huggingface.md).
+
+## Geteilte Experimente
+
+`experiment run --publish`, `pilot --publish` und `experiment publish` verwenden
+die benannte HF-Teamablage: pro Nutzer und Run-ID, mit lesbaren Detailberichten
+und unveränderlichen Snapshots. `--title`, `--note` und `--tags` beschreiben den
+Versuch. Freie Chats lassen sich mit `stacklab share runs/CHAT` im Bereich
+`playground` teilen. [Vollständiger Teamablauf](huggingface.md).

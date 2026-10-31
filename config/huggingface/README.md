@@ -13,64 +13,54 @@ task_categories:
 - text-generation
 ---
 
-# Neura LARA 5 — simulation evidence
+# Neura LARA 5 — shared simulation runs
 
-Versioned simulation and model-interaction records for the LARA 5 seminar project.
-Source code, prompts, model/tokenizer locks and experiment definitions live in
-[GitHub](https://github.com/carlo2004/Simulation-Neura-LARA-5).
+Model interactions, measured simulation results and historical evidence for the
+LARA 5 seminar project. [Code, prompts, model/tokenizer locks and documentation](https://github.com/carlo2004/Simulation-Neura-LARA-5)
+remain on GitHub.
 
-## Status and scope
-
-This card defines the storage protocol. It does not assert that any training or
-evaluation has taken place. Only published snapshots below `runs/` are evidence.
-Raw development episodes are **not** automatically a supervised training dataset.
-There is no claimed fine-tuning improvement or held-out test result.
-
-## Immutable snapshots
-
-Each `runs/<content-sha256>/` contains:
-
-| File | Purpose |
+| Area | Meaning |
 |---|---|
-| `snapshot.json` | Plan identity, per-file sizes/hashes, archive hash, completion state |
-| `manifest.json` | Frozen cases, seeds, budgets, source hashes, hardware and model/tokenizer identities |
-| `episodes.jsonl` | One row per planned episode, including failures and pending attempts |
-| `summary.json`, `results.csv`, `report.md`, `ranking.*` | Rebuildable development summaries |
-| `evidence.zip` | Original requests, responses, code, feedback, physics, optional motion/video and offline review |
+| `experiments/<HF-user>/<run>/` | Frozen comparison plans with declared cases, seeds and budgets |
+| `playground/<HF-user>/<run>/` | Free chats, individual probes and exploration |
+| `legacy/<migration>/` | Verified historical GitHub archives and original-path mappings |
 
-Pin the Hub **commit revision and snapshot ID** when citing or downloading a run.
-Later checkpoints of the same plan create new content-addressed snapshots. They
-are successive observations of that plan, not additional independent episodes.
-Do not concatenate snapshots into a training split or an aggregate success rate.
+## Named runs and immutable snapshots
+
+Each run has a stable random ID, title, note, tags and an authenticated uploader.
+Its `run.json` and README point to the latest snapshot. Each
+`snapshots/<content-sha256>/` retains a readable README, per-attempt Markdown
+reports, JSONL records, a raw-evidence ZIP and per-file/archive checksums.
+Earlier snapshots remain available. A model's response, executed code, measured
+feedback and tokens/s can be inspected without downloading the full ZIP.
+
+Team members use their own HF accounts. Contributions without direct write
+access are submitted as HF pull requests in the Community tab; the run files can
+be inspected there before acceptance. A personal account's access token is not
+shared with the team. A gated dataset requires approval for each reader's account.
 
 ```bash
-python -m stacklab experiment publish runs/my-experiment --dry-run
-python -m stacklab experiment publish runs/my-experiment
-python -m stacklab experiment fetch SNAPSHOT_SHA256 --revision HUB_COMMIT_SHA --output runs/restored
+python -m stacklab share runs/my-chat --title "Interesting gripper attempt"
+python -m stacklab experiment run runs/comparison --publish --title "Laptop comparison"
+python -m stacklab share list --pending
 ```
 
-The fetch command verifies the archive and every extracted file. Native tokenizer
-and chat-template processing remains model-specific. The source catalog records
-the original tokenizer revision and hashes; actual inference uses the tokenizer
-embedded in the pinned GGUF.
+Pin the full Hub revision, run ID and snapshot ID when citing a result. Repeated
+snapshots of the same run are successive data states, not independent trials.
+The original `runs/<sha256>/` format, if present, is a compatible older export.
 
-## Interpretation and future training
+## Scientific interpretation
 
-The model receives exact simulator observations, not camera-derived perception.
-The independent MuJoCo evaluator determines physical success. A model's `done`
-message does not determine the score. Stability samples within an episode do not
-count as independent trials. Free chat without a trusted goal is ungraded.
+Exploration records are not a curated supervised training split. Even an
+`experiment` category does not itself establish a held-out test or improved model.
+Independent simulator checks determine physical success; a model's `done` message
+does not. Free instructions without a trusted goal remain explicitly ungraded.
+Failures and pending/cancelled attempts remain visible. The model receives exact
+simulator states rather than camera-derived perception. Native tokenizer and
+runtime counters define token measurements for each model.
 
-Before SFT/LoRA, freeze train/development/test case groups and publish a separately
-versioned, reviewed export with source episodes and filtering rules. Model errors
-remain in the raw evidence and are not silently treated as correct target answers.
-Adapters/checkpoints belong in a separate Hub **model** repository, with base model,
-tokenizer, dataset revision, training configuration and evaluation references.
-
-## Access and licensing
-
-Publishing is an explicit command using the uploader's local Hugging Face login
-or `HF_TOKEN`. Uploads contain the actual benchmark prompts, model responses and
-environment metadata. Credentials and unrelated local files are not run data.
-Dataset rights and any license for redistributed/generated records must be checked
-before a curated training release; no blanket dataset license is assigned here.
+Before SFT/LoRA, freeze case-level train/development/test groups and publish a
+separate reviewed export with source episodes and filtering rules. Adapters and
+checkpoints belong in a separate model repository linked to the dataset revision,
+base model, tokenizer and training configuration. No blanket dataset license is
+assigned here; redistribution conditions need review for a curated release.

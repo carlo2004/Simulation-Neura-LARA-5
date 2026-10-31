@@ -190,6 +190,6 @@ und JSONL-Episoden stehen daneben. Alle Dateien besitzen Prüfsummen. Bei einem
 Uploadfehler bleiben die lokalen Dateien erhalten. Für A100 einen neuen
 Versuchsordner mit denselben eingefrorenen Bedingungen verwenden.
 
-Die Ausgabe und `hub-receipt.json` nennen den exakten Snapshot-Link. Die beiden
+Die Ausgabe und `share-receipt.json` nennen den exakten Snapshot-Link. Die beiden
 Links können im Chat über den Hugging-Face-Connector gelesen werden.
 [Anmeldung, Speicherformat und geprüfter Download](huggingface.md).

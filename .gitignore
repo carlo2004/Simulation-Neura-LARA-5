@@ -7,6 +7,8 @@ __pycache__/
 .DS_Store
 Thumbs.db
 runs/
+experiments/archive/
+examples/experiments/archive/
 training-runs/
 checkpoints/
 adapters/

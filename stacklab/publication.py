@@ -36,8 +36,8 @@ def safe_relative(name):
     return path
 
 
-def prepare_snapshot(directory, staging):
-    """Copy only this plan's evidence; never modify the original run or start a model."""
+def prepare_experiment_evidence(directory, staging):
+    """Copy and report one frozen experiment; no model or source-file mutation."""
     directory, staging = Path(directory).resolve(), Path(staging).resolve()
     if staging.is_relative_to(directory):
         raise ValueError('Snapshot staging must be outside the experiment directory')
@@ -70,11 +70,16 @@ def prepare_snapshot(directory, staging):
             config = conditions[row['condition_id']]['model_config']
             stream.write(json.dumps(dict(row, split=plan['split'], tokenizer=config.get('tokenizer')),
                                     ensure_ascii=False, sort_keys=True, allow_nan=False)+'\n')
+    return plan, report, evidence
+
+
+def package_evidence(evidence, upload, identity, *, public_files=(), **fields):
+    """One deterministic, checksummed archive; public views are verified files, too."""
+    evidence, upload = Path(evidence), Path(upload)
     files = {p.relative_to(evidence).as_posix(): dict(sha256=sha256(p), bytes=p.stat().st_size)
              for p in sorted(evidence.rglob('*')) if p.is_file()}
-    identity = dict(schema_version=1, plan_sha256=plan['plan_sha256'], files=files)
+    identity = dict(identity, files=files)
     snapshot_id = digest(identity)
-    upload = staging/'upload'
     upload.mkdir()
     archive = upload/'evidence.zip'
     # Stable archive bytes make repeated publication idempotent, including on Windows.
@@ -85,13 +90,24 @@ def prepare_snapshot(directory, staging):
             entry.external_attr = 0o100644 << 16
             with (evidence/name).open('rb') as source, bundle.open(entry, 'w', force_zip64=True) as target:
                 shutil.copyfileobj(source, target)
-    snapshot = dict(identity, snapshot_id=snapshot_id, split=plan['split'], complete=report['complete'],
-                    planned=report['planned'], archive=dict(filename=archive.name, sha256=sha256(archive),
+    snapshot = dict(identity, snapshot_id=snapshot_id, **fields,
+                    archive=dict(filename=archive.name, sha256=sha256(archive),
                                                            bytes=archive.stat().st_size))
     write_json(upload/'snapshot.json', snapshot)
-    for name in REPORT_FILES:
-        shutil.copyfile(evidence/name, upload/name)
+    for name in public_files:
+        safe_relative(name)
+        target = upload/name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(evidence/name, target)
     return snapshot, upload
+
+
+def prepare_snapshot(directory, staging):
+    """Original fixed-snapshot format, retained for compatible exports/restores."""
+    plan, report, evidence = prepare_experiment_evidence(directory, staging)
+    return package_evidence(evidence, Path(staging)/'upload',
+        dict(schema_version=1, plan_sha256=plan['plan_sha256']),
+        public_files=REPORT_FILES, split=plan['split'], complete=report['complete'], planned=report['planned'])
 
 
 def publish_experiment(directory, repository=None, *, dry_run=False):

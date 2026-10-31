@@ -4,11 +4,19 @@ import os
 from pathlib import Path
 import sys
 import subprocess
+from httpx import HTTPError
 
 from stacklab.cli.benchmark import CASES
 from stacklab.experiments import create_plan, run_plan, write_report
 from stacklab.llm.catalog import model_keys
 from huggingface_hub.errors import HfHubHTTPError, LocalTokenNotFoundError
+from stacklab.cli.share import add_options, options as sharing_options, show_receipt
+
+
+def publish(directory, repository, args):
+    from stacklab.sharing import share_run
+    receipt = share_run(directory, repository or None, **sharing_options(args))
+    show_receipt(receipt)
 
 
 def main(argv=None):
@@ -52,6 +60,7 @@ def main(argv=None):
     pilot.add_argument('--backup-dir', type=Path)
     pilot.add_argument('--publish', nargs='?', const='', metavar='HF_DATASET',
                        help='Publish to the Hugging Face dataset after the run; default from config/huggingface.json')
+    add_options(pilot)
     comparison = sub.add_parser('compare', help='Compare matching L4/A100 plans without rerunning inference')
     comparison.add_argument('directories', type=Path, nargs='+')
     comparison.add_argument('--output', type=Path, required=True)
@@ -59,6 +68,7 @@ def main(argv=None):
     publication.add_argument('directory', type=Path)
     publication.add_argument('--repository', help='Hugging Face dataset owner/name; default from config/huggingface.json')
     publication.add_argument('--dry-run', action='store_true', help='Show exact snapshot inventory without network or upload')
+    add_options(publication)
     fetch = sub.add_parser('fetch', help='Download and verify a snapshot at a pinned Hugging Face commit')
     fetch.add_argument('snapshot_id')
     fetch.add_argument('--revision', required=True, help='Full Hub commit SHA from hub-receipt.json')
@@ -80,6 +90,7 @@ def main(argv=None):
             child.add_argument('--backup-dir', type=Path, help='Checkpoint after each episode, e.g. a mounted Drive folder')
             child.add_argument('--publish', nargs='?', const='', metavar='HF_DATASET',
                                help='Publish to the configured Hugging Face dataset on completion')
+            add_options(child)
         if command == 'backup':
             child.add_argument('--output', type=Path, required=True, help='Destination folder outside the experiment')
     args = parser.parse_args(argv)
@@ -101,8 +112,13 @@ def main(argv=None):
             print('Comparison: '+str(args.output.resolve()/'comparison.md'))
             return 0
         if args.command == 'publish':
-            from stacklab.publication import publish_experiment
-            print(publish_experiment(args.directory, args.repository, dry_run=args.dry_run))
+            from stacklab.sharing import share_run
+            import json
+            receipt = share_run(args.directory, args.repository, dry_run=args.dry_run, **sharing_options(args))
+            if args.dry_run:
+                print(json.dumps(receipt, ensure_ascii=False, indent=2))
+            else:
+                show_receipt(receipt)
             return 0
         if args.command == 'fetch':
             from stacklab.publication import fetch_experiment
@@ -128,8 +144,7 @@ def main(argv=None):
             from stacklab.review import write_review
             print('Review: '+str(write_review(args.output, report=report)), flush=True)
             if args.publish is not None:
-                from stacklab.publication import publish_experiment
-                print(publish_experiment(args.output, args.publish or None))
+                publish(args.output, args.publish, args)
             print('Pilot finished. Observed ranking: '+str(args.output.resolve()/'ranking.md'), flush=True)
             return 0 if report['complete'] else 1
         if args.command == 'plan':
@@ -147,8 +162,7 @@ def main(argv=None):
         from stacklab.review import write_review
         write_review(args.directory, report=report)
         if args.command == 'run' and args.publish is not None:
-            from stacklab.publication import publish_experiment
-            print(publish_experiment(args.directory, args.publish or None))
+            publish(args.directory, args.publish, args)
         success = sum(g['success'] for g in report['groups'])
         print(f'{success}/{report["planned"]} planned episodes physically successful; '
               f'complete={report["complete"]}; report: {args.directory.resolve()}/report.md')
@@ -159,7 +173,7 @@ def main(argv=None):
         print('Interrupted; existing evidence was preserved. Run again to process only pending episodes.', file=sys.stderr)
         return 130
     except (ValueError, OSError, RuntimeError, KeyError, subprocess.CalledProcessError,
-            HfHubHTTPError, LocalTokenNotFoundError) as error:
+            HfHubHTTPError, LocalTokenNotFoundError, HTTPError) as error:
         print('Error: '+str(error), file=sys.stderr)
         return 2
 

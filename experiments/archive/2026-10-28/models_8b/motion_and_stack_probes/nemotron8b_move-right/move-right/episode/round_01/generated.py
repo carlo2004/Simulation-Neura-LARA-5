@@ -1,1 +1,0 @@
-robot.position("tcp")

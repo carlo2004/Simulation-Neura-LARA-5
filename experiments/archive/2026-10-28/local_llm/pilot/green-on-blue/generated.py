@@ -1,7 +1,0 @@
-robot.gripper(closed=False)
-robot.move_to([0.30, -0.15, 0.24])
-robot.gripper(closed=True)
-robot.step(0.5)
-robot.move_to([0.30, -0.15, 0.02])
-robot.gripper(closed=False)
-robot.step(0.5)
