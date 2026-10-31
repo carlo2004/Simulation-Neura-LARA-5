@@ -53,6 +53,26 @@ def cmake_executable():
     return command
 
 
+def cuda_build_environment(environ=None):
+    """Find the actual compiler, independently of driver-only CUDA libraries."""
+    env = dict(os.environ if environ is None else environ)
+    compiler = shutil.which(env.get('CUDACXX') or 'nvcc', path=env.get('PATH', ''))
+    candidates = [env.get('CUDACXX')]
+    candidates += [str(Path(env[key])/'bin'/('nvcc.exe' if os.name == 'nt' else 'nvcc'))
+                   for key in ('CUDA_HOME', 'CUDA_PATH') if env.get(key)]
+    candidates.append('/usr/local/cuda/bin/nvcc')
+    if not compiler:
+        compiler = next((p for p in candidates if p and Path(p).is_file() and os.access(p, os.X_OK)), None)
+    if not compiler:
+        raise ValueError('CUDA compiler nvcc was not found. Install the NVIDIA CUDA Toolkit or set '
+                         'CUDA_HOME/CUDACXX; nvidia-smi alone only verifies the driver. '
+                         'Also install CMake and a C++ compiler for this source runtime.')
+    compiler = str(Path(compiler).resolve())
+    env['CUDACXX'] = compiler
+    env['PATH'] = str(Path(compiler).parent)+os.pathsep+env.get('PATH', '')
+    return env
+
+
 def build_runtime(config, directory):
     spec = config['runtime_source']
     revision = spec['revision']
@@ -64,8 +84,7 @@ def build_runtime(config, directory):
     if not shutil.which('git'):
         raise ValueError('This model needs Git to fetch its pinned source runtime')
     cmake = cmake_executable()
-    if config.get('device') == 'cuda' and not shutil.which('nvcc'):
-        raise ValueError('This CUDA source runtime needs the NVIDIA CUDA Toolkit (nvcc), CMake and a C++ compiler')
+    build_env = cuda_build_environment() if config.get('device') == 'cuda' else None
     directory = Path(directory)
     source = directory/'source'
     build = directory/'build'
@@ -82,7 +101,7 @@ def build_runtime(config, directory):
                 subprocess.run(args, cwd=cwd, stdout=log, stderr=subprocess.STDOUT, check=True)
                 return
             with subprocess.Popen(args, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                                  text=True, bufsize=1) as process:
+                                  text=True, bufsize=1, env=build_env) as process:
                 for line in process.stdout:
                     log.write(line)
                     log.flush()
@@ -129,7 +148,8 @@ def build_runtime(config, directory):
     executable = candidates[0].resolve()
     build_tools = {}
     if config.get('device') == 'cuda':
-        tool = subprocess.run(['nvcc', '--version'], capture_output=True, text=True, timeout=15, check=True)
+        tool = subprocess.run([build_env['CUDACXX'], '--version'], env=build_env,
+                              capture_output=True, text=True, timeout=15, check=True)
         build_tools['nvcc_version'] = tool.stdout+tool.stderr
     temporary = marker.with_suffix('.tmp')
     temporary.write_text(json.dumps(dict(source=identity, executable=str(executable.relative_to(directory.resolve())),

@@ -35,6 +35,7 @@ def main():
     p.add_argument('--seed', type=int, default=42)
     p.add_argument('--thinking', action=argparse.BooleanOptionalAction, default=None)
     p.add_argument('--thinking-budget', type=int)
+    p.add_argument('--prompt-profile', choices=['auto', 'legacy', 'one-shot'], default='auto')
     p.add_argument('--generation-timeout', type=int, default=600)
     p.add_argument('--execution-timeout', type=int, default=120)
     args = p.parse_args()
@@ -83,6 +84,7 @@ def main():
             with closing(client):
                 display = Presenter(stats_stream=sys.stdout, compact=args.recording == 'slim')
                 agent = Agent(robot, client, max_rounds=max(1, args.feedback_rounds), max_tokens=args.max_tokens,
+                              prompt_profile=args.prompt_profile,
                               thinking=args.thinking, seed=args.seed, generation_timeout=args.generation_timeout,
                               thinking_budget=args.thinking_budget,
                               execution_timeout=args.execution_timeout,
@@ -96,8 +98,7 @@ def main():
                 report = agent.run_task(args.instruction, args.result.parent/'episode', goal=goal)
                 display.drain()
                 display.end_speed_line()
-                result.update(report, stage='feedback_evaluated' if args.feedback_rounds else 'evaluated',
-                              mode='closed_loop_feedback' if args.feedback_rounds else 'open_loop')
+                result.update(report, stage='feedback_evaluated' if args.feedback_rounds else 'evaluated')
         else:
             result['initial_positions'] = {n: robot.position(n).tolist() for n in robot.object_names}
             result['stage'] = 'execution'

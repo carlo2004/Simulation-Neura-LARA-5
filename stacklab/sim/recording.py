@@ -5,11 +5,35 @@ from pathlib import Path
 import time
 
 
-def model_signature(config):
+def model_signature(config, *, path_separator=None):
     from stacklab.paths import ROOT
     from stacklab.sim.robot import scene_xml
     xml = scene_xml(config).replace(str(ROOT), '$PROJECT')
+    if path_separator is not None:
+        import re
+        xml = re.sub(r'\$PROJECT[^\"]*',
+                     lambda m: m[0].replace('\\', '/').replace('/', path_separator), xml)
     return hashlib.sha256(xml.encode('utf-8')).hexdigest()
+
+
+def mesh_files(xml):
+    import xml.etree.ElementTree as ET
+    root = ET.fromstring(xml)
+    directory = Path(root.find('compiler').get('meshdir', ''))
+    return {(directory/mesh.get('file')).resolve() for mesh in root.findall('asset/mesh') if mesh.get('file')}
+
+
+def asset_matches(path, expected):
+    data = path.read_bytes()
+    if hashlib.sha256(data).hexdigest() == expected:
+        return True
+    if path.suffix.lower() != '.obj':
+        return False
+    # OBJ text exported on Windows may have CRLF. Only line endings differ;
+    # vertex coordinates, faces and all other bytes must still match.
+    lines = data.replace(b'\r\n', b'\n')
+    return expected in (hashlib.sha256(lines).hexdigest(),
+                        hashlib.sha256(lines.replace(b'\n', b'\r\n')).hexdigest())
 
 
 class MotionRecorder:
@@ -65,7 +89,7 @@ class MotionRecorder:
         return dict(path=self.path.name, fps=self.fps, samples=self.samples, error=self.error)
 
 
-def render_replay(directory, output=None):
+def render_replay(directory, output=None, *, schematic=False):
     """Render recorded poses without calling mj_step, IK, the LLM or the evaluator."""
     import imageio.v2 as imageio
     import mujoco
@@ -77,23 +101,36 @@ def render_replay(directory, output=None):
     output = Path(output).resolve() if output else directory/'simulation.mp4'
     if output.exists():
         raise ValueError('Replay output already exists; choose a new output path')
-    # Check geometry hashes against the frozen experiment, if it is available.
-    manifest = directory.parent/'manifest.json'
-    if manifest.is_file():
-        from stacklab.experiments import load_plan
-        from stacklab.llm.catalog import sha256
-        from stacklab.paths import ROOT
-        plan = load_plan(directory.parent)
-        for relative, expected in plan['source_hashes'].items():
-            if relative.startswith('assets/robots/lara5/') and sha256(ROOT/relative) != expected:
-                raise ValueError('Robot geometry changed since recording; use the original assets')
     with (directory/'motion.jsonl').open(encoding='utf-8') as source:
         header = json.loads(next(source))
+        # Version-1 recordings normalized the project root but retained native
+        # separators. Accept both equivalent path spellings for this exact scene.
+        signatures = {model_signature(config), model_signature(config, path_separator='/'),
+                      model_signature(config, path_separator='\\')}
         if (header.get('kind') != 'header' or header.get('schema_version') != 1
-                or header.get('model_sha256') != model_signature(config)
+                or header.get('model_sha256') not in signatures
                 or header.get('mujoco') != mujoco.__version__):
             raise ValueError('Motion file, scene or MuJoCo version differs from the recording')
-        model = mujoco.MjModel.from_xml_string(scene_xml(config))
+        recorded_visuals = header.get('visual_meshes_loaded', True)
+        if type(recorded_visuals) is not bool or type(schematic) is not bool:
+            raise ValueError('Invalid recorded visual geometry mode')
+        visuals = not schematic
+        full_xml = scene_xml(config)
+        xml = full_xml if visuals else scene_xml(config, visuals=False)
+        unused_meshes = set() if visuals else mesh_files(full_xml)-mesh_files(xml)
+        # Recording cost and presentation are separate. Videos use the full robot
+        # by default; schematic collision geometry is an explicit diagnostic mode.
+        manifest = directory.parent/'manifest.json'
+        if manifest.is_file():
+            from stacklab.experiments import load_plan
+            from stacklab.paths import ROOT
+            plan = load_plan(directory.parent)
+            for relative, expected in plan['source_hashes'].items():
+                asset = ROOT/relative
+                if (relative.startswith('assets/robots/lara5/') and asset.resolve() not in unused_meshes
+                        and not asset_matches(asset, expected)):
+                    raise ValueError('Robot geometry changed since recording; use the original assets')
+        model = mujoco.MjModel.from_xml_string(xml)
         if header.get('nq') != model.nq:
             raise ValueError('Motion coordinates do not match this model')
         data = mujoco.MjData(model)
@@ -103,6 +140,12 @@ def render_replay(directory, output=None):
         output.parent.mkdir(parents=True, exist_ok=True)
         frames, complete = 0, False
         renderer = mujoco.Renderer(model, 480, 640)
+        scene_option = mujoco.MjvOption()
+        if visuals:
+            scene_option.geomgroup[2] = 1
+            scene_option.geomgroup[3] = 0
+        else:
+            scene_option.geomgroup[:] = 1
         try:
             with imageio.get_writer(str(output), fps=header['fps'], codec='libx264', quality=7) as writer:
                 for line in source:
@@ -119,7 +162,7 @@ def render_replay(directory, output=None):
                     data.qpos[:] = qpos
                     data.time = record['time_s']
                     mujoco.mj_forward(model, data)
-                    renderer.update_scene(data, camera)
+                    renderer.update_scene(data, camera, scene_option=scene_option)
                     writer.append_data(renderer.render())
                     frames += 1
         finally:
@@ -128,6 +171,8 @@ def render_replay(directory, output=None):
         raise ValueError('No recorded poses are available')
     metadata = dict(frames=frames, fps=header['fps'], complete=complete, source='motion.jsonl',
                     evaluation_repeated=False, model_called=False,
+                    visual_meshes_loaded=visuals,
+                    recorded_visual_meshes_loaded=recorded_visuals, schematic=schematic,
                     note='One recorded pose per frame. Sampled visualization; not a new physics run.')
     write_json(output.with_suffix('.replay.json'), metadata)
     return metadata

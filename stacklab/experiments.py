@@ -59,7 +59,8 @@ def source_hashes():
 def create_plan(directory, *, models, cases, scene_seeds, generation_seeds, blocks,
                 max_tokens=2048, threads=8, thinking=None, thinking_budget=None,
                 generation_timeout=600, execution_timeout=180, device='cpu', video=False,
-                server_url=None, paired_seeds=False, gui=False, recording='full', motion_fps=0):
+                server_url=None, paired_seeds=False, gui=False, recording='full', motion_fps=0,
+                prompt_profile='auto'):
     directory = Path(directory).resolve()
     if directory.exists() and any(directory.iterdir()):
         raise ValueError('Choose a new empty experiment directory; existing evidence is preserved')
@@ -79,6 +80,9 @@ def create_plan(directory, *, models, cases, scene_seeds, generation_seeds, bloc
         raise ValueError('Use recording slim/full and motion-fps 0–60')
     if paired_seeds and len(scene_seeds) != len(generation_seeds):
         raise ValueError('Paired scene and generation seeds must have equal lengths')
+    from stacklab.llm.agent import resolve_prompt_profile
+    for count in blocks:
+        resolve_prompt_profile(count, prompt_profile)
     remote = None
     if server_url:
         info = RemoteControl(server_url).info()
@@ -124,7 +128,8 @@ def create_plan(directory, *, models, cases, scene_seeds, generation_seeds, bloc
                              recording=recording, motion_fps=motion_fps, blocks=count, max_tokens=max_tokens,
                              visual_meshes=not (recording == 'slim' and not (gui or video)),
                              threads=threads, thinking=enabled, thinking_budget=budget if enabled else None,
-                             generation_timeout=generation_timeout, execution_timeout=execution_timeout)
+                             generation_timeout=generation_timeout, execution_timeout=execution_timeout,
+                             prompt_profile=resolve_prompt_profile(count, prompt_profile))
             condition['condition_id'] = 'condition-'+digest(condition)[:16]
             conditions.append(condition)
     episodes = []
@@ -152,7 +157,7 @@ def create_plan(directory, *, models, cases, scene_seeds, generation_seeds, bloc
         policy_limits=plan['policy_limits'], cases=definitions, episodes=[
             dict(case_id=e['case_id'], generation_seed=e['generation_seed'], model=c['model'],
                  model_config=c['model_config'],
-                 blocks=c['blocks'], max_tokens=c['max_tokens'], thinking=c['thinking'],
+                 blocks=c['blocks'], prompt_profile=c['prompt_profile'], max_tokens=c['max_tokens'], thinking=c['thinking'],
                  thinking_budget=c['thinking_budget'], model_sha256=c['model_config']['model_sha256'],
                  profiles=c['model_config']['profiles'], server_args=c['model_config'].get('server_args'),
                  response_format=c['model_config'].get('response_format'),
@@ -319,6 +324,7 @@ def run_plan(directory, backup_dir=None):
 def episode_result(directory, episode, condition, case, plan_sha256):
     path = Path(directory)/episode['episode_id']
     row = dict(**episode, model=condition['model'], blocks=condition['blocks'], case=case['name'],
+               prompt_profile=condition.get('prompt_profile', 'legacy'),
                device=condition.get('device', 'cpu'), plan_sha256=plan_sha256,
                scene_seed=case['scene_seed'], status='pending', goal_success=None,
                model_declared_done=None, error=None, rounds=0, execution_outcomes=[], performance={})
@@ -406,6 +412,7 @@ def write_report(directory):
             scored = counts['success']+counts['model_failure']
             from stacklab.comparison import wilson
             groups.append(dict(condition_id=condition['condition_id'], model=condition['model'],
+                               prompt_profile=condition.get('prompt_profile', 'legacy'),
                                blocks=condition['blocks'], case=name, planned=len(selected),
                                attempted=len(selected)-counts['pending'], scored=scored, **counts,
                                success_rate_scored=counts['success']/scored if scored else None,
@@ -416,7 +423,7 @@ def write_report(directory):
                   complete=all(r['status'] not in ('pending', 'incomplete') for r in rows),
                   groups=groups, episodes=rows, note=plan['note'])
     write_json(directory/'summary.json', report)
-    columns = ('plan_sha256', 'episode_id', 'case_id', 'condition_id', 'model', 'device',
+    columns = ('plan_sha256', 'episode_id', 'case_id', 'condition_id', 'model', 'prompt_profile', 'device',
                'gpu_names', 'gpu_memory_total_mib', 'gpu_driver_versions', 'blocks', 'case', 'scene_seed',
                'generation_seed', 'status', 'goal_success', 'model_declared_done', 'rounds', 'wall_seconds',
                'execution_outcomes', 'execution_seconds', 'evaluation_seconds', 'request_seconds', 'total_seconds',

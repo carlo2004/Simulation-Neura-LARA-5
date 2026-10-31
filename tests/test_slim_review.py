@@ -1,5 +1,9 @@
 """Sampling and offline review are independent of physical scoring and inference."""
+import contextlib
+import hashlib
+import io
 import json
+import os
 from pathlib import Path
 import tempfile
 import unittest
@@ -11,8 +15,10 @@ import numpy as np
 from stacklab import experiments as exp
 from stacklab.config import Config, write_json
 from stacklab.review import write_review
+from stacklab.llm.catalog import sha256
+from stacklab.paths import ROOT
 from stacklab.sim.recording import MotionRecorder, render_replay
-from stacklab.sim.robot import Simulation
+from stacklab.sim.robot import Simulation, scene_xml
 
 
 class MotionTests(unittest.TestCase):
@@ -55,7 +61,7 @@ class MotionTests(unittest.TestCase):
         writer.__enter__ = Mock(return_value=writer)
         writer.__exit__ = Mock(return_value=False)
         seen = []
-        renderer.update_scene.side_effect = lambda data, camera: seen.append(data.qpos.copy())
+        renderer.update_scene.side_effect = lambda data, camera, **options: seen.append(data.qpos.copy())
         with patch.object(mujoco, 'Renderer', return_value=renderer), \
                 patch.object(mujoco, 'mj_step', side_effect=AssertionError('must not simulate')), \
                 patch('stacklab.evaluation.evaluate', side_effect=AssertionError('must not grade')), \
@@ -72,6 +78,103 @@ class MotionTests(unittest.TestCase):
         write_json(self.root/'scene.json', Config(cube_size_m=.045).to_dict())
         with patch.object(mujoco, 'Renderer') as renderer, self.assertRaisesRegex(ValueError, 'differs'):
             render_replay(self.root)
+        renderer.assert_not_called()
+
+    def test_recorded_windows_and_linux_project_paths_replay_the_same_scene(self):
+        self.record()
+        records = [json.loads(line) for line in (self.root/'motion.jsonl').read_text().splitlines()]
+        separator = '/' if os.name == 'nt' else '\\'
+        other_meshdir = '$PROJECT'+separator+separator.join(('assets', 'robots', 'lara5', 'assets'))
+        xml = scene_xml(self.robot.config).replace(str(ROOT/'assets/robots/lara5/assets'), other_meshdir)
+        records[0]['model_sha256'] = hashlib.sha256(xml.replace(str(ROOT), '$PROJECT').encode()).hexdigest()
+        (self.root/'motion.jsonl').write_text('\n'.join(json.dumps(r) for r in records)+'\n')
+        renderer, writer = Mock(), Mock()
+        renderer.render.return_value = np.zeros((480, 640, 3), dtype=np.uint8)
+        writer.__enter__ = Mock(return_value=writer)
+        writer.__exit__ = Mock(return_value=False)
+        with patch.object(mujoco, 'Renderer', return_value=renderer), \
+                patch.object(mujoco, 'mj_step', side_effect=AssertionError('must not simulate')), \
+                patch('imageio.v2.get_writer', return_value=writer):
+            replay = render_replay(self.root)
+        self.assertTrue(replay['complete'])
+
+    def frozen_clip(self, visuals):
+        path = self.root/'episode'
+        path.mkdir()
+        robot = Simulation(visuals=visuals)
+        try:
+            write_json(path/'scene.json', robot.config.to_dict())
+            recorder = MotionRecorder(robot, path/'motion.jsonl', 10)
+            robot.step(.05)
+            recorder.close(robot)
+        finally:
+            robot.close()
+        (self.root/'manifest.json').write_text('{}')
+        hashes = {name: sha256(ROOT/name) for name in
+                  ('assets/robots/lara5/lara5.xml', 'assets/robots/lara5/parameters.json')}
+        hashes['assets/robots/lara5/assets/link0_0.obj'] = '0'*64
+        return path, hashes
+
+    def test_mesh_free_recording_renders_full_robot_and_accepts_equivalent_obj_line_endings(self):
+        path, hashes = self.frozen_clip(False)
+        visual = 'assets/robots/lara5/assets/link0_0.obj'
+        original = (ROOT/visual).read_bytes()
+        lines = original.replace(b'\r\n', b'\n')
+        other = lines if b'\r\n' in original else lines.replace(b'\n', b'\r\n')
+        hashes[visual] = hashlib.sha256(other).hexdigest()
+        renderer, writer = Mock(), Mock()
+        renderer.render.return_value = np.zeros((480, 640, 3), dtype=np.uint8)
+        writer.__enter__ = Mock(return_value=writer)
+        writer.__exit__ = Mock(return_value=False)
+        with patch.object(exp, 'load_plan', return_value=dict(source_hashes=hashes)), \
+                patch.object(mujoco, 'Renderer', return_value=renderer) as factory, \
+                patch.object(mujoco, 'mj_step', side_effect=AssertionError('must not simulate')), \
+                patch('stacklab.evaluation.evaluate', side_effect=AssertionError('must not grade')), \
+                patch('imageio.v2.get_writer', return_value=writer):
+            replay = render_replay(path)
+        self.assertGreater(factory.call_args.args[0].nmesh, 0)
+        self.assertTrue(replay['visual_meshes_loaded'])
+        self.assertFalse(replay['recorded_visual_meshes_loaded'])
+        self.assertFalse(replay['schematic'])
+        self.assertEqual(renderer.update_scene.call_args.kwargs['scene_option'].geomgroup[3], 0)
+        self.assertEqual((ROOT/visual).read_bytes(), original)
+        self.assertTrue(replay['complete'])
+        self.assertFalse(replay['model_called'])
+
+    def test_collision_capsules_are_only_shown_with_explicit_schematic_mode(self):
+        path, hashes = self.frozen_clip(False)
+        renderer, writer = Mock(), Mock()
+        renderer.render.return_value = np.zeros((480, 640, 3), dtype=np.uint8)
+        writer.__enter__ = Mock(return_value=writer)
+        writer.__exit__ = Mock(return_value=False)
+        with patch.object(exp, 'load_plan', return_value=dict(source_hashes=hashes)), \
+                patch.object(mujoco, 'Renderer', return_value=renderer) as factory, \
+                patch('imageio.v2.get_writer', return_value=writer):
+            replay = render_replay(path, schematic=True)
+        self.assertEqual(factory.call_args.args[0].nmesh, 0)
+        self.assertTrue(replay['schematic'])
+        self.assertEqual(renderer.update_scene.call_args.kwargs['scene_option'].geomgroup[3], 1)
+
+    def test_normal_video_of_slim_recording_rejects_genuine_visual_geometry_changes(self):
+        path, hashes = self.frozen_clip(False)
+        with patch.object(exp, 'load_plan', return_value=dict(source_hashes=hashes)), \
+                patch.object(mujoco, 'Renderer') as renderer, self.assertRaisesRegex(ValueError, 'geometry changed'):
+            render_replay(path)
+        renderer.assert_not_called()
+
+    def test_mesh_free_replay_still_rejects_changed_physical_geometry(self):
+        path, hashes = self.frozen_clip(False)
+        hashes['assets/robots/lara5/lara5.xml'] = '0'*64
+        with patch.object(exp, 'load_plan', return_value=dict(source_hashes=hashes)), \
+                patch.object(mujoco, 'Renderer') as renderer, self.assertRaisesRegex(ValueError, 'geometry changed'):
+            render_replay(path)
+        renderer.assert_not_called()
+
+    def test_full_replay_still_rejects_changed_visual_geometry(self):
+        path, hashes = self.frozen_clip(True)
+        with patch.object(exp, 'load_plan', return_value=dict(source_hashes=hashes)), \
+                patch.object(mujoco, 'Renderer') as renderer, self.assertRaisesRegex(ValueError, 'geometry changed'):
+            render_replay(path)
         renderer.assert_not_called()
 
     def test_recording_io_failure_does_not_interrupt_physics(self):
@@ -163,6 +266,19 @@ class ReviewTests(unittest.TestCase):
         self.assertNotIn(str(self.root), text)
         self.assertIn('python -m stacklab experiment replay', text)
         self.assertIn(self.episode['episode_id'], text)
+
+    def test_external_replay_output_preserves_existing_archived_reports(self):
+        from stacklab.cli.experiment import main
+        originals = {name: b'ORIGINAL ARCHIVED REPORT' for name in
+                     ('summary.json', 'results.csv', 'review.html')}
+        for name, content in originals.items():
+            (self.root/name).write_bytes(content)
+        with patch('stacklab.sim.recording.render_replay', return_value=dict(model_called=False)), \
+                contextlib.redirect_stdout(io.StringIO()):
+            result = main(['replay', str(self.path), '--output', str(self.root/'separate.mp4')])
+        self.assertEqual(result, 0)
+        for name, content in originals.items():
+            self.assertEqual((self.root/name).read_bytes(), content)
 
 
 if __name__ == '__main__':

@@ -4,6 +4,7 @@ import queue
 import sys
 import time
 from stacklab.cli.speed import format_speed
+from stacklab.console import print_safe as print
 
 
 class Presenter:

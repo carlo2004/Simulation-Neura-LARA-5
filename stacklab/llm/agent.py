@@ -15,8 +15,17 @@ from stacklab.policy import ExecutionLimits, Interpreter, PolicyCancelled, valid
 from stacklab.llm.responses import parse_reply
 from stacklab.llm.metrics import summarize
 
-def system_prompt():
-    return (ROOT/'config/prompts/robot_api.md').read_text(encoding='utf-8')
+def resolve_prompt_profile(max_rounds, profile='auto'):
+    if profile not in ('auto', 'legacy', 'one-shot'):
+        raise ValueError('Choose prompt profile auto, legacy or one-shot')
+    if profile == 'one-shot' and max_rounds != 1:
+        raise ValueError('The one-shot prompt requires exactly one program block')
+    return ('one-shot' if max_rounds == 1 else 'legacy') if profile == 'auto' else profile
+
+
+def system_prompt(max_rounds=4, profile='auto'):
+    name = 'robot_one_shot.md' if resolve_prompt_profile(max_rounds, profile) == 'one-shot' else 'robot_api.md'
+    return (ROOT/'config/prompts'/name).read_text(encoding='utf-8')
 
 
 def model_json(value):
@@ -42,10 +51,12 @@ def hold(robot):
 
 class Agent:
     def __init__(self, robot, client, *, max_rounds=4, max_tokens=2048, thinking=None, seed=42,
-                 generation_timeout=600, execution_timeout=120, on_event=None, tick=None, thinking_budget=None, policy_limits=None):
+                 generation_timeout=600, execution_timeout=120, on_event=None, tick=None, thinking_budget=None, policy_limits=None,
+                 prompt_profile='auto'):
         self.policy_limits = policy_limits or ExecutionLimits.load()
         self.robot, self.client = robot, client
         self.max_rounds, self.max_tokens, self.thinking = max_rounds, max_tokens, thinking
+        self.prompt_profile = resolve_prompt_profile(max_rounds, prompt_profile)
         self.seed = seed
         self.thinking_budget = thinking_budget
         self.generation_timeout, self.execution_timeout = generation_timeout, execution_timeout
@@ -116,11 +127,13 @@ class Agent:
         request = dict(instruction=instruction, observation=initial, units='world metres',
                        recent_tasks=self.recent_tasks[-3:], program_block_budget=self.max_rounds, policy_limits=asdict(self.policy_limits))
         first = dict(role='user', content=model_json(request))
-        system = dict(role='system', content=system_prompt())
+        system = dict(role='system', content=system_prompt(self.max_rounds, self.prompt_profile))
         history = []
         report = dict(instruction=instruction, goal=goal, success=False if goal else None,
-                      status='budget_exhausted', mode='closed_loop_feedback', max_rounds=self.max_rounds,
-                      protocol_version=2, policy_limits=asdict(self.policy_limits), software=software_provenance(),
+                      status='budget_exhausted', mode='one_shot' if self.max_rounds == 1 else 'closed_loop_feedback',
+                      max_rounds=self.max_rounds,
+                      protocol_version=2, prompt_profile=self.prompt_profile,
+                      policy_limits=asdict(self.policy_limits), software=software_provenance(),
                       physics_during_inference='paused; viewer remains responsive',
                       model_observation_decimal_places=6,
                       model=self.client.config, initial_observation=initial, rounds=[])
@@ -192,6 +205,10 @@ class Agent:
                         item['execution_outcome'] = 'cancelled'
                         raise
                     except Exception as failure:
+                        if isinstance(failure, (OSError, UnicodeError)) and not isinstance(failure, TimeoutError):
+                            item['execution_outcome'] = 'infrastructure_error'
+                            hold(self.robot)
+                            raise
                         error = type(failure).__name__+': '+str(failure)
                         item['execution_outcome'] = phase+'_error'
                         hold(self.robot)

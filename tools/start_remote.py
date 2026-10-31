@@ -48,11 +48,9 @@ def main(argv=None):
                         raise ValueError('Install g++ and make before building the CUDA runtime')
                     run(['apt-get', 'update', '-qq'], env)
                     run(['apt-get', 'install', '-y', '-qq', 'g++', 'make'], env)
-                if not shutil.which('nvcc', path=env.get('PATH')):
-                    if Path('/usr/local/cuda/bin/nvcc').is_file():
-                        env['PATH'] = '/usr/local/cuda/bin:'+env.get('PATH', '')
-                    else:
-                        raise ValueError('CUDA Toolkit (nvcc) is missing; choose a current GPU runtime')
+                compiler_env = ("import json; from stacklab.llm.source_runtime import cuda_build_environment; "
+                                "e=cuda_build_environment(); print(json.dumps({k:e[k] for k in ('PATH','CUDACXX')}))")
+                env.update(json.loads(subprocess.check_output([python, '-c', compiler_env], cwd=ROOT, env=env, text=True)))
         run([python, '-m', 'stacklab', 'setup', '--model', args.model, '--device', args.device], env)
         run([python, '-m', 'stacklab', 'doctor', '--model', args.model, '--device', args.device], env)
         run([python, '-m', 'stacklab', 'serve', '--model', args.model, '--device', args.device,

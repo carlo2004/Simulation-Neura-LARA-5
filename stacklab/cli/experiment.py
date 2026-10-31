@@ -31,6 +31,7 @@ def main(argv=None):
     plan.add_argument('--threads', type=int, default=min(8, os.cpu_count() or 1))
     plan.add_argument('--thinking', action=argparse.BooleanOptionalAction, default=None)
     plan.add_argument('--thinking-budget', type=int)
+    plan.add_argument('--prompt-profile', choices=['auto', 'legacy', 'one-shot'], default='auto')
     plan.add_argument('--generation-timeout', type=int, default=600)
     plan.add_argument('--execution-timeout', type=int, default=180)
     pilot = sub.add_parser('pilot', help='Plan and run ten trials per model with automatic remote model changes')
@@ -41,6 +42,7 @@ def main(argv=None):
     pilot.add_argument('--cases', nargs='+', choices=CASES, default=['move-right', 'red-on-blue-jitter'])
     pilot.add_argument('--blocks', nargs='+', type=int, default=[1], help='One-block screening by default; select 4 for feedback trials')
     pilot.add_argument('--max-tokens', type=int, default=2048)
+    pilot.add_argument('--prompt-profile', choices=['auto', 'legacy', 'one-shot'], default='auto')
     pilot.add_argument('--generation-timeout', type=int, default=180)
     pilot.add_argument('--execution-timeout', type=int, default=180)
     pilot.add_argument('--recording', choices=['slim', 'full'], default='slim')
@@ -63,6 +65,8 @@ def main(argv=None):
     replay = sub.add_parser('replay', help='Render a recorded episode; no inference or physics evaluation')
     replay.add_argument('directory', type=Path, help='episode-... directory containing motion.jsonl and scene.json')
     replay.add_argument('--output', type=Path)
+    replay.add_argument('--schematic', action='store_true',
+                        help='Show collision geometry for diagnostics; default uses the full robot model')
     for command, help_text in [('run', 'Run pending episodes; preserve existing attempts'),
                                 ('report', 'Rebuild JSON, CSV and Markdown without starting a model'),
                                 ('backup', 'Save existing raw evidence and reports in an atomic ZIP')]:
@@ -81,8 +85,11 @@ def main(argv=None):
             return 0
         if args.command == 'replay':
             from stacklab.sim.recording import render_replay
-            print(render_replay(args.directory, args.output))
-            if (args.directory.parent/'manifest.json').is_file():
+            output = (args.output or args.directory/'simulation.mp4').resolve()
+            print(render_replay(args.directory, output, schematic=args.schematic))
+            print('Video: '+str(output))
+            if (output == (args.directory/'simulation.mp4').resolve()
+                    and (args.directory.parent/'manifest.json').is_file()):
                 from stacklab.review import write_review
                 print(write_review(args.directory.parent))
             return 0
@@ -109,7 +116,8 @@ def main(argv=None):
                 blocks=args.blocks, max_tokens=args.max_tokens, server_url=args.server_url,
                 video=(args.video if args.video is not None else args.recording == 'full'),
                 gui=args.gui, generation_timeout=args.generation_timeout,
-                execution_timeout=args.execution_timeout, recording=args.recording, motion_fps=args.motion_fps)
+                execution_timeout=args.execution_timeout, recording=args.recording, motion_fps=args.motion_fps,
+                prompt_profile=args.prompt_profile)
             print(f'{len(frozen["episodes"])} planned episodes; all outputs: {args.output.resolve()}', flush=True)
             report = run_plan(args.output, backup_dir=args.backup_dir)
             from stacklab.review import write_review
