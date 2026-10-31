@@ -269,7 +269,8 @@ def root_checkpoint(directory, checkpoint_dir):
     if destination.is_relative_to(directory):
         raise ValueError('Checkpoint folder must be outside the working collection')
     destination.mkdir(parents=True, exist_ok=True)
-    for name in ('study.json', 'feasibility.json'):
+    # study.json is the commit marker read by prepare/restore; publish it last.
+    for name in ('feasibility.json', 'study.json'):
         source, target = directory/name, destination/name
         if target.exists():
             if target.read_bytes() != source.read_bytes():

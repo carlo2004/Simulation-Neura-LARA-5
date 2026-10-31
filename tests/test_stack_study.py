@@ -143,6 +143,23 @@ class StudyDesignTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, 'checksum'):
                 study.restore_zip(root/'corrupt.zip', root/'bad')
 
+    def test_interrupted_initial_checkpoint_is_not_advertised_as_a_restorable_study(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            source = root/'source'
+            write_json(source/'study.json', dict(study='CONTROLLED'))
+            write_json(source/'feasibility.json', dict(complete=True))
+            import shutil
+            original = shutil.copyfile
+            def fail_before_commit(src, dst):
+                if Path(src).name == 'study.json':
+                    raise OSError('CONTROLLED interrupted final root copy')
+                return original(src, dst)
+            with patch.object(study.shutil, 'copyfile', side_effect=fail_before_commit), self.assertRaises(OSError):
+                study.root_checkpoint(source, root/'checkpoint')
+            self.assertTrue((root/'checkpoint/feasibility.json').exists())
+            self.assertFalse((root/'checkpoint/study.json').exists())
+
 
 class StudyCollectionTests(unittest.TestCase):
     def setUp(self):
