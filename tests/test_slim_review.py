@@ -61,7 +61,7 @@ class MotionTests(unittest.TestCase):
         writer.__enter__ = Mock(return_value=writer)
         writer.__exit__ = Mock(return_value=False)
         seen = []
-        renderer.update_scene.side_effect = lambda data, camera: seen.append(data.qpos.copy())
+        renderer.update_scene.side_effect = lambda data, camera, **options: seen.append(data.qpos.copy())
         with patch.object(mujoco, 'Renderer', return_value=renderer), \
                 patch.object(mujoco, 'mj_step', side_effect=AssertionError('must not simulate')), \
                 patch('stacklab.evaluation.evaluate', side_effect=AssertionError('must not grade')), \
@@ -115,8 +115,13 @@ class MotionTests(unittest.TestCase):
         hashes['assets/robots/lara5/assets/link0_0.obj'] = '0'*64
         return path, hashes
 
-    def test_mesh_free_replay_uses_recorded_mode_without_unused_visual_assets(self):
+    def test_mesh_free_recording_renders_full_robot_and_accepts_equivalent_obj_line_endings(self):
         path, hashes = self.frozen_clip(False)
+        visual = 'assets/robots/lara5/assets/link0_0.obj'
+        original = (ROOT/visual).read_bytes()
+        lines = original.replace(b'\r\n', b'\n')
+        other = lines if b'\r\n' in original else lines.replace(b'\n', b'\r\n')
+        hashes[visual] = hashlib.sha256(other).hexdigest()
         renderer, writer = Mock(), Mock()
         renderer.render.return_value = np.zeros((480, 640, 3), dtype=np.uint8)
         writer.__enter__ = Mock(return_value=writer)
@@ -127,10 +132,35 @@ class MotionTests(unittest.TestCase):
                 patch('stacklab.evaluation.evaluate', side_effect=AssertionError('must not grade')), \
                 patch('imageio.v2.get_writer', return_value=writer):
             replay = render_replay(path)
-        self.assertEqual(factory.call_args.args[0].nmesh, 0)
-        self.assertFalse(replay['visual_meshes_loaded'])
+        self.assertGreater(factory.call_args.args[0].nmesh, 0)
+        self.assertTrue(replay['visual_meshes_loaded'])
+        self.assertFalse(replay['recorded_visual_meshes_loaded'])
+        self.assertFalse(replay['schematic'])
+        self.assertEqual(renderer.update_scene.call_args.kwargs['scene_option'].geomgroup[3], 0)
+        self.assertEqual((ROOT/visual).read_bytes(), original)
         self.assertTrue(replay['complete'])
         self.assertFalse(replay['model_called'])
+
+    def test_collision_capsules_are_only_shown_with_explicit_schematic_mode(self):
+        path, hashes = self.frozen_clip(False)
+        renderer, writer = Mock(), Mock()
+        renderer.render.return_value = np.zeros((480, 640, 3), dtype=np.uint8)
+        writer.__enter__ = Mock(return_value=writer)
+        writer.__exit__ = Mock(return_value=False)
+        with patch.object(exp, 'load_plan', return_value=dict(source_hashes=hashes)), \
+                patch.object(mujoco, 'Renderer', return_value=renderer) as factory, \
+                patch('imageio.v2.get_writer', return_value=writer):
+            replay = render_replay(path, schematic=True)
+        self.assertEqual(factory.call_args.args[0].nmesh, 0)
+        self.assertTrue(replay['schematic'])
+        self.assertEqual(renderer.update_scene.call_args.kwargs['scene_option'].geomgroup[3], 1)
+
+    def test_normal_video_of_slim_recording_rejects_genuine_visual_geometry_changes(self):
+        path, hashes = self.frozen_clip(False)
+        with patch.object(exp, 'load_plan', return_value=dict(source_hashes=hashes)), \
+                patch.object(mujoco, 'Renderer') as renderer, self.assertRaisesRegex(ValueError, 'geometry changed'):
+            render_replay(path)
+        renderer.assert_not_called()
 
     def test_mesh_free_replay_still_rejects_changed_physical_geometry(self):
         path, hashes = self.frozen_clip(False)

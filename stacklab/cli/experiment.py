@@ -65,6 +65,8 @@ def main(argv=None):
     replay = sub.add_parser('replay', help='Render a recorded episode; no inference or physics evaluation')
     replay.add_argument('directory', type=Path, help='episode-... directory containing motion.jsonl and scene.json')
     replay.add_argument('--output', type=Path)
+    replay.add_argument('--schematic', action='store_true',
+                        help='Show collision geometry for diagnostics; default uses the full robot model')
     for command, help_text in [('run', 'Run pending episodes; preserve existing attempts'),
                                 ('report', 'Rebuild JSON, CSV and Markdown without starting a model'),
                                 ('backup', 'Save existing raw evidence and reports in an atomic ZIP')]:
@@ -84,7 +86,7 @@ def main(argv=None):
         if args.command == 'replay':
             from stacklab.sim.recording import render_replay
             output = (args.output or args.directory/'simulation.mp4').resolve()
-            print(render_replay(args.directory, output))
+            print(render_replay(args.directory, output, schematic=args.schematic))
             print('Video: '+str(output))
             if (output == (args.directory/'simulation.mp4').resolve()
                     and (args.directory.parent/'manifest.json').is_file()):

@@ -11,12 +11,13 @@ Die vorhandenen A100-Rohdaten und ihre ursprüngliche Rangliste bleiben
 archivierte Ergebnisse von Version 3.6. Der neue Prompt ist noch kein
 Nachweis einer höheren Modellqualität.
 
-Offline-Videos übernehmen den gespeicherten Darstellungsmodus. Bei schlanken
-Aufzeichnungen wird die Kollisionsgeometrie schematisch gezeigt. Dafür werden
-nur tatsächlich verwendete Geometriedateien geprüft; nicht geladene visuelle
-Meshes werden nicht benötigt. Änderungen an XML, Parametern oder verwendeten
-Meshes verhindern die Wiedergabe weiterhin. Das Video spielt aufgezeichnete
-Positionen ab und bewertet die Physik nicht erneut.
+Offline-Videos zeigen standardmäßig das vollständige Robotermodell, auch wenn
+der Benchmark ohne visuelle Meshes lief. Die Kapselansicht wird nur mit
+`experiment replay --schematic` für Diagnosen aktiviert. Die Meshes werden erst
+beim Erstellen des Videos geladen. OBJ-Dateien mit äquivalenten Windows-/Linux-
+Zeilenenden werden erkannt; sonstige Änderungen an verwendeter Geometrie werden
+weiterhin abgelehnt. Das Video spielt aufgezeichnete Positionen ab und bewertet
+die Physik nicht erneut.
 Alte Windows- und Linux-Aufzeichnungen werden auch mit ihren jeweils nativen
 Projektpfad-Trennzeichen erkannt; die Szenenprüfung vergleicht weiterhin dieselbe
 Geometrie und Konfiguration.

@@ -23,6 +23,19 @@ def mesh_files(xml):
     return {(directory/mesh.get('file')).resolve() for mesh in root.findall('asset/mesh') if mesh.get('file')}
 
 
+def asset_matches(path, expected):
+    data = path.read_bytes()
+    if hashlib.sha256(data).hexdigest() == expected:
+        return True
+    if path.suffix.lower() != '.obj':
+        return False
+    # OBJ text exported on Windows may have CRLF. Only line endings differ;
+    # vertex coordinates, faces and all other bytes must still match.
+    lines = data.replace(b'\r\n', b'\n')
+    return expected in (hashlib.sha256(lines).hexdigest(),
+                        hashlib.sha256(lines.replace(b'\n', b'\r\n')).hexdigest())
+
+
 class MotionRecorder:
     def __init__(self, robot, path, fps=10):
         import mujoco
@@ -76,7 +89,7 @@ class MotionRecorder:
         return dict(path=self.path.name, fps=self.fps, samples=self.samples, error=self.error)
 
 
-def render_replay(directory, output=None):
+def render_replay(directory, output=None, *, schematic=False):
     """Render recorded poses without calling mj_step, IK, the LLM or the evaluator."""
     import imageio.v2 as imageio
     import mujoco
@@ -98,24 +111,24 @@ def render_replay(directory, output=None):
                 or header.get('model_sha256') not in signatures
                 or header.get('mujoco') != mujoco.__version__):
             raise ValueError('Motion file, scene or MuJoCo version differs from the recording')
-        visuals = header.get('visual_meshes_loaded', True)
-        if type(visuals) is not bool:
+        recorded_visuals = header.get('visual_meshes_loaded', True)
+        if type(recorded_visuals) is not bool or type(schematic) is not bool:
             raise ValueError('Invalid recorded visual geometry mode')
+        visuals = not schematic
         full_xml = scene_xml(config)
         xml = full_xml if visuals else scene_xml(config, visuals=False)
         unused_meshes = set() if visuals else mesh_files(full_xml)-mesh_files(xml)
-        # Mesh-free recordings use the original collision model. Verify every
-        # core file and retained mesh; omitted visual meshes are not dependencies.
+        # Recording cost and presentation are separate. Videos use the full robot
+        # by default; schematic collision geometry is an explicit diagnostic mode.
         manifest = directory.parent/'manifest.json'
         if manifest.is_file():
             from stacklab.experiments import load_plan
-            from stacklab.llm.catalog import sha256
             from stacklab.paths import ROOT
             plan = load_plan(directory.parent)
             for relative, expected in plan['source_hashes'].items():
                 asset = ROOT/relative
                 if (relative.startswith('assets/robots/lara5/') and asset.resolve() not in unused_meshes
-                        and sha256(asset) != expected):
+                        and not asset_matches(asset, expected)):
                     raise ValueError('Robot geometry changed since recording; use the original assets')
         model = mujoco.MjModel.from_xml_string(xml)
         if header.get('nq') != model.nq:
@@ -128,7 +141,10 @@ def render_replay(directory, output=None):
         frames, complete = 0, False
         renderer = mujoco.Renderer(model, 480, 640)
         scene_option = mujoco.MjvOption()
-        if not visuals:
+        if visuals:
+            scene_option.geomgroup[2] = 1
+            scene_option.geomgroup[3] = 0
+        else:
             scene_option.geomgroup[:] = 1
         try:
             with imageio.get_writer(str(output), fps=header['fps'], codec='libx264', quality=7) as writer:
@@ -146,10 +162,7 @@ def render_replay(directory, output=None):
                     data.qpos[:] = qpos
                     data.time = record['time_s']
                     mujoco.mj_forward(model, data)
-                    if visuals:
-                        renderer.update_scene(data, camera)
-                    else:
-                        renderer.update_scene(data, camera, scene_option=scene_option)
+                    renderer.update_scene(data, camera, scene_option=scene_option)
                     writer.append_data(renderer.render())
                     frames += 1
         finally:
@@ -159,6 +172,7 @@ def render_replay(directory, output=None):
     metadata = dict(frames=frames, fps=header['fps'], complete=complete, source='motion.jsonl',
                     evaluation_repeated=False, model_called=False,
                     visual_meshes_loaded=visuals,
+                    recorded_visual_meshes_loaded=recorded_visuals, schematic=schematic,
                     note='One recorded pose per frame. Sampled visualization; not a new physics run.')
     write_json(output.with_suffix('.replay.json'), metadata)
     return metadata
