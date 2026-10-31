@@ -10,6 +10,8 @@ Hier liegen ausgewählte **tatsächlich ausgeführte** Entwicklungsversuche. Mod
 
 [Neue Integrationstests](archive/2026-10-29/model-support/README.md): Dory4B, Granite 4.2 8B und LFM2.5-2.6B wurden mit nativen Tokenzählern ausgeführt. Alle drei bestehen einen vorgegebenen Bewegungstest; LFM benötigt eine JSON-Antworthülle. Der vorherige freie Formatfehler und eine unzuverlässig beendete freie LFM-Chatprobe bleiben erhalten. Rohdaten liegen kompakt mit Prüfsummen vor. Dies ist eine Integrationsprüfung, kein standardisierter Modellvergleich.
 
+Der A100-Pilot enthält zusätzlich einen [sechsfachen Stapelvergleich als Endlos-GIF](archive/2026-10-29/a100-pilot-stapelvergleich-6-modelle.gif). Er zeigt ausgewählte, tatsächlich aufgezeichnete Fehlversuche nebeneinander; das GIF wurde aus den gespeicherten Posen erzeugt und führt keine Modellanfragen oder neue Bewertungen aus.
+
 ## Frühere Entwicklungsproben, 28.10.2026
 
 | Versuch | Bedingungen | Beobachtung |
