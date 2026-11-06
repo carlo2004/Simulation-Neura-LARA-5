@@ -6,7 +6,7 @@ from pathlib import Path
 
 from stacklab.paths import ROOT
 
-COMPONENTS = ('world_info', 'observation', 'runtime_info', 'few_shot', 'user_prompt')
+COMPONENTS = ('world_info', 'observation', 'runtime_info', 'user_prompt')
 
 
 def model_json(value):
@@ -23,20 +23,19 @@ def model_json(value):
 
 
 class PromptContext:
-    """Load static context once, then supply fresh observations for every task.
+    """Load static zero-shot context, then supply fresh observations for each task.
 
     Native templates receive one initial system message and one user turn.
-    Named context blocks remain distinct in the user turn's JSON and in the log;
-    no fake assistant acknowledgements or demonstration answers are inserted.
+    Named context blocks remain distinct in the user turn's JSON and in the log.
     """
     def __init__(self, path=None):
         self.path = Path(path or os.environ.get('STACKLAB_CONTEXT_CONFIG',
                                               ROOT/'config/prompts/context.json')).expanduser().resolve()
         raw = self.path.read_bytes()
         settings = json.loads(raw)
-        if (not isinstance(settings, dict) or settings.get('schema_version') != 1
-                or set(settings) != {'schema_version', 'system_prompt_file', 'world_info_file', 'few_shot_file', 'order'}):
-            raise ValueError('Unsupported prompt context configuration')
+        if (not isinstance(settings, dict) or settings.get('schema_version') != 2
+                or set(settings) != {'schema_version', 'system_prompt_file', 'world_info_file', 'order'}):
+            raise ValueError('Use schema version 2 with system_prompt_file, world_info_file and order')
         order = settings['order']
         if (not isinstance(order, list) or not all(isinstance(name, str) for name in order)
                 or len(order) != len(COMPONENTS) or set(order) != set(COMPONENTS)):
@@ -44,7 +43,7 @@ class PromptContext:
         self.order = order
         self.source_hashes = {'layout': hashlib.sha256(raw).hexdigest()}
         files = {}
-        for key in ('system_prompt', 'world_info', 'few_shot'):
+        for key in ('system_prompt', 'world_info'):
             name = settings[key+'_file']
             if not isinstance(name, str) or not name:
                 raise ValueError('Context source filenames must be nonempty strings')
@@ -53,14 +52,8 @@ class PromptContext:
             files[key] = data.decode('utf-8')
         self.system_prompt = files['system_prompt']
         self.static_world = json.loads(files['world_info'])
-        self.few_shot = json.loads(files['few_shot'])
-        if not isinstance(self.static_world, dict) or not isinstance(self.few_shot, list):
-            raise ValueError('World info must be an object and few-shot examples must be a list')
-        for example in self.few_shot:
-            if (not isinstance(example, dict) or set(example) != {'input', 'solution'}
-                    or not isinstance(example['input'], str) or not example['input'].strip()
-                    or not isinstance(example['solution'], str) or not example['solution'].strip()):
-                raise ValueError('Each few-shot example needs nonempty input and solution strings')
+        if not isinstance(self.static_world, dict):
+            raise ValueError('World info must be a JSON object')
 
     def assemble(self, robot, instruction, observation, runtime_info):
         # These values come from the actual loaded simulation, not prompt literals.
@@ -71,11 +64,11 @@ class PromptContext:
                      objects=[dict(name=s.name, color=s.color_name(), shape=s.shape, full_size_m=s.dimensions())
                               for s in robot.config.object_specs()])
         components = dict(system_prompt=self.system_prompt, world_info=world, observation=observation,
-                          runtime_info=runtime_info, few_shot=self.few_shot, user_prompt=instruction)
-        turn = {name: components[name] for name in self.order if name != 'few_shot' or self.few_shot}
+                          runtime_info=runtime_info, user_prompt=instruction)
+        turn = {name: components[name] for name in self.order}
         messages = [dict(role='system', content=self.system_prompt),
                     dict(role='user', content=model_json(turn))]
-        return dict(schema_version=1, order=['system_prompt', *self.order],
+        return dict(schema_version=2, prompt_mode='zero_shot', order=['system_prompt', *self.order],
                     source_hashes=self.source_hashes, components=components, messages=messages,
                     transport='initial system message; ordered named JSON context blocks in user turn')
 

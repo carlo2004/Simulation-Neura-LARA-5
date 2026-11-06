@@ -1,11 +1,10 @@
 # Hersteller-Systemprompt
 
-Der [Kontextaufbau](../../docs/context.md) trennt den zahlenfreien
-`robot_api.md`-Systemprompt, `world_info.json`, dynamische Beobachtungen,
-Ressourcenbudgets, `few_shot.json` (derzeit leer) und den unveränderten Nutzerauftrag.
+Der Zero-shot-Kontext trennt den zahlenfreien `robot_api.md`-Systemprompt,
+`world_info.json`, dynamische Beobachtungen, Ressourcenbudgets und den Nutzerauftrag.
 `context.json` legt Dateiquellen und Blockreihenfolge fest. Jede Aufgabe protokolliert
 diese Bausteine und ihre Hashes; die Runtime speichert zusätzlich die tatsächlich
-übertragene Anfrage.
+übertragene Anfrage. [Kontextaufbau](../../docs/context.md)
 
 `ministral_system.txt` ist die unveränderte `SYSTEM_PROMPT.txt` aus
 `mistralai/Ministral-3-8B-Reasoning-2512`, Revision

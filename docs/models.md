@@ -48,10 +48,9 @@ Wiederholbare Texte statt interaktiver Eingabe:
 
 `--max-rounds` im Chat und `--feedback-rounds` im Benchmark bestimmen die Zahl der Programmblöcke. `--max-tokens`, `--thinking-budget`, `--threads` und die Timeouts steuern Ressourcen. `--help` ist die Referenz für Optionen.
 
-Der Agent erhält dokumentierte Einzelbefehle, getrennte World Info und echte
-Beobachtungen. Few-Shot-Beispiele sind vorbereitet, aber leer; es gibt kein
-voreingestelltes Stapelprogramm. [Kontextaufbau und Reihenfolge](context.md),
-[API-Prompt](../config/prompts/robot_api.md) und [Versuchsdaten](../experiments/README.md) sind einsehbar.
+Der Agent startet Zero-shot mit dokumentierten Einzelbefehlen, World Info und
+aktuellen Beobachtungen. [Kontextaufbau und Reihenfolge](context.md) ·
+[API-Prompt](../config/prompts/robot_api.md) · [Versuchsdaten](../experiments/README.md)
 
 ## Geschwindigkeit sehen
 

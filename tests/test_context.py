@@ -18,7 +18,7 @@ from stacklab.sim.robot import Simulation
 class ContextTests(unittest.TestCase):
     def context_copy(self, root, **overrides):
         root.mkdir()
-        for filename in ('context.json', 'robot_api.md', 'world_info.json', 'few_shot.json'):
+        for filename in ('context.json', 'robot_api.md', 'world_info.json'):
             shutil.copyfile(ROOT/'config/prompts'/filename, root/filename)
         settings = json.loads((root/'context.json').read_text(encoding='utf-8'))
         settings.update(overrides)
@@ -36,34 +36,36 @@ class ContextTests(unittest.TestCase):
         self.assertEqual(blocks['world_info']['suggested_transport_z_m'], .31)
         self.assertEqual(blocks['world_info']['tcp_bounds_m']['x'], [.2, .6])
         self.assertEqual(blocks['world_info']['table_surface_z_m'], 0)
-        self.assertEqual(blocks['few_shot'], [])
+        self.assertEqual(record['prompt_mode'], 'zero_shot')
+        self.assertEqual([message['role'] for message in record['messages']], ['system', 'user'])
         self.assertEqual(record['messages'][0], {'role': 'system', 'content': system_prompt()})
         wire = json.loads(record['messages'][1]['content'])
-        self.assertNotIn('few_shot', wire)
+        self.assertEqual(list(wire), ['world_info', 'observation', 'runtime_info', 'user_prompt'])
         self.assertEqual(wire['user_prompt'], blocks['user_prompt'])
         self.assertNotIn('goal', wire)
 
-    def test_context_order_examples_and_external_source_hashes_are_recorded(self):
+    def test_context_order_and_external_source_hashes_are_recorded(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)/'context'
-            order = ['user_prompt', 'few_shot', 'world_info', 'runtime_info', 'observation']
+            order = ['user_prompt', 'world_info', 'runtime_info', 'observation']
             path = self.context_copy(root, order=order)
-            example = {'input': 'A demonstration input.', 'solution': 'A demonstration answer.'}
-            (root/'few_shot.json').write_text(json.dumps([example]), encoding='utf-8')
+            world_path = root/'world_info.json'
+            world = json.loads(world_path.read_text(encoding='utf-8'))
             with patch.dict('os.environ', STACKLAB_CONTEXT_CONFIG=str(path)):
                 before = context_source_hashes()
                 context = PromptContext()
                 with closing(Simulation(Config(), visuals=False)) as robot:
                     record = context.assemble(robot, 'User text', {}, {})
                 self.assertEqual(list(json.loads(record['messages'][1]['content'])), order)
-                self.assertEqual(record['components']['few_shot'], [example])
-                (root/'few_shot.json').write_text('[]', encoding='utf-8')
+                self.assertEqual(set(record['source_hashes']), {'layout', 'system_prompt', 'world_info'})
+                updated_world = dict(world, default_relative_distance_m=.07)
+                world_path.write_text(json.dumps(updated_world), encoding='utf-8')
                 self.assertNotEqual(before, context_source_hashes())
-                self.assertEqual(context.few_shot, [example])  # Loaded once for this agent.
-            for order in ([], ['world_info']*5, ['world_info', {}, None]):
-                settings = json.loads(path.read_text(encoding='utf-8'))
-                settings['order'] = order
-                path.write_text(json.dumps(settings), encoding='utf-8')
+                self.assertEqual(context.static_world, world)  # Loaded once per agent.
+            settings = json.loads(path.read_text(encoding='utf-8'))
+            for override in (dict(order=[]), dict(order=['world_info']*4), dict(order=['world_info', {}, None]),
+                             dict(schema_version=1), dict(extra_file='extra.json')):
+                path.write_text(json.dumps(dict(settings, **override)), encoding='utf-8')
                 with self.assertRaises(ValueError):
                     PromptContext(path)
 
@@ -85,8 +87,8 @@ class ContextTests(unittest.TestCase):
             self.assertEqual(record['messages'], client.messages)
             self.assertEqual(record['components']['user_prompt'], instruction)
             self.assertEqual(result['context_source_hashes'], record['source_hashes'])
-            self.assertEqual(result['few_shot_count'], 0)
-            self.assertEqual(result['protocol_version'], 3)
+            self.assertEqual(result['prompt_mode'], 'zero_shot')
+            self.assertEqual(result['protocol_version'], 4)
             self.assertIsNone(result['success'])
 
 

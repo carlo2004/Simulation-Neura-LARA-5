@@ -31,7 +31,7 @@ Fine-Tuning verwendet später die Original-/BF16-Trainingsmodelle, nicht die GGU
 | Generierungsseeds | Ein eigener Seed je Startlage, zwischen Modellen gepaart; Rundenoffset bleibt dokumentiert |
 | Simulationsstart | Neue Szene und neue Agentenhistorie für jede Episode |
 | Objekte | Genau zwei gleich große, achsenparallele 40-mm-Würfel; gleiche physikalische Parameter |
-| Modellkontext | 16.384 Tokens für alle Modelle, keine Musterlösung/Few-Shot-Beispiele |
+| Modellkontext | Zero-shot bei 16.384 Kontexttokens für jedes Modell |
 | Programmblöcke | Bis zu vier mit tatsächlichem Ausführungsfeedback innerhalb derselben Episode |
 | Generierung | Thinking an, maximal 3.072 Ausgabetokens insgesamt je Block; darin angefragtes Thinking-Limit von 1.024 Tokens |
 | Zeitbudgets | 240 s Generierung und 180 s Ausführung je Block; Transport hat kurze Rückgabe-Kulanz |
@@ -45,7 +45,7 @@ Fine-Tuning verwendet später die Original-/BF16-Trainingsmodelle, nicht die GGU
 
 Die Modellgruppen laufen über vier Szenenblöcke. Gespiegelte Reihenfolgen gleichen frühe und späte Modellpositionen aus; die mittlere Position ist für jedes Modell gleich. Damit läuft nicht jedes Modell immer an derselben Stelle eines mehrstündigen Tests. Alle Szenen und Seeds sind vor der ersten Modellantwort festgelegt.
 
-Die 32 Szenen wurden bei ihrer Erstellung mit einem separaten handgeschriebenen Kontrollprogramm und anschließendem unabhängigem Kontakt-/Stabilitätstest physisch ausgeführt und bestanden. Prüfsummen, Geometrie und Paketstände werden in Colab abgeglichen. Diese Kontrollen werden dort **nicht nochmals simuliert** und gehen nicht als Modellleistung ein. Kontrollcode oder Musterantworten werden den Modellen nicht gegeben.
+Ein handgeschriebenes Kontrollprogramm und ein unabhängiger Kontakt- und Stabilitätstest bestätigten die 32 Szenen bei ihrer Erstellung. Colab verwendet die aufgezeichneten Kontrollresultate und gleicht Prüfsummen, Geometrie und Paketstände ab. Die 192 geplanten Episoden sind den Zero-shot-Modellversuchen vorbehalten.
 
 Es werden konfigurierte Modellsysteme verglichen. Hersteller-Samplingprofile, native Tokenizer, Ministrals Systempräfix und LFMs bestehende JSON-Antworthülle bleiben dokumentierte Unterschiede. Die Bedingungen sind damit nachvollziehbar, aber keine reine Ablation ausschließlich der Gewichte. Tokens/s verschiedener Tokenizer sind ebenfalls keine direkte gemeinsame Textmenge.
 

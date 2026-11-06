@@ -15,7 +15,7 @@ objects can share a color. After an error use current observations.
 Use assignments, flat lists/tuples, read-only indexing and numeric + - * /.
 The current interpreter executes straight-line Python. Only the documented robot
 methods below are exposed. The context has separate world_info, observation,
-runtime_info, optional few_shot examples, and user_prompt blocks. World info
+runtime_info, and user_prompt blocks. World info
 describes the loaded environment; observations describe its current state.
 Follow the user_prompt. Resource budgets come from runtime_info.
 

@@ -111,8 +111,8 @@ class Agent:
         history = []
         report = dict(instruction=instruction, goal=goal, success=False if goal else None,
                       status='budget_exhausted', mode='closed_loop_feedback', max_rounds=rounds,
-                      protocol_version=3, context_source_hashes=context['source_hashes'],
-                      context_order=context['order'], few_shot_count=len(self.context.few_shot),
+                      protocol_version=4, prompt_mode=context['prompt_mode'],
+                      context_source_hashes=context['source_hashes'], context_order=context['order'],
                       policy_limits=asdict(self.policy_limits), software=software_provenance(),
                       physics_during_inference='paused; viewer remains responsive',
                       model_observation_decimal_places=6,

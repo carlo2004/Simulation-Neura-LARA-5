@@ -84,11 +84,12 @@ und bietet eine lokale HTML-Sichtung mit Auftrag, Modellantwort, Code und Zeiten
 
 Modellgewichte liegen standardmäßig im lokalen Cache. Mit `STACKLAB_CACHE_DIR` kann ein anderer Datenträger gewählt werden; `STACKLAB_RUN_DIR` steuert den Ergebnisordner. Das Projekt wird aus diesem Checkout mit editierbarer Installation betrieben.
 
-Der [Modellkontext](docs/context.md) trennt Systemregeln, World Info, aktuelle
-Beobachtungen, Budgets, optionale Few-Shot-Beispiele und Nutzerauftrag. Die
-Systemregeln enthalten keine Zahlenliterale. Die Reihenfolge der Kontextblöcke
-ist konfigurierbar. [Alle Modellkarten](docs/models.md) nennen den verwendeten
-Tokenizer mit Herstellerrevision und Prüfsummen.
+Der Zero-shot-Kontext trennt Systemregeln, World Info, aktuelle Beobachtungen,
+Budgets und Nutzerauftrag. Die Systemregeln enthalten keine Zahlenliterale.
+Die Reihenfolge der Kontextblöcke ist konfigurierbar. [Modellkontext](docs/context.md)
+
+Die Modellkarten nennen den verwendeten Tokenizer mit Herstellerrevision und
+Prüfsummen. [Alle Modellkarten](docs/models.md)
 
 ## Einen Lauf mit dem Team teilen
 

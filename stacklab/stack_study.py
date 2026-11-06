@@ -135,9 +135,6 @@ def load_study(directory):
 
 
 def prepare(directory, checkpoint_dir=None):
-    from stacklab.llm.context import PromptContext
-    if PromptContext().few_shot:
-        raise ValueError('This study uses no demonstration solutions; use an empty few-shot context')
     directory = Path(directory).resolve()
     if (directory/'study.json').exists():
         study = load_study(directory)
