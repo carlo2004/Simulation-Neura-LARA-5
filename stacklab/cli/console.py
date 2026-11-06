@@ -15,7 +15,9 @@ HELP = '''Commands (metres / seconds):
   status / objects          Show object names, shapes, positions and TCP
   pos NAME|tcp              Show one position
   joints                    Show six arm angles in degrees
-  move X Y Z                Move the tool; fixed downward orientation
+  move-joints J1 J2 J3 J4 J5 J6  Move the six arm joints in degrees
+  quat NAME|tcp             Show a world quaternion in w, x, y, z order
+  move X Y Z [ORIENTATION [YAW]]  Move the tool; top/left/right/bottom, yaw in degrees
   jog x|y|z DELTA            Move relative to the current tool position
   manual on [STEP]|off      Opt-in 3D-window keyboard jogging; default step 0.005 m
   goto-selected [Z]         Hover over a point selected by left double-click
@@ -136,8 +138,14 @@ class Controller:
             self.output(args[0]+' '+format_position(value))
         elif command == 'joints' and not args:
             self.output('Arm angles: ['+', '.join(f'{math.degrees(float(q)):.2f}' for q in robot.data.qpos[:6])+'] deg')
-        elif command == 'move' and len(args) == 3:
-            robot.move_to([number(x) for x in args])
+        elif command == 'move-joints' and len(args) == 6:
+            robot.move_joints([math.radians(number(angle)) for angle in args])
+            self.output('tcp '+format_position(robot.data.site_xpos[robot.sid]))
+        elif command == 'quat' and len(args) == 1:
+            self.output(args[0]+' wxyz '+str(robot.orientation(args[0]).round(6).tolist()))
+        elif command == 'move' and 3 <= len(args) <= 5:
+            robot.move_to([number(x) for x in args[:3]], orientation=args[3] if len(args) > 3 else 'top',
+                          yaw_deg=number(args[4]) if len(args) > 4 else 0)
             self.output('tcp '+format_position(robot.data.site_xpos[robot.sid]))
         elif command == 'jog' and len(args) == 2 and args[0] in ('x', 'y', 'z'):
             target = robot.data.site_xpos[robot.sid].copy()

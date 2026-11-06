@@ -76,6 +76,11 @@ class Presenter:
                       f'{check["stable_checks"]}/20; Greifer frei={check["tool_clear"]}', flush=True)
             if (grading.get('goal') or {}).get('type') == 'move':
                 print('Zielabweichung: '+str(grading['tcp_error_m'])+' m', flush=True)
+            if 'checks' in grading:
+                print(f'Physik: {grading["stable_checks"]}/{grading["checks"]} Stichproben; '
+                      f'Ziel erreicht={grading["success"]}', flush=True)
+            elif (grading.get('goal') or {}).get('type') == 'response':
+                print('Reaktion und Zustand geprüft: '+str(grading['success']), flush=True)
 
     def drain(self):
         while True:

@@ -8,7 +8,8 @@ from stacklab.paths import ROOT
 import math
 import operator
 
-METHODS = {'position', 'move_to', 'jog', 'gripper', 'step'}
+READ_METHODS = {'position', 'orientation', 'joints'}
+METHODS = READ_METHODS | {'move_to', 'move_joints', 'jog', 'gripper', 'step'}
 OPS = {ast.Add: operator.add, ast.Sub: operator.sub, ast.Mult: operator.mul, ast.Div: operator.truediv}
 
 
@@ -80,10 +81,10 @@ def validate(code, limits=None):
                 number(node.value)
         if isinstance(node, ast.Attribute):
             if not isinstance(node.value, ast.Name) or node.value.id != 'robot' or node.attr not in METHODS:
-                raise PolicyError('Only the five documented robot methods are accessible')
+                raise PolicyError('Only the documented robot methods are accessible')
         if isinstance(node, ast.Call):
             if not isinstance(node.func, ast.Attribute) or node.func.attr not in METHODS:
-                raise PolicyError('Only calls to robot.position/move_to/jog/gripper/step are allowed')
+                raise PolicyError('Only direct calls to documented robot methods are allowed')
             if any(k.arg is None for k in node.keywords):
                 raise PolicyError('Argument unpacking is not allowed')
         if isinstance(node, ast.Assign):
@@ -169,38 +170,47 @@ class Interpreter:
                 self.on_action('end', action)
 
     def dispatch(self, method, args, kwargs, action):
-        if method == 'position':
+        if method in ('position', 'orientation'):
             if kwargs or len(args) != 1 or not isinstance(args[0], str):
-                raise PolicyError('position expects one object name')
-            if args[0] == 'tcp':
-                result = self.robot.data.site_xpos[self.robot.sid].tolist()
-                action['result'] = result
-                return result
-            if args[0] not in self.robot.object_names:
+                raise PolicyError(method+' expects one object name or "tcp"')
+            if args[0] not in (*self.robot.object_names, 'tcp'):
                 raise PolicyError('Unknown object: '+args[0])
-            result = self.robot.position(args[0]).tolist()
+            if method == 'position' and args[0] == 'tcp':
+                result = self.robot.data.site_xpos[self.robot.sid].tolist()
+            else:
+                result = getattr(self.robot, method)(args[0]).tolist()
             action['result'] = result
             return result
-        if method == 'move_to':
-            if kwargs or len(args) != 1 or not isinstance(args[0], list) or len(args[0]) != 3:
-                raise PolicyError('move_to expects one three-number position list')
-            xyz = [number(v) for v in args[0]]
+        if method == 'joints':
+            if args or kwargs:
+                raise PolicyError('joints takes no arguments')
+            result = self.robot.joints().tolist()
+            action['result'] = result
+            return result
+        if method in ('move_to', 'jog'):
+            if set(kwargs)-{'orientation', 'yaw_deg'}:
+                raise PolicyError(method+' accepts only orientation and yaw_deg as options')
+            if method == 'move_to':
+                if len(args) != 1 or not isinstance(args[0], list) or len(args[0]) != 3:
+                    raise PolicyError('move_to expects one three-number position list')
+                xyz = [number(v) for v in args[0]]
+            else:
+                if len(args) != 2 or args[0] not in ('x', 'y', 'z'):
+                    raise PolicyError('jog expects an axis (x/y/z) and a distance in metres')
+                xyz = self.robot.data.site_xpos[self.robot.sid].copy()
+                xyz['xyz'.index(args[0])] += number(args[1])
             try:
                 self.robot.validate_tcp(xyz)
+                self.robot.move_to(xyz, **kwargs)
             except ValueError as error:
                 raise PolicyError(str(error)) from None
-            self.robot.move_to(xyz)
-        elif method == 'jog':
-            if kwargs or len(args) != 2 or args[0] not in ('x', 'y', 'z'):
-                raise PolicyError('jog expects an axis (x/y/z) and a distance in metres')
-            delta = number(args[1])
-            xyz = self.robot.data.site_xpos[self.robot.sid].copy()
-            xyz['xyz'.index(args[0])] += delta
+        elif method == 'move_joints':
+            if kwargs or len(args) != 1 or not isinstance(args[0], list) or len(args[0]) != 6:
+                raise PolicyError('move_joints expects one list of six angles in radians')
             try:
-                self.robot.validate_tcp(xyz)
+                self.robot.move_joints([number(v) for v in args[0]])
             except ValueError as error:
                 raise PolicyError(str(error)) from None
-            self.robot.move_to(xyz)
         elif method == 'gripper':
             if args and not kwargs and len(args) == 1:
                 closed = args[0]
@@ -210,7 +220,9 @@ class Interpreter:
                 raise PolicyError('Use gripper(closed=True) or gripper(closed=False)')
             if type(closed) is not bool:
                 raise PolicyError('closed must be a boolean')
-            self.robot.gripper(closed)
+            releases = self.robot.gripper(closed)
+            if releases:
+                action['release_centres_m'] = releases
         elif method == 'step':
             if kwargs or len(args) != 1:
                 raise PolicyError('step expects one duration in seconds')

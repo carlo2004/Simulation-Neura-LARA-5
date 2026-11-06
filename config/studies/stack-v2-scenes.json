@@ -1785,8 +1785,8 @@
       "assets/robots/lara5/assets/link6_0.obj": "ea61d94cdb03ee805eaed6882d4f863e2d9013d0fcea098e8362670275041cb0",
       "assets/robots/lara5/lara5.xml": "b892ea5d6a7cfbb3ed1aa4b4f2ef5dee0709595ed94ff9df819cb7658295b9b7",
       "assets/robots/lara5/parameters.json": "57fbaf421bd545864eea026af17a84352c67087bdd9b985c92bc0fd45bd0e6ee",
-      "stacklab/config.py": "9420c40a0042c5401f3b518593dace10032a912ebb22ccf43f50148b8f899274",
-      "stacklab/evaluation.py": "6b6f8bb71815267f5d73c4093f79fd5c1fc6ee656d29b337dfa13ac8241a0454",
+      "stacklab/config.py": "d8107c5a2ff451c5230397de939794c8b7fe3233701a7ee3bf9a3c71b21b05f2",
+      "stacklab/evaluation.py": "1e39297afb0d4bf3867eec13b117a6a4c92eaa4a0231ea66f04f63d770c19ad9",
       "stacklab/sim/__init__.py": "73dc0dfa4e97391ee242fbffcb04ef41d9f2602cdb2be7fbf6aac8411cd68a4c",
       "stacklab/sim/assets.py": "d7c8995a7bab605bd27a60ce713f35a35f85831a3d7a96963cdfb6fcbc3c1d9f",
       "stacklab/sim/convert.py": "80211ffe2e17d0862d6252771aaeaa4e7da2ed9ed91372a4d5b67ec7033a896a",
@@ -1794,8 +1794,8 @@
       "stacklab/sim/meshes.py": "a2a1df6b3b9c3f99332dc80db902a9f1f5a2adb67bb3c1cbff6e7c59fe24f82b",
       "stacklab/sim/overlays.py": "9a1920460248bcd537accbe8072d8d77caf9bcc3479c30051d45fcf0577e8614",
       "stacklab/sim/recording.py": "33ab4e614c49abe08053fada6df26432ad69088ddcc43141df0001b546dbff6a",
-      "stacklab/sim/robot.py": "fabdef932854332d6a9f41bbdb6bbe3c8ec2402b41219aa2cfb5a6ac3cd3eac1"
+      "stacklab/sim/robot.py": "e900978e0f891cadc7cd5fc4bb794fb20c6ca2813bace9cb474c522e8d3fc3ff"
     }
   },
-  "bank_sha256": "3e701409fc9415f22da2107362d9dd714f6b3e69cd81b218cbfe5a057bc94e63"
+  "bank_sha256": "a9d3d7bc57ddfaf562485c6b9b628558f79f5755916cb5a3e452ae72ccb42304"
 }

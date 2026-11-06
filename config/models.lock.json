@@ -395,6 +395,10 @@
               },
               "message": {
                 "type": "string"
+              },
+              "intent": {
+                "type": "string",
+                "enum": ["no_op", "clarify", "cannot_execute"]
               }
             },
             "required": [

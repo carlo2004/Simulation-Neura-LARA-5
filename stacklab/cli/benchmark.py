@@ -12,8 +12,9 @@ from stacklab.config import Config, write_json
 from stacklab.llm.catalog import lock, setup, model_keys
 from stacklab.cli.speed import format_speed
 from stacklab.cli.process import run_logged
+from stacklab.tasks import TASKS, task_definition
 
-CASES = {
+LEGACY_CASES = {
     'red-on-blue': ('Staple den roten Würfel auf den blauen Würfel.', 'red', 'blue', 'scenes/default.json', 0),
     'blue-on-red': ('Staple den blauen Würfel auf den roten Würfel.', 'blue', 'red', 'scenes/default.json', .015),
     'green-on-blue': ('Staple den grünen Würfel auf den blauen Würfel.', 'green', 'blue', 'scenes/three_cubes.json', .015),
@@ -22,10 +23,13 @@ CASES = {
     'move-up': ('Bewege den Greifer um 5 cm nach oben.', None, None, 'scenes/default.json', 0),
     'red-on-blue-jitter': ('Staple den roten Würfel auf den blauen Würfel.', 'red', 'blue', 'scenes/default.json', .015),
 }
+CASES = {**LEGACY_CASES, **TASKS}
 
 
 def case_definition(name, scene_seed):
-    instruction, source, target, filename, jitter = CASES[name]
+    if name in TASKS:
+        return task_definition(name, scene_seed)
+    instruction, source, target, filename, jitter = LEGACY_CASES[name]
     config = replace(Config.load(ROOT/filename), seed=scene_seed, random_jitter_m=jitter)
     return dict(name=name, instruction=instruction, source=source, target=target,
                 scene_seed=scene_seed, config=config.to_dict(), initial_object_positions=config.scene(),
@@ -52,10 +56,15 @@ def run_case(name, args, directory, *, case=None):
         result['stage'] = 'execution'
         command = [sys.executable, '-m', 'stacklab.cli.worker', '--config', str(directory/'scene.json'),
                    '--result', str(directory/'execution.json')]
-        if source is None:
-            command += ['--move-delta', *map(str, case['goal']['delta_m'])]
+        goal = case['goal']
+        if goal['type'] == 'move' and 'delta_m' in goal:
+            command += ['--move-delta', *map(str, goal['delta_m'])]
+        elif goal['type'] == 'stack':
+            command += ['--source', goal['source'], '--target', goal['target']]
         else:
-            command += ['--source', source, '--target', target]
+            goal_path = directory/'goal.json'
+            write_json(goal_path, goal)
+            command += ['--goal', str(goal_path)]
         command += ['--feedback-rounds', str(args.feedback_rounds), '--model', lock(args.model)['model_key'],
                     '--device', getattr(args, 'device', 'cpu'),
                     '--instruction', instruction, '--max-tokens', str(args.max_tokens),
@@ -126,8 +135,8 @@ def main(argv=None):
     test.add_argument('--video', action='store_true', help='Record actual simulated execution to simulation.mp4')
     test.add_argument('--feedback-rounds', type=int, default=0,
                       help='0: one-block baseline; positive N: up to N blocks using real simulation feedback')
-    test.add_argument('--suite', action='store_true', help='Run all development cases')
-    test.add_argument('--instruction', help='Override wording; expected source/target remain those of --case')
+    test.add_argument('--suite', action='store_true', help='Run the original pilot cases')
+    test.add_argument('--instruction', help='Override wording while keeping the trusted goal of --case')
     test.add_argument('--gui', action='store_true', help='Show the generated program acting in the native viewer')
     test.add_argument('--axes', action='store_true', help='Optional coordinate overlay')
     test.add_argument('--stackviz', action='store_true', help='Optional independent evaluation overlay')
@@ -177,7 +186,7 @@ def main(argv=None):
         directory = (args.output or RUNS_ROOT/('llm_'+time.strftime('%Y%m%d_%H%M%S'))).resolve()
         if directory.exists() and any(directory.iterdir()):
             raise ValueError('Choose a new output directory to preserve previous test evidence')
-        names = list(CASES) if args.suite else [args.case]
+        names = list(LEGACY_CASES) if args.suite else [args.case]
         results = [run_case(name, args, directory/name) for name in names]
         report = dict(model=config, passed=sum(r['success'] for r in results), total=len(results),
                       results=results, mode='closed_loop_feedback' if args.feedback_rounds else 'open_loop',

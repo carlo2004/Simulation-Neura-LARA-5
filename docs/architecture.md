@@ -13,6 +13,7 @@ Eine lokale Simulationsanwendung, ein Python-Paket, wenige direkte Schnittstelle
 | `llm/remote.py`, `llm/service.py` | Inferenz über SSH-Portforward, native Evidenz, Abbruch | Andere Compute-Maschine mit demselben Protokoll |
 | `llm/agent.py` | Sprache → Code → Ausführung → Feedback | Kontext- oder Planungsstrategie |
 | `policy.py` | Öffentliche Modellbefehle und Ausführungsbudgets | Fähigkeit an einer Stelle hinzufügen |
+| `tasks.py` | Startlagen, Aufträge und Ziele der Folgeaufgaben | Weitere Anordnung oder Aufgabenvariante |
 | `evaluation.py` | Ziele aus realem Physikzustand prüfen | Neue unabhängig definierte Metrik |
 | `cli/` | Argumente, Terminaldarstellung, Prozessgrenzen | Neuer Befehl |
 
@@ -33,7 +34,7 @@ Die Simulation kennt keine Modellnamen. Der Evaluator kennt keine Modellantwort.
 1. **Szene:** JSON unter `scenes/` anlegen, mit `console --config …` prüfen. Für zusätzliche Würfel ist kein Python-Umbau nötig.
 2. **Modell:** Eintrag im Katalog kopieren, Revision, Gesamtparameterzahl, Dateigröße, SHA-256, Vorlage und Sampling bewusst setzen. Danach `models` und `setup --model …` verwenden.
 3. **Modellfähigkeit:** API-Dispatch und Validierung in `policy.py`, Dokumentation in `config/prompts/robot_api.md` und passenden Fähigkeitstest gemeinsam ändern.
-4. **Aufgabe:** Bewertungsmetrik in `evaluation.py` und Benchmark-Fall ergänzen. Die Zieldefinition stammt vom Versuchsaufbau.
+4. **Aufgabe:** Eine Variante mit Startszene und Ziel in `tasks.py` eintragen. Für ein neues Prüfkriterium `evaluation.py` erweitern. Die Zieldefinition stammt vom Versuchsaufbau.
 5. **Neues Backend:** Client mit derselben kleinen Schnittstelle übergeben. Die Agententests verwenden bereits solche Clients.
 
 Arbeitsraum- und Kontaktprüfungen hängen an realer Geometrie. Ressourcenbudgets begrenzen Laufzeit und Speicher; sie sollten im Versuchsaufbau explizit gewählt und im Ergebnis protokolliert werden. Keine versteckte Aufgabenerfüllung durch handgeschriebene Stapelfunktionen in der Modell-API.

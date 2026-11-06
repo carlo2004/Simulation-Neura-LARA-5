@@ -10,7 +10,7 @@ from stacklab.config import write_json
 from stacklab.provenance import software_provenance
 
 from stacklab.llm.runtime import GenerationCancelled
-from stacklab.evaluation import evaluate, observe, physics_state
+from stacklab.evaluation import evaluate, observe, physics_state, protected_motion, resolve_goal
 from stacklab.policy import ExecutionLimits, Interpreter, PolicyCancelled, validate
 from stacklab.llm.responses import parse_reply
 from stacklab.llm.metrics import summarize
@@ -93,6 +93,8 @@ class Agent:
             raise ValueError('Choose at least one program block')
         if 'tcp' in self.robot.object_names:
             raise ValueError('The LLM API reserves the object name tcp for the tool centre')
+        goal = resolve_goal(self.robot, goal)
+        rounds = 1 if goal and goal['type'] == 'response' else self.max_rounds
         directory = Path(directory).resolve()
         if directory.exists() and any(directory.iterdir()):
             raise ValueError('Choose a new output directory to preserve previous evidence')
@@ -102,13 +104,13 @@ class Agent:
         write_json(directory/'initial_physics.json', physics_state(self.robot))
         initial = observe(self.robot)
         context = self.context.assemble(self.robot, instruction, initial,
-                    dict(recent_tasks=self.recent_tasks[-3:], program_block_budget=self.max_rounds,
+                    dict(recent_tasks=self.recent_tasks[-3:], program_block_budget=rounds,
                          policy_limits=asdict(self.policy_limits)))
         write_json(directory/'context.json', context)
         prefix = context['messages']
         history = []
         report = dict(instruction=instruction, goal=goal, success=False if goal else None,
-                      status='budget_exhausted', mode='closed_loop_feedback', max_rounds=self.max_rounds,
+                      status='budget_exhausted', mode='closed_loop_feedback', max_rounds=rounds,
                       protocol_version=3, context_source_hashes=context['source_hashes'],
                       context_order=context['order'], few_shot_count=len(self.context.few_shot),
                       policy_limits=asdict(self.policy_limits), software=software_provenance(),
@@ -117,18 +119,18 @@ class Agent:
                       model=self.client.config, initial_observation=initial, rounds=[])
         write_json(directory/'task.json', report)
         started = time.monotonic()
-        with (directory/'trajectory.jsonl').open('w', encoding='utf-8') as trajectory:
+        with (directory/'trajectory.jsonl').open('w', encoding='utf-8') as trajectory, protected_motion(self.robot, goal) as protected:
             def record(kind, data):
                 trajectory.write(json.dumps(dict(event=kind, data=data, wall_seconds=time.monotonic()-started,
                                                  simulation_time_s=float(self.robot.data.time)), ensure_ascii=False)+'\n')
                 trajectory.flush()
 
             try:
-                for index in range(1, self.max_rounds+1):
+                for index in range(1, rounds+1):
                     if self.cancelled.is_set():
                         raise PolicyCancelled('Task cancelled')
                     path = directory/f'round_{index:02d}'
-                    self.on_event('generating', dict(round=index, maximum=self.max_rounds))
+                    self.on_event('generating', dict(round=index, maximum=rounds))
                     # Retain the task plus the latest two feedback exchanges, not unbounded chat.
                     messages = [*prefix, *history[-4:]]
                     item = dict(round=index, stage='generation', actions=[], execution_outcome='not_generated')
@@ -155,6 +157,8 @@ class Agent:
                     execution_simulation_started = float(self.robot.data.time)
                     try:
                         reply = parse_reply(raw, self.policy_limits)
+                        if 'intent' in reply:
+                            item['response'] = dict(intent=reply['intent'], message=reply['message'])
                         (path/'generated.py').write_text(reply['code'].rstrip()+'\n', encoding='utf-8')
                         self.on_event('program', dict(round=index, **reply))
                         if reply['code'].strip():
@@ -199,14 +203,16 @@ class Agent:
                     evaluation_started = time.monotonic()
                     evaluation_simulation_started = float(self.robot.data.time)
                     try:
-                        grading = evaluate(self.robot, goal)
+                        actions = [action for turn in report['rounds'] for action in turn['actions']]
+                        grading = evaluate(self.robot, goal, initial=initial, actions=actions, reply=reply,
+                                           protected=protected)
                     finally:
                         item['evaluation_seconds'] = time.monotonic()-evaluation_started
                         item['evaluation_simulation_seconds'] = float(self.robot.data.time)-evaluation_simulation_started
                         self.robot.command_interrupt = None
                     feedback = dict(error=error, observation=observe(self.robot), evaluation=grading,
                                     actions=item['actions'], local_variables_reset=True,
-                                    remaining_blocks=self.max_rounds-index,
+                                    remaining_blocks=rounds-index,
                                     model_declared_done=reply['done'] if reply else False)
                     item.update(stage='evaluated', feedback=feedback,
                                 model_declared_done=reply['done'] if reply else False)
@@ -240,5 +246,8 @@ class Agent:
                 write_json(directory/'final_physics.json', physics_state(self.robot))
                 write_json(directory/'result.json', report)
                 record('task_result', dict(status=report['status'], verified_goal_success=report['success']))
-        self.recent_tasks.append(dict(instruction=instruction, status=report['status']))
+        recent = dict(instruction=instruction, status=report['status'])
+        if report['rounds'] and 'response' in report['rounds'][-1]:
+            recent.update(report['rounds'][-1]['response'])
+        self.recent_tasks.append(recent)
         return report

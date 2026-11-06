@@ -11,6 +11,20 @@ from stacklab.sim.overlays import Overlays
 from stacklab.sim.manual import ManualControl
 from stacklab.paths import ROOT
 
+APPROACH_ANGLES = {'top': 0, 'left': -90, 'right': 90, 'bottom': 180}
+
+
+def tool_rotation(orientation='top', yaw_deg=0):
+    """World rotation of the TCP frame. Local +Z points out of the fingers."""
+    if not isinstance(orientation, str) or orientation not in APPROACH_ANGLES:
+        raise ValueError('Orientation must be top, left, right or bottom')
+    if type(yaw_deg) not in (int, float) or not np.isfinite(yaw_deg) or not -180 <= yaw_deg <= 180:
+        raise ValueError('yaw_deg must be a finite angle between -180 and 180 degrees')
+    down = Rotation.from_matrix(np.diag([1, -1, -1]))
+    approach = Rotation.from_euler('y', APPROACH_ANGLES[orientation], degrees=True)
+    return Rotation.from_euler('z', yaw_deg, degrees=True)*approach*down
+
+
 def scene_xml(c, *, visuals=True):
     root = E.parse(ROOT/'assets/robots/lara5/lara5.xml').getroot()
     root.find('compiler').set('meshdir', str(ROOT/'assets/robots/lara5/assets'))
@@ -241,8 +255,8 @@ class Simulation:
         mujoco.mj_forward(self.model, self.data)
         self.step(.5)
 
-    def ik(self, xyz, start=None):
-        target = np.diag([1, -1, -1])
+    def ik(self, xyz, start=None, *, rotation=None):
+        target = np.diag([1, -1, -1]) if rotation is None else rotation
         start = self.command if start is None else start
         def residual(q):
             self.ikdata.qpos[:6] = q
@@ -251,7 +265,8 @@ class Simulation:
             return np.r_[self.ikdata.site_xpos[self.sid]-xyz, .3*Rotation.from_matrix(rotation).as_rotvec()]
         bounds = (self.model.jnt_range[:6, 0]+.001, self.model.jnt_range[:6, 1]-.001)
         result = least_squares(residual, start, bounds=bounds, xtol=1e-10, ftol=1e-10, gtol=1e-10, max_nfev=150)
-        if np.linalg.norm(residual(result.x)) > 1e-4:
+        tolerance = 1e-4 if rotation is None else 5e-4
+        if np.linalg.norm(residual(result.x)) > tolerance:
             raise RuntimeError(f'Unreachable tool pose: {xyz}')
         return result.x
 
@@ -293,6 +308,19 @@ class Simulation:
         if name not in self.objects: raise ValueError(f'Unknown object: {name}')
         return self.data.body('obj_'+name).xpos.copy()
 
+    def orientation(self, name):
+        """Measured world quaternion in w, x, y, z order."""
+        if name == 'tcp':
+            xyzw = Rotation.from_matrix(self.data.site_xmat[self.sid].reshape(3, 3)).as_quat()
+            return xyzw[[3, 0, 1, 2]]
+        if name not in self.objects:
+            raise ValueError('Unknown object: '+name)
+        return self.data.body('obj_'+name).xquat.copy()
+
+    def joints(self):
+        """Measured angles of the six arm joints in radians."""
+        return self.data.qpos[:6].copy()
+
     @staticmethod
     def validate_tcp(xyz):
         xyz = np.asarray(xyz, dtype=float)
@@ -301,25 +329,71 @@ class Simulation:
             raise ValueError('TCP outside supported workspace')
         return xyz
 
-    def move_to(self, xyz, duration=None):
-        """Move TCP in metres, with fixed downward orientation and smooth waypoints."""
+    def move_to(self, xyz, duration=None, *, orientation='top', yaw_deg=0):
+        """Follow a smooth Cartesian path with a chosen TCP orientation."""
         xyz = self.validate_tcp(xyz)
         if duration is not None and (not np.isfinite(duration) or duration <= 0):
             raise ValueError('Duration must be positive and finite')
         start = self.data.site_xpos[self.sid].copy()
-        duration = duration or max(.8, np.linalg.norm(xyz-start)/(self.config.speed_mm_s/1000)*1.5)
+        rotation = tool_rotation(orientation, yaw_deg)
+        start_rotation = Rotation.from_matrix(self.data.site_xmat[self.sid].reshape(3, 3))
+        twist = (rotation*start_rotation.inv()).as_rotvec()
+        angle = np.linalg.norm(twist)
+        duration = duration or max(.8, np.linalg.norm(xyz-start)/(self.config.speed_mm_s/1000)*1.5, angle*1.7)
         n = int(np.ceil(duration/.02))
+
+        def waypoints():
+            seed = self.command
+            target_rotation = None if orientation == 'top' and yaw_deg == 0 else rotation.as_matrix()
+            for i in range(1, n+1):
+                interrupt = getattr(self, 'command_interrupt', None)
+                if interrupt is not None:
+                    interrupt()
+                u = i/n
+                smooth = 10*u**3-15*u**4+6*u**5
+                if angle > .01:
+                    target_rotation = (Rotation.from_rotvec(smooth*twist)*start_rotation).as_matrix()
+                seed = self.ik(start+smooth*(xyz-start), seed, rotation=target_rotation)
+                yield seed
+
+        # Verify a reorientation path before moving any actuators. The usual
+        # downward translations can keep streaming their original waypoints.
+        path = list(waypoints()) if angle > .01 else waypoints()
+        for target in path:
+            self.command = target
+            self.data.ctrl[:6] = target
+            self.step(.02)
+        self.step(.3)
+
+    def move_joints(self, angles):
+        """Interpolate to six valid arm angles using the physical actuators."""
+        target = np.asarray(angles, dtype=float)
+        limits = self.model.jnt_range[:6]
+        if (target.shape != (6,) or not np.isfinite(target).all()
+                or np.any(target < limits[:, 0]) or np.any(target > limits[:, 1])):
+            raise ValueError('Provide six finite joint angles within the arm limits in radians')
+        start = self.joints()
+        n = int(np.ceil(max(.8, 1.8*np.max(np.abs(target-start)))/.02))
         for i in range(1, n+1):
             u = i/n
             smooth = 10*u**3-15*u**4+6*u**5
-            self.command = self.ik(start+smooth*(xyz-start))
+            self.command = start+smooth*(target-start)
             self.data.ctrl[:6] = self.command
             self.step(.02)
         self.step(.3)
 
     def gripper(self, closed):
+        releases = {} if closed else {name: self.position(name).tolist()
+                                      for name in self.object_names if self.grasped(name)}
         self.data.ctrl[6:] = 0 if closed else .032
         self.step(.7)
+        return releases
+
+    def grasped(self, name):
+        """A closed gripper has simultaneous contact on both finger pads."""
+        return bool(self.data.ctrl[6] < .016
+                    and self._touching(name+'_geom', 'left_pad')
+                    and self._touching(name+'_geom', 'right_pad'))
 
     def push(self, name, dx, dy):
         """Simple tabletop push with closed fingers; all object motion is contact-driven."""

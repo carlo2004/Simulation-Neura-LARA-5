@@ -5,7 +5,7 @@ from pathlib import Path
 
 COLORS = {'red': (.90, .19, .16, 1), 'blue': (.12, .43, .90, 1),
           'green': (.15, .72, .34, 1), 'yellow': (.95, .73, .12, 1),
-          'duck': (.98, .72, .12, 1)}
+          'purple': (.61, .31, .79, 1), 'duck': (.98, .72, .12, 1)}
 from stacklab.paths import ROOT
 
 def finite_number(value):
@@ -46,6 +46,10 @@ class ObjectSpec:
 
     def rgba(self):
         return self.color if self.color is not None else COLORS.get(self.name, (.65, .67, .71, 1))
+
+    def color_name(self):
+        rgba = tuple(self.rgba())
+        return next((name for name, color in COLORS.items() if color == rgba), 'custom')
 
     def validate(self):
         if not isinstance(self.name, str) or not re.fullmatch(r'[a-z][a-z0-9_]{0,31}', self.name) or self.name in ('tcp', 'phase', 'time_s', 'objects'):

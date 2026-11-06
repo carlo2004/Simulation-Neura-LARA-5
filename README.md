@@ -4,6 +4,8 @@ Interaktive MuJoCo-Simulation eines NEURA LARA 5 mit Greifer, Kontaktphysik und 
 
 ## Schnell starten
 
+`python -m stacklab tasks list` zeigt die **Folgeaufgaben für einen bis fünf Würfel**. Die Pyramide lässt sich mit `python -m stacklab tasks run pyramid --code examples/pyramid.py --gui` ohne Modell ausprobieren. [Aufgabenkatalog und API](docs/tasks.md)
+
 **Testlauf 2 auf A100:** [32 Rot-auf-Blau-Versuche je Modell, insgesamt 192 Episoden](docs/stack-study-v2.md). Das [Colab-Notebook](https://colab.research.google.com/github/carlo2004/Simulation-Neura-LARA-5/blob/main/notebooks/colab_stack_study_v2.ipynb) prüft zuerst den HF-Schreibzugriff und sichert jeden Versuch automatisch nach Drive und HF. Hinterlege `HF_TOKEN` als Colab-Secret. Nach Laufzeitverlust werden die Checkpoints wiederhergestellt; die Auswertung und Modellauswahl nimmst du selbst vor.
 
 Voraussetzung: Git, Python **3.12 oder neuer**, Internet für die erste Einrichtung. CI prüft Python 3.12 und 3.13 auf Linux und Windows. Ein Desktop wird für das 3D-Fenster benötigt; Tests funktionieren ohne Fenster.

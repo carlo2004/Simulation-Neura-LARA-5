@@ -1,21 +1,23 @@
 """Run one validated generated policy in a separate process, then evaluate independently."""
 import argparse
+import json
 from pathlib import Path
 import time
 import math
 import sys
-from stacklab.evaluation import tool_clear, evaluate
+from stacklab.evaluation import tool_clear, evaluate, observe, protected_motion, resolve_goal
 from stacklab.config import Config, write_json
 from stacklab.policy import Interpreter, PolicyError, validate
 
 
-def main():
+def main(argv=None):
     p = argparse.ArgumentParser()
     p.add_argument('--config', type=Path, required=True)
     p.add_argument('--code', type=Path)
     p.add_argument('--result', type=Path, required=True)
     p.add_argument('--source')
     p.add_argument('--target')
+    p.add_argument('--goal', type=Path, help='Trusted task goal JSON')
     p.add_argument('--gui', action='store_true')
     p.add_argument('--result-hold-seconds', type=float, default=10)
     p.add_argument('--axes', action='store_true')
@@ -37,7 +39,7 @@ def main():
     p.add_argument('--thinking-budget', type=int)
     p.add_argument('--generation-timeout', type=int, default=600)
     p.add_argument('--execution-timeout', type=int, default=120)
-    args = p.parse_args()
+    args = p.parse_args(argv)
     result = dict(success=False, stage='validation', actions=[])
     robot = None
     interpreter = None
@@ -50,9 +52,16 @@ def main():
             raise ValueError('motion-fps must be 0–60')
         if args.code is not None:
             code = args.code.read_text(encoding='utf-8')
-            validate(code)
-        if bool(args.source or args.target) == bool(args.move_delta):
-            raise ValueError('Choose a source/target pair or a movement delta')
+            if args.goal is not None:
+                from stacklab.llm.responses import parse_reply
+                reply = parse_reply(code)
+                code = reply['code']
+            else:
+                reply = None
+                validate(code)
+        if (sum(map(bool, (args.source or args.target, args.move_delta, args.goal))) != 1
+                or bool(args.source) != bool(args.target)):
+            raise ValueError('Choose one goal file, a source/target pair, or a movement delta')
         from stacklab.sim.robot import Simulation
         robot = Simulation(Config.load(args.config), video=args.video, gui=args.gui, axes=args.axes,
                            stackviz=(args.source, args.target) if args.stackviz and args.source else None,
@@ -61,11 +70,17 @@ def main():
             from stacklab.sim.recording import MotionRecorder
             recorder = MotionRecorder(robot, args.result.parent/'motion.jsonl', args.motion_fps)
             robot.record_callback = recorder.capture
-        if args.source:
-            robot._pair(args.source, args.target)
+        if args.goal is not None:
+            goal = json.loads(args.goal.read_text(encoding='utf-8'))
+            if goal is None:
+                raise ValueError('A goal file must specify a task goal')
+        elif args.source:
             goal = dict(type='stack', source=args.source, target=args.target)
         else:
-            goal = dict(type='move', target_m=(robot.data.site_xpos[robot.sid]+args.move_delta).tolist())
+            goal = dict(type='move', delta_m=args.move_delta)
+        goal = resolve_goal(robot, goal)
+        if args.move_delta:
+            goal.pop('delta_m')  # Keep legacy movement result fields.
         if args.code is None:
             from stacklab.llm.agent import Agent
             from stacklab.llm.runtime import LocalModel
@@ -102,11 +117,21 @@ def main():
             result['initial_positions'] = {n: robot.position(n).tolist() for n in robot.object_names}
             result['stage'] = 'execution'
             interpreter = Interpreter(robot)
-            interpreter.run(code)
-            if args.move_delta:
+            if args.goal is not None:
+                initial = observe(robot)
+                with protected_motion(robot, goal) as protected:
+                    if code.strip():
+                        interpreter.run(code)
+                    grading = evaluate(robot, goal, initial=initial, actions=interpreter.actions,
+                                       reply=reply, protected=protected)
+                result.update(grading, stage='evaluated', simulation_seconds=float(robot.data.time),
+                              initial_observation=initial, final_observation=observe(robot))
+            elif args.move_delta:
+                interpreter.run(code)
                 grading = evaluate(robot, goal)
                 result.update(grading, stage='evaluated', simulation_seconds=float(robot.data.time))
             else:
+                interpreter.run(code)
                 robot.step(1)
                 checks = []
                 robot.overlays.begin_check(args.source, args.target)

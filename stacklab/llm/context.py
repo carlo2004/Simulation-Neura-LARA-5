@@ -66,8 +66,9 @@ class PromptContext:
         # These values come from the actual loaded simulation, not prompt literals.
         world = dict(self.static_world, table_surface_z_m=float(robot.model.geom('table').pos[2]),
                      tcp_bounds_m={axis: list(bounds) for axis, bounds in zip('xyz', robot.TCP_BOUNDS)},
+                     joint_limits_rad=robot.model.jnt_range[:6].tolist(),
                      suggested_transport_z_m=robot.config.hover_z_m,
-                     objects=[dict(name=s.name, shape=s.shape, full_size_m=s.dimensions())
+                     objects=[dict(name=s.name, color=s.color_name(), shape=s.shape, full_size_m=s.dimensions())
                               for s in robot.config.object_specs()])
         components = dict(system_prompt=self.system_prompt, world_info=world, observation=observation,
                           runtime_info=runtime_info, few_shot=self.few_shot, user_prompt=instruction)
