@@ -46,7 +46,7 @@
           <label class="sr-only" for="task">Startszene auswählen</label>
           <select id="task"></select>
           <p id="scene-id" class="muted identifier"></p>
-          <p id="scene-request"></p>
+          <p id="scene-request" hidden></p>
           <details id="recording" hidden>
             <summary>Referenzvideo</summary>
             <video id="proof-player" controls playsinline preload="none" aria-label="Referenzlauf auf dem LARA 5"></video>
@@ -133,7 +133,7 @@
   <template id="lane-template">
     <article class="lane">
       <header><h2 class="lane-title"></h2><span class="lane-state" role="status"></span></header>
-      <label class="field model-choice">Modell <select class="model" disabled></select></label>
+      <select class="model" disabled></select>
       <p class="model-note muted"></p>
       <details class="model-details" hidden><summary>Modellkennung</summary><dl class="model-identity kv"></dl></details>
       <label class="field lane-prompt" hidden>Prompt <textarea class="prompt" rows="2" maxlength="4000"></textarea></label>

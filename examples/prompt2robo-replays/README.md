@@ -1,6 +1,6 @@
 # Prompt2Robo auf dem LARA 5
 
-Die Videos zeigen Programme aus dem Trainingssplit auf dem LARA 5 aus der Live-Simulation. Alle sechs gezeigten Programme erfüllten die Zielbedingungen. Für die Vorführung laufen die Videos mit zweifacher Wiedergabegeschwindigkeit. [Prüfbericht und Prüfsummen](manifest.json)
+Die Videos zeigen Programme aus dem Trainingssplit auf dem LARA 5 aus der Live-Simulation. Alle sechs gezeigten Programme erfüllten die Zielbedingungen. Die Videos wurden in 960 × 720 Pixeln gerendert und laufen mit zweifacher Wiedergabegeschwindigkeit. [Prüfbericht und Prüfsummen](manifest.json)
 
 | Video | Aufgabe |
 |---|---|

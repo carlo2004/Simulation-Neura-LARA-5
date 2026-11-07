@@ -71,6 +71,7 @@ video { display: block; width: 100%; margin-top: 7px; background: #171b21; }
 }
 .scene-preview figure { margin: 0; }
 .scene-preview svg { display: block; width: 100%; max-width: 252px; height: auto; }
+#scene-preview svg { max-width: 196px; }
 .scene-preview figcaption, .positions { font-size: .76rem; color: var(--muted); }
 .positions { list-style: none; padding: 0; margin: 0; }
 .positions li + li { margin-top: 4px; }

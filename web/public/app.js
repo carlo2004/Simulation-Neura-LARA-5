@@ -34,7 +34,7 @@ for (const [side, label] of Object.entries(laneNames)) {
   parts.prompt.setAttribute('aria-label', 'Prompt für ' + label);
   parts.prompt.addEventListener('input', controls);
   parts.model.setAttribute('aria-label', 'Modell für ' + label);
-  parts.model.add(new Option('Runner verbinden', ''));
+  parts.model.add(new Option('Kein Runner verbunden', ''));
   parts.model.addEventListener('change', () => {
     showModel(parts, connection?.models.get(parts.model.value));
     resetLane(parts);
@@ -91,7 +91,7 @@ function canRun() {
 
 function controls() {
   const busy = Boolean(active);
-  const ready = canRun() && !busy && !connecting;
+  const ready = canRun() && get('task').value === scene.id && !busy && !connecting;
   const left = lanes.left.model.value;
   const right = lanes.right.model.value;
   const shared = get('shared').checked;
@@ -104,11 +104,12 @@ function controls() {
   get('export').disabled = !report || busy;
   get('report-id').textContent = report?.id ? 'Lauf ' + report.id : '';
   get('shared-field').hidden = !shared;
+  get('scene-request').hidden = shared && !changed;
   get('shared-prompt').disabled = busy || !scene;
   get('shared').disabled = busy || !scene;
   get('reset-prompt').hidden = !changed;
   get('reset-prompt').disabled = busy;
-  get('scoring').textContent = !scene ? '' : connection && !canRun() ? 'Szene und Runner benötigen dieselbe Datensatzrevision.'
+  get('scoring').textContent = !scene ? '' : connection && !canRun() ? 'Für diese Szene bitte den Runner aktualisieren.'
     : changed ? 'Eigene Prompts ohne Zielprüfung' : 'Datensatzprompt mit Zielprüfung';
   get('task').disabled = busy || ![...get('task').options].some((item) => item.value);
   for (const id of ['scene-search', 'scene-filter', 'code-input', 'import']) get(id).disabled = busy;
@@ -192,6 +193,9 @@ function selectScene(item, reset = true) {
 get('task').addEventListener('change', () => {
   const item = cases.get(get('task').value);
   if (item) selectScene(item);
+});
+get('recording').addEventListener('toggle', (event) => {
+  if (!event.currentTarget.open) get('proof-player').pause();
 });
 get('scene-search').addEventListener('input', listScenes);
 get('scene-filter').addEventListener('change', listScenes);
@@ -331,7 +335,7 @@ function streamEvent(event, frames) {
 }
 
 async function run(mode, side = 'left') {
-  if (!canRun() || active || connecting) return;
+  if (!canRun() || get('task').value !== scene.id || active || connecting) return;
   const controller = new AbortController();
   const payload = { task: scene.id, mode };
   if (mode === 'compare') {

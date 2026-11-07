@@ -118,7 +118,12 @@
       "frames": 1312,
       "fps": 24,
       "video_duration_s": 54.667,
-      "video_sha256": "74ab12296b6535daa382ce7a7c59bd5e8b5bd07fbac7061f577c0b1375c8b5bc"
+      "video_sha256": "c26a96825a5e969d66b85b5af45513d7478d4e71d2dda6d04a2500e7b65b199a",
+      "video_resolution": [
+        960,
+        720
+      ],
+      "video_frames": 1312
     },
     {
       "id": "abs-pyramid_2_layer-000",
