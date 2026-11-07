@@ -1,15 +1,16 @@
-"""Isolated process for the pinned dataset checker and optional rendering."""
+"""Run one pinned Prompt2Robo sample on the shared LARA 5 simulation."""
 import argparse
 from contextlib import ExitStack
+import importlib.util
 import json
 from pathlib import Path
 import sys
-import time
+from types import ModuleType
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('tools', type=Path)
+    parser.add_argument('checker', type=Path)
     parser.add_argument('output', type=Path)
     parser.add_argument('sample_id')
     parser.add_argument('--video', action='store_true')
@@ -21,88 +22,71 @@ def main():
     if sample['id'] != args.sample_id:
         raise ValueError('Wrong sample in worker')
 
-    sys.path.insert(0, str(args.tools))
-    import check
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
     import mujoco
-    import robot
+    from stacklab.config import write_json
+    from stacklab.prompt2robo import FPS, LaraReplay, ReplayScene, run_reference
+    from stacklab.sim.robot import Simulation
 
     video_path = args.output / f'{args.sample_id}.mp4'
     partial = video_path.with_suffix('.partial.mp4')
-    original_sim = robot.Sim
     observed = None
+    initial_state = None
     frame_count = 0
-    fps = 24
+    stage = 'text_check' if not response['code'] else 'setup'
     with ExitStack() as cleanup:
-        writer = None
-        renderer = None
-        viewer = None
-        next_frame = 0.
-        camera = mujoco.MjvCamera()
-        camera.lookat[:] = [.38, 0, .49]
-        camera.distance = 1.85
-        camera.azimuth = 130
-        camera.elevation = -27
+        def execute(scene, code):
+            nonlocal observed, initial_state, stage, frame_count
+            sim = Simulation(ReplayScene(scene), visuals=args.video or args.gui)
+            cleanup.callback(sim.close)
+            observed = LaraReplay(sim, scene)
+            initial_state = observed.state()
+            if args.gui:
+                sim.open_viewer()
+            first_frame = sim.frames
+            if args.video:
+                import imageio.v2 as imageio
+                sim.renderer = mujoco.Renderer(sim.model, height=480, width=640)
+                sim.writer = imageio.get_writer(partial, fps=FPS, codec='libx264', quality=6,
+                                                ffmpeg_params=['-movflags', '+faststart'])
+                sim.writer.append_data(sim.render_frame(sim.renderer))
+            stage = 'execution'
+            try:
+                run_reference(code, observed)
+                sim.step(.75)
+            except Exception as error:
+                return observed.state(), f'{type(error).__name__}: {error}', observed
+            finally:
+                if sim.writer:
+                    frame = sim.render_frame(sim.renderer)
+                    for _ in range(FPS):
+                        sim.writer.append_data(frame)
+                    frame_count = sim.frames - first_frame + 1 + FPS
+            stage = 'goal_check'
+            return observed.state(), None, observed
 
-        class ObservedSim(original_sim):
-            def _step(self, q_target=None):
-                nonlocal observed, renderer, viewer, next_frame, frame_count
-                super()._step(q_target)
-                observed = self
-                if not (args.video or args.gui) or self.data.time < next_frame:
-                    return
-                if args.video:
-                    if renderer is None:
-                        headlight = self.model.vis.headlight
-                        headlight.ambient[:] = .42
-                        headlight.diffuse[:] = .78
-                        headlight.specular[:] = .15
-                        renderer = cleanup.enter_context(mujoco.Renderer(self.model, height=480, width=640))
-                    renderer.update_scene(self.data, camera=camera)
-                    writer.append_data(renderer.render())
-                    frame_count += 1
-                if args.gui:
-                    if viewer is None:
-                        from mujoco import viewer as mj_viewer
-                        viewer = cleanup.enter_context(mj_viewer.launch_passive(self.model, self.data))
-                        with viewer.lock():
-                            viewer.cam.lookat[:] = camera.lookat
-                            viewer.cam.distance = camera.distance
-                            viewer.cam.azimuth = camera.azimuth
-                            viewer.cam.elevation = camera.elevation
-                    if not viewer.is_running():
-                        raise robot.RobotError('Viewer closed')
-                    viewer.sync()
-                    time.sleep(1 / fps)
-                next_frame += 1 / fps
+        # The dataset checker imports robot.execute at call time. Supply our
+        # implementation before loading it. Only check.py is fetched from tools/.
+        backend = ModuleType('robot')
+        backend.execute = execute
+        sys.modules['robot'] = backend
+        spec = importlib.util.spec_from_file_location('prompt2robo_goals', args.checker)
+        checker = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(checker)
+        passed, reasons = checker.check(sample)
 
-        if args.video and response['code']:
-            import imageio.v2 as imageio
-            writer = cleanup.enter_context(imageio.get_writer(
-                partial, fps=fps, codec='libx264', quality=5,
-                ffmpeg_params=['-movflags', '+faststart']))
-        robot.Sim = ObservedSim
-        try:
-            passed, reasons = check.check(sample)
-        finally:
-            robot.Sim = original_sim
-        if frame_count:
-            renderer.update_scene(observed.data, camera=camera)
-            final_frame = renderer.render()
-            for _ in range(fps):
-                writer.append_data(final_frame)
-            frame_count += fps
     if frame_count:
         partial.replace(video_path)
-    elif partial.exists():
-        partial.unlink()
+    else:
+        partial.unlink(missing_ok=True)
     report = {'id': args.sample_id, 'split': sample['split'], 'category': sample['category'],
-              'subcategory': sample['subcategory'], 'passed': passed, 'reasons': reasons,
-              'request': sample['user_prompt'].partition('\n')[2],
-              'message': response['message'],
-              'final_state': observed.state() if observed is not None else None,
-              'video': video_path.name if frame_count else None, 'frames': frame_count, 'fps': fps}
-    receipt = args.output / f'{args.sample_id}.json'
-    receipt.write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+              'subcategory': sample['subcategory'], 'passed': passed, 'stage': stage, 'reasons': reasons,
+              'request': sample['user_prompt'].partition('\n')[2], 'message': response['message'],
+              'initial_state': initial_state, 'final_state': observed.state() if observed is not None else None,
+              'held_object_ids': sorted(observed.held_objects(), key=int) if observed is not None else [],
+              'simulation_seconds': round(float(observed.data.time), 3) if observed is not None else None,
+              'video': video_path.name if frame_count else None, 'frames': frame_count, 'fps': FPS}
+    write_json(args.output / f'{args.sample_id}.json', report)
     return 0 if passed else 1
 
 

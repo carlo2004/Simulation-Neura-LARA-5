@@ -4,7 +4,7 @@ Interaktive MuJoCo-Simulation eines NEURA LARA 5 mit Greifer, Kontaktphysik und 
 
 ## Schnell starten
 
-Der **Prompt2Robo-Modus** spielt den HF-Datensatz im zugehörigen Simulator ab und exportiert die Splits im SFT-Format. [Einrichtung und Befehle](docs/prompt2robo.md) · [Replay-Videos](examples/prompt2robo-replays/)
+Der **Prompt2Robo-Modus** spielt die HF-Referenzprogramme auf derselben LARA-5-Simulation wie Demo und Live-Chat ab. Der SFT-Export kann auf erfolgreiche LARA-Replays beschränkt werden. [Einrichtung und Befehle](docs/prompt2robo.md) · [Replay-Videos](examples/prompt2robo-replays/)
 
 `python -m stacklab tasks list` zeigt die **Folgeaufgaben für einen bis fünf Würfel**. Die Pyramide lässt sich mit `python -m stacklab tasks run pyramid --code examples/pyramid.py --gui` ohne Modell ausprobieren. [Aufgabenkatalog und API](docs/tasks.md)
 
