@@ -4,6 +4,8 @@ Interaktive MuJoCo-Simulation eines NEURA LARA 5 mit Greifer, Kontaktphysik und 
 
 ## Schnell starten
 
+Der **Prompt2Robo-Modus** spielt den HF-Datensatz im zugehörigen Simulator ab und exportiert die Splits im SFT-Format. [Einrichtung und Befehle](docs/prompt2robo.md) · [Replay-Videos](examples/prompt2robo-replays/)
+
 `python -m stacklab tasks list` zeigt die **Folgeaufgaben für einen bis fünf Würfel**. Die Pyramide lässt sich mit `python -m stacklab tasks run pyramid --code examples/pyramid.py --gui` ohne Modell ausprobieren. [Aufgabenkatalog und API](docs/tasks.md)
 
 **Testlauf 2 auf A100:** [32 Rot-auf-Blau-Versuche je Modell, insgesamt 192 Episoden](docs/stack-study-v2.md). Das [Colab-Notebook](https://colab.research.google.com/github/carlo2004/Simulation-Neura-LARA-5/blob/main/notebooks/colab_stack_study_v2.ipynb) prüft zuerst den HF-Schreibzugriff und sichert jeden Versuch automatisch nach Drive und HF. Hinterlege `HF_TOKEN` als Colab-Secret. Nach Laufzeitverlust werden die Checkpoints wiederhergestellt; die Auswertung und Modellauswahl nimmst du selbst vor.

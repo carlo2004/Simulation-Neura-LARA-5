@@ -1,0 +1,15 @@
+{
+  "repository": "Carlo0001/Prompt2Robo",
+  "revision": "32360b8d733e9afc46062c3f421598381eb07c91",
+  "mujoco": "3.17.0",
+  "numpy": "2.4.6",
+  "files": {
+    "tools/scene.py": "59c26d2207beae651756be21c7c4e9388c269f3d39ca03cede1f10c0b6c33cd0",
+    "tools/robot.py": "11189a34603e5bb3ce1e6eddcdff46aaadb2412645483627126767e5fb36b7bb",
+    "tools/check.py": "b544302a96fcd5889b5453935b7f41d792c5cda26f55c95695da5fa189bdf9ec",
+    "data_v4/01_basic_single_explicit.jsonl": "37c0c98123366dcbaf6d1b8893470fc1f49a2c61a2c2ec73b2e0394ed3520e38",
+    "data_v4/02_single_explicit.jsonl": "0ee555652a93a2e19e23bbdff13dea80726b4d3e40fc797b3d572f51e484975a",
+    "data_v4/03_abstract.jsonl": "a8928ae7780a5cbfd46a38055c5f41da4901627bad4da036030c23e7d4385a0f",
+    "data_v4/04_edge_cases.jsonl": "c8546f1044959565c8462368ca956d19747c1513e101b5f5c0d5144d672f7493"
+  }
+}

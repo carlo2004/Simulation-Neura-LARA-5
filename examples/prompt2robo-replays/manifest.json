@@ -1,0 +1,315 @@
+{
+  "dataset": "Carlo0001/Prompt2Robo",
+  "revision": "32360b8d733e9afc46062c3f421598381eb07c91",
+  "split": "train",
+  "mode": "dataset_reference_replay",
+  "mujoco": "3.17.0",
+  "numpy": "2.4.6",
+  "results": [
+    {
+      "id": "bse-drop_height_position-000",
+      "split": "train",
+      "category": "basic_single_explicit",
+      "subcategory": "drop/height_position",
+      "passed": true,
+      "reasons": [],
+      "request": "Let the red cube drop from a height of 10 cm onto the position x = 0.55 m, y = -0.15 m.",
+      "message": "",
+      "final_state": {
+        "objects": {
+          "1": {
+            "color": "red",
+            "position": [
+              0.5509,
+              -0.15,
+              0.02
+            ]
+          },
+          "2": {
+            "color": "blue",
+            "position": [
+              0.5,
+              0.05,
+              0.02
+            ]
+          }
+        },
+        "gripper": {
+          "position": [
+            0.55,
+            -0.15,
+            0.2
+          ],
+          "angle_deg": 0.0,
+          "is_open": true
+        }
+      },
+      "video": "bse-drop_height_position-000.mp4",
+      "frames": 146,
+      "fps": 24,
+      "video_sha256": "b490eeb6367178a227249bb13fc2ec76bb90d179bfabc7fc0e1d06f8ef60f669",
+      "duration_s": 6.083333
+    },
+    {
+      "id": "abs-arrange_2d_line-000",
+      "split": "train",
+      "category": "abstract",
+      "subcategory": "arrange_2d/line",
+      "passed": true,
+      "reasons": [],
+      "request": "Put all four cubes in a line.",
+      "message": "",
+      "final_state": {
+        "objects": {
+          "1": {
+            "color": "red",
+            "position": [
+              0.3006,
+              -0.0,
+              0.02
+            ]
+          },
+          "2": {
+            "color": "blue",
+            "position": [
+              0.3607,
+              -0.0,
+              0.02
+            ]
+          },
+          "3": {
+            "color": "green",
+            "position": [
+              0.4207,
+              0.0,
+              0.02
+            ]
+          },
+          "4": {
+            "color": "yellow",
+            "position": [
+              0.4805,
+              0.0,
+              0.02
+            ]
+          }
+        },
+        "gripper": {
+          "position": [
+            0.48,
+            -0.0,
+            0.2
+          ],
+          "angle_deg": 0.0,
+          "is_open": true
+        }
+      },
+      "video": "abs-arrange_2d_line-000.mp4",
+      "frames": 487,
+      "fps": 24,
+      "video_sha256": "43a0a835412de5e9230d63d7835e7a1f3c921219eb3cf59f83581bca840ccb6f",
+      "duration_s": 20.291667
+    },
+    {
+      "id": "abs-pyramid_2_layer-000",
+      "split": "train",
+      "category": "abstract",
+      "subcategory": "pyramid/2_layer",
+      "passed": true,
+      "reasons": [],
+      "request": "Build a pyramid out of the three cubes.",
+      "message": "",
+      "final_state": {
+        "objects": {
+          "1": {
+            "color": "red",
+            "position": [
+              0.4,
+              0.0103,
+              0.02
+            ]
+          },
+          "2": {
+            "color": "blue",
+            "position": [
+              0.4,
+              0.0301,
+              0.06
+            ]
+          },
+          "3": {
+            "color": "yellow",
+            "position": [
+              0.4,
+              0.05,
+              0.02
+            ]
+          }
+        },
+        "gripper": {
+          "position": [
+            0.4,
+            0.03,
+            0.2
+          ],
+          "angle_deg": 90.0,
+          "is_open": true
+        }
+      },
+      "video": "abs-pyramid_2_layer-000.mp4",
+      "frames": 255,
+      "fps": 24,
+      "video_sha256": "088f51187166b0d33180bac1e6368b866f745941c5eed3c3eedd7fd1b62d4f68",
+      "duration_s": 10.625
+    },
+    {
+      "id": "abs-v4-referencing_top_beside_tower-001",
+      "split": "train",
+      "category": "abstract",
+      "subcategory": "referencing/top_beside_tower",
+      "passed": true,
+      "reasons": [],
+      "request": "Could you please take the uppermost cube of the stack and stand it on the table next to the stack?",
+      "message": "",
+      "final_state": {
+        "objects": {
+          "1": {
+            "color": "cyan",
+            "position": [
+              0.422,
+              -0.089,
+              0.1
+            ]
+          },
+          "6": {
+            "color": "red",
+            "position": [
+              0.552,
+              0.215,
+              0.02
+            ]
+          },
+          "9": {
+            "color": "white",
+            "position": [
+              0.422,
+              -0.089,
+              0.06
+            ]
+          },
+          "10": {
+            "color": "orange",
+            "position": [
+              0.422,
+              -0.089,
+              0.02
+            ]
+          },
+          "12": {
+            "color": "green",
+            "position": [
+              0.422,
+              -0.0386,
+              0.02
+            ]
+          }
+        },
+        "gripper": {
+          "position": [
+            0.422,
+            -0.039,
+            0.26
+          ],
+          "angle_deg": 90.0,
+          "is_open": true
+        }
+      },
+      "video": "abs-v4-referencing_top_beside_tower-001.mp4",
+      "frames": 157,
+      "fps": 24,
+      "video_sha256": "0ae61881bec904a0699e433ad3a17da647de789ec985f6d2f159be4ae3a44fb6",
+      "duration_s": 6.541667
+    },
+    {
+      "id": "sexp-v2-rotation_explicit_turn-001",
+      "split": "train",
+      "category": "single_explicit",
+      "subcategory": "chain/turn_gripper+move",
+      "passed": true,
+      "reasons": [],
+      "request": "Move the gripper 7 inches above the white cube and turn it to 45 degrees.",
+      "message": "",
+      "final_state": {
+        "objects": {
+          "3": {
+            "color": "orange",
+            "position": [
+              0.647,
+              0.246,
+              0.02
+            ]
+          },
+          "4": {
+            "color": "brown",
+            "position": [
+              0.343,
+              0.061,
+              0.02
+            ]
+          },
+          "5": {
+            "color": "white",
+            "position": [
+              0.393,
+              0.061,
+              0.02
+            ]
+          },
+          "6": {
+            "color": "brown",
+            "position": [
+              0.578,
+              0.099,
+              0.02
+            ]
+          }
+        },
+        "gripper": {
+          "position": [
+            0.393,
+            0.061,
+            0.1978
+          ],
+          "angle_deg": 45.0,
+          "is_open": true
+        }
+      },
+      "video": "sexp-v2-rotation_explicit_turn-001.mp4",
+      "frames": 47,
+      "fps": 24,
+      "video_sha256": "f303bb2b3974ce33e59f7479e374743c24d2591c69946c2f0b032aae591008d5",
+      "duration_s": 1.958333
+    },
+    {
+      "id": "edge-already_solved-000",
+      "split": "train",
+      "category": "edge_cases",
+      "subcategory": "already_solved",
+      "passed": true,
+      "reasons": [],
+      "request": "The red cube is lying on top of the blue cube. Stack the red cube on the blue cube.",
+      "message": "There is nothing to do, because the red cube is already stacked on the blue cube. On the table are 1 (red) and 2 (blue). Should I build something different instead, for example put the blue cube on top of the red one?",
+      "final_state": null,
+      "video": null,
+      "frames": 0,
+      "fps": 24
+    }
+  ],
+  "exported_splits": {
+    "train": 2093,
+    "eval": 102,
+    "eval_v2": 61,
+    "eval_v3": 92,
+    "eval_v4": 12
+  }
+}

@@ -12,6 +12,7 @@ COMMANDS = {
     "models": ("stacklab.cli.benchmark", "models"),
     "setup": ("stacklab.cli.benchmark", "setup"),
     "benchmark": ("stacklab.cli.benchmark", "test"),
+    "prompt2robo": ("stacklab.cli.prompt2robo", None),
     "tasks": ("stacklab.cli.tasks", None),
     "experiment": ("stacklab.cli.experiment", None),
     "share": ("stacklab.cli.share", None),
