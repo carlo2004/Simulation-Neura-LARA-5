@@ -20,7 +20,6 @@ from stacklab.cli.prompt2robo import (CHECKER, LOCK, read_samples,
                                      replay_environment, response_for, source_files)
 from stacklab.llm.metrics import GenerationMetrics
 from stacklab.llm.remote import RemoteModel, endpoint
-from stacklab.llm.responses import parse_reply
 from stacklab.paths import ROOT
 
 WEB = ROOT / 'web/public'
@@ -103,8 +102,14 @@ def decode_answer(raw):
             raise ValueError('Expected one fenced response')
         answer = block[1].strip()
     if answer.startswith('{'):
-        reply = parse_reply(answer)
-        code, message = reply['code'].strip(), reply['message'].strip()
+        try:
+            reply = json.loads(answer)
+        except json.JSONDecodeError as error:
+            raise ValueError('Invalid JSON response. Return one JSON object or a Python function.') from error
+        code, message = reply.get('code'), reply.get('message', '')
+        if not isinstance(code, str) or not isinstance(message, str):
+            raise ValueError('Expected a code string and an optional message string')
+        code, message = code.strip(), message.strip()
     elif fenced or re.search(r'(?m)^[ \t]*(?:async[ \t]+)?def\b', answer):
         code, message = answer, ''
     else:

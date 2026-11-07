@@ -43,6 +43,10 @@ class WorkbenchTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'empty'):
             decode_answer('  ')
 
+    def test_mixed_json_and_python_is_reported_as_invalid_json(self):
+        with self.assertRaisesRegex(ValueError, 'Invalid JSON response'):
+            decode_answer('{}\ndef run(robot):\n    robot.open_gripper()')
+
     def test_comparison_sends_native_user_messages_for_both_sides(self):
         sample = {'id': 'scene', 'user_prompt': 'Objects: 1 (red), 3 (blue)\nStack the cubes.\n',
                   'scene': {'objects': {'1': {'position': [.4, .1, .02]}}},

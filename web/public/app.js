@@ -1,5 +1,6 @@
 const get = (id) => document.getElementById(id);
 const protocol = 'stacklab-workbench-v1';
+const promptFormat = 'prompt2robo-hf-text-v1';
 const redOnBlue = 'bse-drop_onto_cube-000';
 const replayTitles = {
   [redOnBlue]: 'Rot auf Blau',
@@ -133,10 +134,13 @@ get('connect-form').addEventListener('submit', async (event) => {
     if (data.lane_prompts !== true) {
       throw new Error('Der Runner braucht ein Update. Repo aktualisieren und Runner neu starten.');
     }
+    if (data.models.length && data.prompt_format !== promptFormat) {
+      throw new Error('Der Modellvergleich braucht das Prompt2Robo-HF-Format. Colab-Repo aktualisieren und Runner neu starten.');
+    }
     connection = { url, key };
     get('key').value = '';
     get('connection').open = false;
-    get('connection-status').textContent = 'Runner verbunden';
+    get('connection-status').textContent = data.prompt_format === promptFormat ? 'Runner verbunden · HF' : 'Runner verbunden';
     for (const [index, side] of Object.keys(lanes).entries()) {
       const model = lanes[side].model;
       model.replaceChildren(...data.models.map(({ id, label }) => option(label, id)));

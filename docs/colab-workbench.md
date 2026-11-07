@@ -82,6 +82,7 @@ Teile die ausgegebene HTTPS-Adresse mit dem Team und übermittle den LARA-Sitzun
 
 ## Wenn der Start hängt
 
+- **`Unsupported Python construct: FunctionDef`**. `def run(robot)` ist die vorgesehene Modellantwort. Beende den aktiven Runner und starte ihn mit dem aktuellen Notebook oder aus einem auf `main` aktualisierten Colab-Checkout. Nach erneutem Verbinden zeigt die Workbench **Runner verbunden · HF**.
 - **Zelle 2 meldet `CalledProcessError` bei `bootstrap.py`**. Öffne die aktuelle Notebook-Version, übernimm deine Einstellungen aus Zelle 1 und führe die Einrichtung erneut aus. Zelle 2 erstellt oder repariert die Projektumgebung mit `uv`, auch wenn dem Colab-Python `ensurepip` fehlt. Bei einem weiteren Fehler stehen der betroffene Befehl und seine Ausgabe direkt unter der Zelle.
 - **Datei fehlt**. Prüfe den tatsächlichen Pfad in Colab. Ein PEFT-Adapter im Safetensors-Format braucht zuerst einen GGUF-Export.
 - **GPU oder Speicher reicht nicht**. Beginne mit dem Referenzmodus und prüfe die Größe beider GGUF-Dateien. Der Runner startet beide Modelle auf derselben GPU.
