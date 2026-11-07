@@ -82,6 +82,7 @@ Teile die ausgegebene HTTPS-Adresse mit dem Team und übermittle den LARA-Sitzun
 
 ## Wenn der Start hängt
 
+- **Zelle 2 meldet `CalledProcessError` bei `bootstrap.py`**. Öffne die aktuelle Notebook-Version, übernimm deine Einstellungen aus Zelle 1 und führe die Einrichtung erneut aus. Zelle 2 erstellt oder repariert die Projektumgebung mit `uv`, auch wenn dem Colab-Python `ensurepip` fehlt. Bei einem weiteren Fehler stehen der betroffene Befehl und seine Ausgabe direkt unter der Zelle.
 - **Datei fehlt**. Prüfe den tatsächlichen Pfad in Colab. Ein PEFT-Adapter im Safetensors-Format braucht zuerst einen GGUF-Export.
 - **GPU oder Speicher reicht nicht**. Beginne mit dem Referenzmodus und prüfe die Größe beider GGUF-Dateien. Der Runner startet beide Modelle auf derselben GPU.
 - **Runner wurde nicht bereit**. Das Startprotokoll steht unter `/content/lara-workbench/runner.log`. Ein erster CUDA-Quellbuild kann mehrere Minuten dauern.
