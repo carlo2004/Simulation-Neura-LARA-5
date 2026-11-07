@@ -10,7 +10,7 @@ Für die interaktive Nutzung ist eine Colab-Pro-Laufzeit mit positivem Rechenein
 2. Lege links unter **Secrets** `STACKLAB_WORKBENCH_TOKEN` an und aktiviere den Zugriff für das Notebook. Verwende einen zufälligen Schlüssel mit mindestens 24 URL-sicheren Zeichen. Den kannst du lokal mit `python -c "import secrets; print(secrets.token_urlsafe(24))"` erzeugen. Dieser Schlüssel gehört zum LARA-Runner.
 3. Lass in Zelle 1 die Modellpfade für den ersten Test leer. Für den Vergleich setze `BASE_GGUF` und `TUNED_GGUF`. Bei einem kompatiblen GGUF-LoRA setzt du `LORA_GGUF` anstelle von `TUNED_GGUF`. Dateien in Drive kannst du mit einem Pfad wie `/content/drive/MyDrive/LARA/base.gguf` angeben. Die Einrichtungszelle bindet Drive bei Bedarf ein.
 4. Führe die Zellen 1 bis 4 aus. Warte auf **Runner bereit**. In der Vorschau unter Zelle 4 **Runner verbinden** wählen, URL leer lassen und den Sitzungsschlüssel eingeben.
-5. Wähle **Rot auf Blau**. Unter **Startkoordinaten und Python** auf **Referenz ausführen** klicken. Mit geladenen Modellen kannst du danach A und B einzeln oder gemeinsam starten.
+5. Wähle **Rot auf Blau** und klicke auf **Referenzprogramm ausführen**. Mit geladenen Modellen kannst du danach einzelne Modelle oder beide mit demselben Prompt testen.
 
 Die Colab-Vorschau ist für deine eigene Notebook-Sitzung gedacht. Für einen Team-Link verwende den folgenden Ablauf mit einer per CLI angelegten Laufzeit.
 
@@ -82,7 +82,7 @@ Teile die HTTPS-Adresse und den LARA-Sitzungsschlüssel getrennt. Öffnet die ng
 
 ## Wenn der Start hängt
 
-- **`Unsupported Python construct: FunctionDef`**. `def run(robot)` ist die vorgesehene Modellantwort. Beende den aktiven Runner und starte ihn mit dem aktuellen Notebook oder aus einem auf `main` aktualisierten Colab-Checkout. Nach erneutem Verbinden zeigt die Workbench **Runner verbunden · HF**.
+- **`Unsupported Python construct: FunctionDef`**. `def run(robot)` ist die vorgesehene Modellantwort. Beende den aktiven Runner und starte ihn mit dem aktuellen Notebook oder aus einem auf `main` aktualisierten Colab-Checkout.
 - **Zelle 2 meldet `CalledProcessError` bei `bootstrap.py`**. Öffne die aktuelle Notebook-Version, übernimm deine Einstellungen aus Zelle 1 und führe die Einrichtung erneut aus. Zelle 2 erstellt oder repariert die Projektumgebung mit `uv`, auch wenn dem Colab-Python `ensurepip` fehlt. Bei einem weiteren Fehler stehen der betroffene Befehl und seine Ausgabe direkt unter der Zelle.
 - **Datei fehlt**. Prüfe den tatsächlichen Pfad in Colab. Ein PEFT-Adapter im Safetensors-Format braucht zuerst einen GGUF-Export.
 - **GPU oder Speicher reicht nicht**. Beginne mit dem Referenzmodus und prüfe die Größe beider GGUF-Dateien. Der Runner startet beide Modelle auf derselben GPU.

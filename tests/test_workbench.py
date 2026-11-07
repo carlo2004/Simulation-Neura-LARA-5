@@ -48,12 +48,14 @@ class WorkbenchTests(unittest.TestCase):
 
     def test_comparison_sends_native_user_messages_for_both_sides(self):
         sample = {'id': 'scene', 'user_prompt': 'Objects: 1 (red), 3 (blue)\nStack the cubes.\n',
+                  'split': 'train', 'subcategory': 'stack', 'expected_behavior': 'execute',
                   'scene': {'objects': {'1': {'position': [.4, .1, .02]}}},
                   'destination': 'private goal', 'assistant_answer': 'private reference'}
         handler = Handler.__new__(Handler)
         handler.server = SimpleNamespace(
-            system='HF system prompt', lock={'repository': 'fixture', 'revision': 'abc'},
-            models={'base': {'label': 'Base'}, 'tuned': {'label': 'Fine-Tuning'}}, checker=Path('check.py'))
+            system='HF system prompt', lock={'repository': 'fixture', 'revision': 'abc'}, git_revision='def',
+            models={'base': {'label': 'Base', 'model': 'base'}, 'tuned': {'label': 'Fine-Tuning', 'model': 'tuned'}},
+            checker=Path('check.py'))
         handler.wfile = BytesIO()
         for name in ('send_response', 'send_header', 'end_headers'):
             setattr(handler, name, lambda *args: None)
@@ -62,7 +64,8 @@ class WorkbenchTests(unittest.TestCase):
         message = 'Which cube should I move?'
         answers = [(code, {}, 'base', 'stop'), (message, {}, 'tuned', 'stop')]
         with patch('stacklab.cli.workbench.completion', side_effect=answers) as generate, \
-                patch('stacklab.cli.workbench.simulate', return_value={}) as simulate:
+                patch('stacklab.cli.workbench.simulate', return_value={}) as simulate, \
+                patch('stacklab.cli.workbench.write_json') as save:
             handler.stream_job('compare', sample, '', [('left', 'base', 'Stack the cubes.'),
                                                       ('right', 'tuned', 'Move up.')])
 
@@ -75,6 +78,35 @@ class WorkbenchTests(unittest.TestCase):
         self.assertEqual(simulate.call_args_list[1].args[2], {'code': '', 'message': message})
         self.assertFalse(simulate.call_args_list[0].kwargs['unscored'])
         self.assertTrue(simulate.call_args_list[1].kwargs['unscored'])
+        report = json.loads(handler.wfile.getvalue().splitlines()[-1])['report']
+        self.assertEqual(report, save.call_args.args[1])
+        self.assertEqual(report['runner_revision'], 'def')
+        self.assertEqual(report['results']['left']['model_identity']['api_model'], 'base')
+        self.assertEqual(report['results']['right']['user_prompt'], 'Objects: 1 (red), 3 (blue)\nMove up.')
+
+    def test_run_trace_separates_malformed_replies_from_execution(self):
+        handler = Handler.__new__(Handler)
+        handler.server = SimpleNamespace(checker=Path('check.py'))
+        invalid = '{"code":'
+        output = {'actions': [], 'scored': True, 'metrics': {}}
+        with patch('stacklab.cli.workbench.completion', return_value=(invalid, {}, 'base', 'stop')), \
+                patch('stacklab.cli.workbench.simulate') as simulate:
+            handler.run_lane('single', {}, '', {'model': 'base'}, [], output, 'run', lambda *a, **kw: None)
+        simulate.assert_not_called()
+        self.assertEqual(output['raw'], invalid)
+        self.assertEqual(output['error_stage'], 'response')
+
+        step = {'method': 'move_to', 'args': [.4, .1, .2], 'time_s': 1.0, 'step': 1, 'status': 'error'}
+
+        def failed_motion(checker, sample, reply, directory, emit, **kwargs):
+            emit('action', **step)
+            return {'passed': False, 'stage': 'execution', 'reasons': ['Target unreachable']}
+
+        output = {'actions': [], 'scored': True, 'metrics': {}}
+        with patch('stacklab.cli.workbench.simulate', side_effect=failed_motion):
+            handler.run_lane('code', {}, 'def run(robot):\n    pass', None, [], output, 'run', lambda *a, **kw: None)
+        self.assertEqual(output['actions'], [step])
+        self.assertEqual(output['check']['stage'], 'execution')
 
     def test_model_policy_uses_helpers_positions_and_bounded_loops(self):
         robot = Robot()
@@ -112,6 +144,13 @@ class WorkbenchTests(unittest.TestCase):
             model = {'label': 'Base', 'protocol': 'openai', 'url': 'http://127.0.0.1:8081/v1', 'model': 'base'}
             path.write_text(json.dumps({'base': model}), encoding='utf-8')
             self.assertEqual(load_models(path), {'base': model})
+            model['weights'] = {'file': 'Model-Q4_K_M.gguf', 'sha256': 'a' * 64, 'bytes': 123}
+            path.write_text(json.dumps({'base': model}), encoding='utf-8')
+            self.assertEqual(load_models(path), {'base': model})
+            model['weights']['file'] = '/private/Model-Q4_K_M.gguf'
+            path.write_text(json.dumps({'base': model}), encoding='utf-8')
+            with self.assertRaisesRegex(ValueError, 'weights identity'):
+                load_models(path)
             model['url'] = 'https://external.example/v1'
             path.write_text(json.dumps({'base': model}), encoding='utf-8')
             with self.assertRaisesRegex(ValueError, 'loopback'):
@@ -120,7 +159,7 @@ class WorkbenchTests(unittest.TestCase):
     def test_paired_and_individual_jobs_keep_prompts_on_their_side(self):
         original = {'id': 'scene', 'user_prompt': 'Objects: 1 (red)\nStack the cubes.'}
         handler = Handler.__new__(Handler)
-        handler.server = SimpleNamespace(cases={'scene': original}, models={'base': {}, 'tuned': {}})
+        handler.server = SimpleNamespace(samples={'scene': original}, models={'base': {}, 'tuned': {}})
 
         def job(**values):
             body = json.dumps(dict(task='scene', **values)).encode()

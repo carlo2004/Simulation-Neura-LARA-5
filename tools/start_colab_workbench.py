@@ -14,7 +14,7 @@ import sys
 from tempfile import mkdtemp
 import time
 
-from stacklab.llm.catalog import cuda_runtime, install_cuda_runtime, runtime_env
+from stacklab.llm.catalog import cuda_runtime, install_cuda_runtime, runtime_env, sha256
 from stacklab.llm.hardware import check_cuda_backend, gpu_inventory, gpu_offload
 from stacklab.paths import ROOT, RUNS_ROOT
 
@@ -24,6 +24,10 @@ def gguf(path):
     if not path.is_file() or path.suffix.lower() != '.gguf':
         raise ValueError(f'Expected an existing .gguf file: {path}')
     return path
+
+
+def gguf_identity(path):
+    return dict(file=path.name, sha256=sha256(path), bytes=path.stat().st_size)
 
 
 def stop(process):
@@ -106,8 +110,8 @@ def main(argv=None):
         env = dict(os.environ, MUJOCO_GL=args.render, PYOPENGL_PLATFORM=args.render)
         preflight = (
             'from contextlib import closing; import mujoco; from stacklab.sim.robot import Simulation\n'
-            'with closing(Simulation()) as sim, mujoco.Renderer(sim.model, 120, 160) as renderer:\n'
-            '    assert sim.render_frame(renderer).shape == (120, 160, 3)\n'
+            'with closing(Simulation()) as sim, mujoco.Renderer(sim.model, 720, 960) as renderer:\n'
+            '    assert sim.render_frame(renderer).shape == (720, 960, 3)\n'
         )
         subprocess.run([sys.executable, '-c', preflight], cwd=ROOT, env=env, check=True)
         command = [sys.executable, '-m', 'stacklab', 'workbench', '--port', str(args.port),
@@ -130,13 +134,18 @@ def main(argv=None):
                 directory = Path(mkdtemp(prefix='colab-workbench-', dir=RUNS_ROOT))
                 models = {}
                 tuned_weights = tuned or (base if adapter else None)
+                artifacts = {path: gguf_identity(path) for path in dict.fromkeys(
+                    path for path in (base, tuned, adapter) if path is not None)}
                 for key, label, weights, lora in (
                         ('base', 'Basismodell', base, None),
                         ('tuned', 'Fine-Tuning', tuned_weights, adapter)):
                     if weights:
                         url = launch_model(executable, model_env, weights, lora, key,
                                            directory/(key + '.log'), cleanup, args.gpu_layers)
-                        models[key] = dict(label=label, protocol='openai', url=url, model=key)
+                        models[key] = dict(label=label, protocol='openai', url=url, model=key,
+                                           weights=artifacts[weights])
+                        if lora:
+                            models[key]['adapter'] = artifacts[lora]
                 catalog = directory/'models.json'
                 catalog.write_text(json.dumps(models, indent=2)+'\n', encoding='utf-8')
                 command.extend(['--models', str(catalog)])

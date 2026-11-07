@@ -1,8 +1,16 @@
 # LARA 5 im Browser
 
-Mit **A starten** oder **B starten** kannst du ein Modell testen. **Beide starten** führt die Läufe nacheinander aus derselben Startszene aus. **Prompt A → B** übernimmt den Auftrag für einen direkten Vergleich.
+Wähle eine Startszene und prüfe Würfel und Greifer in der Draufsicht. **Beide testen** führt die Läufe nacheinander aus derselben Startszene aus. **Gleicher Prompt für beide Modelle** ist voreingestellt. Schalte die Option aus, um pro Seite einen anderen Auftrag einzugeben.
 
-Der unveränderte Datensatzauftrag erhält eine Zielprüfung. Bei eigenen Aufträgen siehst du das Programm, die Bewegung und den Endzustand. Unter **Aufnahmen und Berichte** findest du die Referenzvideos und den JSON-Export. Ein Vergleichsbericht enthält Startszene, Prompts, erzeugten Code, Zielprüfung, Generierungszeit und Tokens pro Sekunde.
+Der unveränderte Datensatzauftrag erhält eine Zielprüfung. Bei eigenen Aufträgen siehst du das Programm, die Bewegung und den Endzustand. **Referenzprogramm ausführen** führt die Antwort aus dem Datensatz aus. Für die sechs aufgezeichneten Szenen kannst du außerdem das Referenzvideo ohne Runner abspielen.
+
+## Trainingsdaten
+
+Die Workbench lädt die verifizierten Trainingszeilen aus der in [`prompt2robo.lock.json`](../config/prompt2robo.lock.json) festgelegten Revision. Sie zeigt die Nutzereingabe, die Referenzantwort und die Startszene. Ein aktueller Runner kann die gewählte Trainingsszene ausführen. Der Viewer zeigt `data_v4`. Der genaue Trainingsstand eines Checkpoints ergibt sich aus seiner Modellkarte.
+
+## Laufberichte
+
+**Programm und Protokoll** zeigt den Auftrag, die erzeugte Antwort, die Roboterbefehle mit Simulationszeit und die Zustände vor und nach dem Lauf. Fehler beim Antworten, beim Ausführen und bei der Zielprüfung sind separat erkennbar. **Laufbericht speichern** exportiert die Lauf-ID, Prompts, Modellkennung, Messwerte und die Endbilder als JSON. Der Runner schreibt den Bericht anhand derselben ID nach `runs/workbench/`. Bei einem Abbruch können Teile des Berichts fehlen.
 
 ## Modellformat
 
@@ -12,9 +20,9 @@ Für den Vergleich des Trainingseffekts verwende den Ausgangscheckpoint des Fine
 
 ## Runner starten
 
-Für Colab und den Team-Zugang folge der [Schritt-für-Schritt-Anleitung](colab-workbench.md). Nach dem Verbinden mit einem aktuellen Modellrunner zeigt die Oberfläche **Runner verbunden · HF**.
+Für Colab und den Team-Zugang folge der [Schritt-für-Schritt-Anleitung](colab-workbench.md). Der Colab-Starter berechnet beim Start den SHA-256-Fingerabdruck der geladenen GGUF-Dateien und eines gegebenenfalls geladenen LoRA-Adapters. Die Workbench zeigt die Dateinamen direkt an. Unter **Modellkennung** stehen die Prüfsummen und die API-ID.
 
-Wenn bereits OpenAI-kompatible Modellserver laufen, verwende deren Loopback-Adressen in einer Kopie der [Beispielkonfiguration](../config/workbench-models.example.json). `model` ist die vom jeweiligen Server erwartete ID. Ein optionales `api_key_env` verweist auf eine Umgebungsvariable des Runners.
+Wenn bereits OpenAI-kompatible Modellserver laufen, verwende deren Loopback-Adressen in einer Kopie der [Beispielkonfiguration](../config/workbench-models.example.json). `model` ist die vom jeweiligen Server erwartete ID. Ein optionales `api_key_env` verweist auf eine Umgebungsvariable des Runners. Falls nur die API-ID bekannt ist, zeigt die Workbench sie als solche an.
 
 ~~~bash
 .venv/bin/python -m stacklab workbench --models runs/workbench-models.json

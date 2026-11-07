@@ -1,4 +1,7 @@
-const get = (id) => document.getElementById(id);
+import { categoryNames, get, showScene } from './scene.js';
+import { trainingViewer } from './training.js';
+import { resetLane, showFrame, showMetrics, showModel, showResult } from './run-view.js';
+
 const protocol = 'stacklab-workbench-v1';
 const promptFormat = 'prompt2robo-hf-text-v1';
 const redOnBlue = 'bse-drop_onto_cube-000';
@@ -6,37 +9,62 @@ const replayTitles = {
   [redOnBlue]: 'Rot auf Blau',
   'abs-pyramid_2_layer-000': 'Pyramide',
   'abs-arrange_2d_line-000': 'Viererlinie',
-  'abs-stack_cube_on_cube-117': 'Stapel mit Drehung',
-  'bse-drop_height_position-000': 'Fall aus 10 cm',
+  'abs-stack_cube_on_cube-117': 'Stapel mit Greiferdrehung',
+  'bse-drop_height_position-000': 'Würfel aus 10 cm fallen lassen',
   'sexp-v2-rotation_explicit_turn-001': 'Greiferdrehung',
 };
 const laneNames = { left: 'Basismodell', right: 'Fine-Tuning' };
 const lanes = {};
-let cases = [];
+const cases = new Map();
+const videos = new Map();
+let scene = null;
 let connection = null;
 let connecting = false;
 let active = null;
 let report = null;
 
-function option(text, value) {
-  return new Option(text, value);
-}
-
 for (const [side, label] of Object.entries(laneNames)) {
   const node = get('lane-template').content.firstElementChild.cloneNode(true);
   const parts = Object.fromEntries(
-    ['lane-title', 'lane-state', 'model', 'prompt', 'start', 'frame', 'frame-label', 'clock', 'score',
-      'rate', 'duration', 'feedback', 'program', 'output'].map((name) => [name, node.querySelector('.' + name)]));
+    ['lane-title', 'lane-state', 'model', 'model-note', 'model-details', 'model-identity',
+      'lane-prompt', 'prompt', 'start', 'frame', 'frame-label', 'clock', 'score', 'rate', 'duration',
+      'feedback', 'run-model', 'output', 'run-facts', 'program', 'action-log', 'action-title', 'actions',
+      'raw-log', 'raw', 'state-log', 'states'].map((name) => [name, node.querySelector('.' + name)]));
   parts['lane-title'].textContent = label;
-  parts.prompt.setAttribute('aria-label', 'Prompt ' + label);
-  parts.model.setAttribute('aria-label', 'Modell ' + label);
-  parts.start.textContent = side === 'left' ? 'A starten' : 'B starten';
+  parts.prompt.setAttribute('aria-label', 'Prompt für ' + label);
+  parts.prompt.addEventListener('input', controls);
+  parts.model.setAttribute('aria-label', 'Modell für ' + label);
+  parts.model.add(new Option('Runner verbinden', ''));
+  parts.model.addEventListener('change', () => {
+    showModel(parts, connection?.models.get(parts.model.value));
+    resetLane(parts);
+    controls();
+  });
+  parts.start.textContent = label + ' testen';
   parts.start.addEventListener('click', () => run('single', side));
-  parts.model.add(option('Runner verbinden', ''));
-  parts.model.addEventListener('change', controls);
   get('lanes').append(node);
   lanes[side] = parts;
 }
+
+function showTab(training) {
+  get('compare').hidden = training;
+  get('training').hidden = !training;
+  get('show-compare').setAttribute('aria-pressed', String(!training));
+  get('show-training').setAttribute('aria-pressed', String(training));
+  if (training) viewer.load();
+}
+
+const viewer = trainingViewer((row) => {
+  if (active) return;
+  get('scene-search').value = '';
+  get('scene-filter').value = '';
+  cases.set(row.id, row);
+  selectScene(row);
+  showTab(false);
+  get('task').focus();
+});
+get('show-compare').addEventListener('click', () => showTab(false));
+get('show-training').addEventListener('click', () => showTab(true));
 
 get('code-input').value = `def run(robot):
     x, y, z = robot.get_gripper_position()
@@ -44,60 +72,146 @@ get('code-input').value = `def run(robot):
 `;
 
 function notify(text, error = false) {
-  get('notice').textContent = text;
-  get('notice').classList.toggle('error', error);
+  const notice = get('notice');
+  notice.textContent = text;
+  notice.hidden = !text;
+  notice.classList.toggle('error', error);
+}
+
+function prompt(side) {
+  const value = get('shared').checked ? get('shared-prompt').value : lanes[side].prompt.value;
+  return value.trim() || scene?.request?.trim() || '';
+}
+
+function canRun() {
+  if (!connection || !scene) return false;
+  if (scene.revision && (scene.revision !== connection.revision || scene.dataset !== connection.dataset)) return false;
+  return connection.cases.has(scene.id) || (scene.file && connection.trainingCases);
 }
 
 function controls() {
-  const ready = Boolean(connection && get('task').value && !active);
+  const busy = Boolean(active);
+  const ready = canRun() && !busy && !connecting;
   const left = lanes.left.model.value;
   const right = lanes.right.model.value;
+  const shared = get('shared').checked;
+  const original = scene?.request?.trim();
+  const changed = Boolean(scene && (prompt('left') !== original || prompt('right') !== original));
   get('run').disabled = !(ready && left && right && left !== right);
   get('reference').disabled = !ready;
   get('run-code').disabled = !ready;
-  get('stop').hidden = !active;
-  get('export').disabled = !report || Boolean(active);
-  get('task').disabled = Boolean(active);
-  get('copy-prompt').disabled = Boolean(active) || !get('task').value;
-  get('code-input').disabled = Boolean(active);
-  get('connect').disabled = connecting || Boolean(active);
-  get('import').disabled = Boolean(active);
+  get('stop').hidden = !busy;
+  get('export').disabled = !report || busy;
+  get('report-id').textContent = report?.id ? 'Lauf ' + report.id : '';
+  get('shared-field').hidden = !shared;
+  get('shared-prompt').disabled = busy || !scene;
+  get('shared').disabled = busy || !scene;
+  get('reset-prompt').hidden = !changed;
+  get('reset-prompt').disabled = busy;
+  get('scoring').textContent = !scene ? '' : connection && !canRun() ? 'Szene und Runner benötigen dieselbe Datensatzrevision.'
+    : changed ? 'Eigene Prompts ohne Zielprüfung' : 'Datensatzprompt mit Zielprüfung';
+  get('task').disabled = busy || ![...get('task').options].some((item) => item.value);
+  for (const id of ['scene-search', 'scene-filter', 'code-input', 'import']) get(id).disabled = busy;
+  get('connect').disabled = connecting || busy;
+  viewer.setBusy(busy);
   for (const lane of Object.values(lanes)) {
     lane.start.disabled = !ready || !lane.model.value;
-    lane.model.disabled = !ready || !lane.model.value;
-    lane.prompt.disabled = Boolean(active);
+    lane.model.disabled = busy || !connection?.models.size;
+    lane['lane-prompt'].hidden = shared;
+    lane.prompt.disabled = busy || !scene;
   }
 }
 
-function showCase(resetPrompts = true) {
-  const selected = cases.find((item) => item.id === get('task').value);
-  if (resetPrompts) {
-    for (const lane of Object.values(lanes)) lane.prompt.value = selected?.request ?? '';
-    resetLanes();
-  }
-  const objects = Object.entries(selected?.scene?.objects ?? {});
-  get('objects').replaceChildren(...objects.map(([id, object]) => {
-    const item = document.createElement('li');
-    item.textContent = '#' + id + ' ' + object.color + '  [' + object.position.join(', ') + '] m';
-    return item;
-  }));
+function resetPrompts() {
+  get('shared-prompt').value = scene?.request ?? '';
+  for (const lane of Object.values(lanes)) lane.prompt.value = get('shared-prompt').value;
   controls();
 }
 
-function setCases(items) {
-  const previous = get('task').value;
-  cases = items;
-  get('task').replaceChildren(...items.map((item) => option(
-    (replayTitles[item.id] ?? item.id) + ' · ' + item.split, item.id)));
-  if (items.some((item) => item.id === previous)) get('task').value = previous;
-  else if (items.some((item) => item.id === redOnBlue)) get('task').value = redOnBlue;
-  showCase(previous !== get('task').value);
+get('shared').addEventListener('change', () => {
+  if (get('shared').checked) get('shared-prompt').value = lanes.left.prompt.value;
+  else for (const lane of Object.values(lanes)) lane.prompt.value = get('shared-prompt').value;
+  controls();
+});
+get('shared-prompt').addEventListener('input', controls);
+get('reset-prompt').addEventListener('click', resetPrompts);
+
+function sceneName(item) {
+  return replayTitles[item.id] || item.request?.trim() || item.id;
 }
 
-get('task').addEventListener('change', () => showCase());
-get('copy-prompt').addEventListener('click', () => {
-  lanes.right.prompt.value = lanes.left.prompt.value;
+function listScenes() {
+  const search = get('scene-search').value.trim().toLowerCase();
+  const filter = get('scene-filter').value;
+  const items = [...cases.values()].filter((item) => {
+    if (filter === 'video' && !videoFor(item)) return false;
+    if (filter && filter !== 'video' && item.split !== filter) return false;
+    return [sceneName(item), item.id, item.subcategory, categoryNames[item.category], item.request]
+      .join(' ').toLowerCase().includes(search);
+  });
+  const task = get('task');
+  task.replaceChildren(...items.map((item) => new Option(sceneName(item), item.id)));
+  if (!items.some((item) => item.id === scene?.id)) {
+    task.prepend(new Option(items.length ? 'Szene auswählen' : 'Keine Szenen gefunden', ''));
+  }
+  task.value = items.some((item) => item.id === scene?.id) ? scene.id : '';
+  controls();
+}
+
+function videoFor(item) {
+  const video = videos.get(item.id);
+  if (video && item.revision === video.revision && item.dataset === video.dataset) return video.url;
+}
+
+function selectScene(item, reset = true) {
+  if (!item) return;
+  scene = item;
+  const split = item.split === 'train' ? 'Training' : item.split === 'eval_v4' ? 'Evaluation · eval_v4' : item.split;
+  get('scene-id').textContent = [split, item.id].filter(Boolean).join(' · ');
+  get('scene-request').textContent = item.request;
+  showScene(get('scene-preview'), item.scene);
+  const recording = get('recording');
+  const player = get('proof-player');
+  const source = videoFor(item);
+  recording.hidden = !source;
+  if (source !== player.getAttribute('src')) {
+    recording.open = false;
+    player.pause();
+    player.removeAttribute('src');
+    if (source) player.src = source;
+    player.load();
+  }
+  if (reset) {
+    resetPrompts();
+    for (const lane of Object.values(lanes)) resetLane(lane);
+    notify('');
+  }
+  listScenes();
+}
+
+get('task').addEventListener('change', () => {
+  const item = cases.get(get('task').value);
+  if (item) selectScene(item);
 });
+get('scene-search').addEventListener('input', listScenes);
+get('scene-filter').addEventListener('change', listScenes);
+
+async function replays() {
+  const response = await checked(await fetch('proof/manifest.json'));
+  const manifest = await response.json();
+  if (manifest.video_playback_speed > 1) {
+    get('recording').querySelector('summary').textContent = 'Referenzvideo · ' + manifest.video_playback_speed + '×';
+  }
+  for (const item of manifest.results) {
+    if (!/^[\w-]+\.mp4$/.test(item.video ?? '')) continue;
+    const origin = { dataset: manifest.dataset, revision: manifest.revision };
+    videos.set(item.id, { ...origin, url: 'proof/' + item.video });
+    if (!cases.has(item.id)) cases.set(item.id, { ...item, ...origin, scene: item.initial_state });
+  }
+  if (scene) selectScene(scene, false);
+  else if (cases.has(redOnBlue)) selectScene(cases.get(redOnBlue));
+  else listScenes();
+}
 
 function runnerOrigin(value) {
   const url = new URL(value.trim() || location.origin);
@@ -118,8 +232,10 @@ async function checked(response) {
 get('connect-form').addEventListener('submit', async (event) => {
   event.preventDefault();
   if (active || connecting) return;
+  const errorLine = get('connection-error');
+  errorLine.hidden = true;
   connecting = true;
-  get('connect').disabled = true;
+  controls();
   try {
     const url = runnerOrigin(get('runner').value);
     const key = get('key').value.trim();
@@ -127,88 +243,52 @@ get('connect-form').addEventListener('submit', async (event) => {
       headers: { Authorization: 'Bearer ' + key }, cache: 'no-store', redirect: 'error',
       signal: AbortSignal.timeout(8000),
     }));
+    if (!response.headers.get('content-type')?.startsWith('application/json')) {
+      throw new Error('Kein Runner-Katalog empfangen. Bei ngrok zuerst „Visit Site“ öffnen.');
+    }
     const data = await response.json();
     if (data.protocol !== protocol || !Array.isArray(data.models) || !Array.isArray(data.cases)) {
       throw new Error('Unter dieser Adresse läuft kein kompatibler LARA Runner.');
     }
-    if (data.lane_prompts !== true) {
-      throw new Error('Der Runner braucht ein Update. Repo aktualisieren und Runner neu starten.');
+    if (data.lane_prompts !== true || (data.models.length && data.prompt_format !== promptFormat)) {
+      throw new Error('Für das Prompt2Robo-Format bitte das Colab-Repo aktualisieren und den Runner neu starten.');
     }
-    if (data.models.length && data.prompt_format !== promptFormat) {
-      throw new Error('Der Modellvergleich braucht das Prompt2Robo-HF-Format. Colab-Repo aktualisieren und Runner neu starten.');
-    }
-    connection = { url, key };
+    connection = { url, key, dataset: data.dataset, revision: data.revision, trainingCases: data.training_cases,
+      cases: new Set(data.cases.map((item) => item.id)), models: new Map(data.models.map((item) => [item.id, item])) };
     get('key').value = '';
     get('connection').open = false;
-    get('connection-status').textContent = data.prompt_format === promptFormat ? 'Runner verbunden · HF' : 'Runner verbunden';
+    get('connection-status').textContent = 'Runner verbunden';
     for (const [index, side] of Object.keys(lanes).entries()) {
-      const model = lanes[side].model;
-      model.replaceChildren(...data.models.map(({ id, label }) => option(label, id)));
-      if (!model.options.length) model.add(option('Keine Modelle eingetragen', ''));
-      model.selectedIndex = Math.min(index, model.options.length - 1);
+      const lane = lanes[side];
+      lane.model.replaceChildren(...data.models.map(({ id, label }) => new Option(label, id)));
+      if (!lane.model.options.length) lane.model.add(new Option('Keine Modelle im Runner', ''));
+      const preferred = side === 'left' ? 'base' : 'tuned';
+      if (connection.models.has(preferred)) lane.model.value = preferred;
+      else lane.model.selectedIndex = Math.min(index, lane.model.options.length - 1);
+      showModel(lane, connection.models.get(lane.model.value));
+      resetLane(lane);
     }
-    setCases(data.cases);
-    notify(data.models.length ? 'Jeder Lauf startet aus der gewählten Startszene.'
-      : 'Der Runner hat keine Modelle eingetragen. Die Referenz läuft unter „Startkoordinaten und Python“.');
+    for (const item of data.cases) {
+      if (!cases.get(item.id)?.file) cases.set(item.id, { ...item, dataset: data.dataset, revision: data.revision });
+    }
+    selectScene((scene && cases.get(scene.id)) || cases.get(redOnBlue) || cases.values().next().value, !scene);
   } catch (error) {
-    notify(error instanceof TypeError ? 'Runner nicht erreichbar. Prüfe die URL, das Teamnetz und die erlaubte Browser-Origin.' : error.message, true);
+    errorLine.textContent = error instanceof TypeError || error.name === 'TimeoutError'
+      ? 'Runner nicht erreichbar. Prüfe URL und Tunnel. Bei ngrok gegebenenfalls zuerst „Visit Site“ öffnen.'
+      : error.message;
+    errorLine.hidden = false;
   } finally {
     connecting = false;
     controls();
   }
 });
 
-const jpegPattern = /^[A-Za-z0-9+/]+={0,2}$/;
-function frame(side, jpeg, time, label = 'Simulation') {
-  if (typeof jpeg !== 'string' || jpeg.length > 180000 || !jpegPattern.test(jpeg)) return;
-  lanes[side].frame.src = 'data:image/jpeg;base64,' + jpeg;
-  lanes[side]['frame-label'].textContent = label;
-  lanes[side].clock.textContent = Number.isFinite(time) ? 'T = ' + time.toFixed(2) + ' s' : 'T = —';
-}
-
-function resetLanes(side) {
-  for (const lane of side ? [lanes[side]] : Object.values(lanes)) {
-    lane['lane-state'].textContent = 'Bereit';
-    lane.frame.src = 'lara-start.webp';
-    lane['frame-label'].textContent = 'Referenzbild';
-    lane.clock.textContent = 'T = —';
-    lane.score.textContent = lane.rate.textContent = lane.duration.textContent = '—';
-    lane.score.className = 'score';
-    lane.program.textContent = '';
-    lane.feedback.textContent = 'Ergebnisse erscheinen hier.';
-  }
-}
-
-function showMetrics(lane, metrics = {}) {
-  const native = metrics?.decode_tokens_per_second;
-  const effective = metrics?.effective_tokens_per_second;
-  const rate = native ?? effective;
-  lane.rate.textContent = Number.isFinite(rate) ? rate.toFixed(1) : '—';
-  lane.rate.title = Number.isFinite(native) ? 'Native Decode-Tokens pro Sekunde'
-    : Number.isFinite(effective) ? 'Ausgabetokens pro Sekunde über die gesamte Anfrage' : 'Kein Zähler verfügbar';
-  lane.duration.textContent = Number.isFinite(metrics?.request_seconds)
-    ? metrics.request_seconds.toFixed(2) + ' s' : '—';
-}
-
-function showResult(side, result, archived = false) {
-  if (!result || typeof result !== 'object') return;
-  const lane = lanes[side];
-  const passed = result.check?.passed;
-  const reasons = Array.isArray(result.check?.reasons) ? result.check.reasons.join(' · ') : '';
-  const error = result.error || (passed === null && reasons);
-  lane['lane-state'].textContent = error ? 'Fehler' : 'Fertig';
-  lane['lane-state'].title = String(result.actual_model || result.label || '');
-  lane.score.textContent = passed === true ? 'Bestanden' : passed === false ? 'Verfehlt'
-    : error ? 'Fehler' : passed === null ? 'Frei' : '—';
-  lane.score.className = 'score' + (passed === true ? ' pass' : passed === false || error ? ' fail' : '');
-  showMetrics(lane, result.metrics);
-  lane.program.textContent = String(result.code || result.raw || '');
-  const detail = [result.message, result.error || reasons].filter(Boolean).join(' · ');
-  lane.feedback.textContent = [result.instruction, detail || 'Ausführung abgeschlossen.'].filter(Boolean).join('\n');
-  if (archived && result.frame) frame(side, result.frame.jpeg, result.frame.time_s, 'Endbild');
-}
-
 function streamEvent(event, frames) {
+  if (event.event === 'start') {
+    report = event.report;
+    controls();
+    return;
+  }
   if (event.event === 'complete') {
     report = event.report;
     for (const [side, value] of Object.entries(frames)) {
@@ -216,50 +296,63 @@ function streamEvent(event, frames) {
     }
     return;
   }
-  if (!Object.hasOwn(lanes, event.lane)) return;
+  if (!report || !Object.hasOwn(lanes, event.lane)) return;
   const side = event.lane;
   const lane = lanes[side];
+  const partial = report.results[side] ??= {
+    model_identity: ['single', 'compare'].includes(report.mode) ? connection.models.get(lane.model.value) : null,
+    label: report.mode === 'reference' ? 'Referenz' : 'Eigener Code',
+    instruction: prompt(side), actions: [], interrupted: true,
+  };
   switch (event.event) {
     case 'phase':
-      lane['lane-state'].textContent = event.phase === 'generating' ? 'Generiert …' : 'Führt aus …';
+      lane['lane-state'].textContent = event.phase === 'generating' ? 'Generiert …' : 'Simuliert …';
       break;
     case 'program':
-      lane.program.textContent = event.code || '';
-      lane.feedback.textContent = event.message || 'Programm empfangen.';
+      Object.assign(partial, { code: event.code, message: event.message, metrics: event.metrics });
       showMetrics(lane, event.metrics);
       break;
-    case 'action':
-      if (event.phase === 'start') lane['lane-state'].textContent = event.method;
+    case 'action': {
+      const { event: _event, lane: _lane, ...action } = event;
+      partial.actions.push(action);
+      if (action.phase === 'start') lane['lane-state'].textContent = action.method;
       break;
+    }
     case 'frame':
       frames[side] = { jpeg: event.jpeg, time_s: event.time_s };
-      frame(side, event.jpeg, event.time_s);
+      showFrame(lane, frames[side]);
       break;
     case 'result':
-      showResult(side, event.result);
+      report.results[side] = event.result;
+      showResult(lane, event.result);
+      if (frames[side]) showFrame(lane, frames[side], 'Endbild');
       break;
   }
 }
 
 async function run(mode, side = 'left') {
-  if (!connection || active) return;
+  if (!canRun() || active || connecting) return;
   const controller = new AbortController();
-  const task = get('task').value;
-  const payload = { task, mode };
+  const payload = { task: scene.id, mode };
   if (mode === 'compare') {
     payload.left = lanes.left.model.value;
     payload.right = lanes.right.model.value;
-    payload.prompts = { left: lanes.left.prompt.value, right: lanes.right.prompt.value };
+    payload.prompts = { left: prompt('left'), right: prompt('right') };
   } else if (mode === 'single') {
-    Object.assign(payload, { side, model: lanes[side].model.value, prompt: lanes[side].prompt.value });
+    Object.assign(payload, { side, model: lanes[side].model.value, prompt: prompt(side) });
   } else if (mode === 'code') {
-    Object.assign(payload, { code: get('code-input').value, prompt: lanes[side].prompt.value });
+    Object.assign(payload, { code: get('code-input').value, prompt: prompt(side) });
   }
   report = null;
   active = controller;
-  resetLanes(mode === 'compare' ? undefined : side);
+  const testing = mode === 'compare' ? ['left', 'right'] : [side];
+  for (const key of testing) {
+    resetLane(lanes[key]);
+    lanes[key]['lane-state'].textContent = 'Wartet …';
+  }
   controls();
-  notify(mode === 'compare' ? 'A startet zuerst, danach B.' : 'Lauf gestartet.');
+  notify('');
+  const frames = {};
   try {
     const response = await checked(await fetch(connection.url + '/api/run', {
       method: 'POST', redirect: 'error', signal: controller.signal,
@@ -271,20 +364,37 @@ async function run(mode, side = 'left') {
     }
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
-    const frames = {};
     let rest = '';
+    let complete = false;
     for (;;) {
       const { value, done } = await reader.read();
       if (done) break;
       const lines = (rest + decoder.decode(value, { stream: true })).split('\n');
       rest = lines.pop();
-      if (rest.length > 512000) throw new Error('Live-Datensatz zu groß.');
-      for (const line of lines) if (line) streamEvent(JSON.parse(line), frames);
+      if (rest.length > 2 * 1024 * 1024) throw new Error('Live-Datensatz zu groß.');
+      for (const line of lines) {
+        if (!line) continue;
+        const event = JSON.parse(line);
+        streamEvent(event, frames);
+        if (event.event === 'complete') complete = true;
+      }
     }
-    if (!report) throw new Error('Verbindung endete vor dem Ergebnis.');
-    notify(mode === 'compare' && !report.same_prompt ? 'Fertig. A und B hatten unterschiedliche Prompts.' : 'Fertig.');
+    if (!complete) throw new Error('Verbindung endete vor dem Ergebnis.');
+    if (mode === 'compare' && !report.same_prompt) notify('Die Modelle erhielten unterschiedliche Prompts.');
   } catch (error) {
-    notify(controller.signal.aborted ? 'Live-Ansicht abgebrochen.' : error.message, !controller.signal.aborted);
+    if (report) {
+      report.status = 'interrupted';
+      report.stream_error = controller.signal.aborted ? 'Live-Ansicht beendet' : error.message;
+    }
+    for (const key of testing) {
+      const result = report?.results[key];
+      if (result) {
+        if (frames[key]) result.frame = frames[key];
+        showResult(lanes[key], result);
+      } else lanes[key]['lane-state'].textContent = 'Ohne Ergebnis';
+    }
+    notify(controller.signal.aborted ? 'Live-Ansicht beendet.' : error.message, !controller.signal.aborted);
+    controller.abort();
   } finally {
     active = null;
     controls();
@@ -300,7 +410,7 @@ get('export').addEventListener('click', () => {
   const url = URL.createObjectURL(new Blob([JSON.stringify(report, null, 2) + '\n'], { type: 'application/json' }));
   const link = document.createElement('a');
   link.href = url;
-  link.download = 'lara-vergleich.json';
+  link.download = 'lara-' + (String(report.id ?? '').replace(/[^a-zA-Z0-9-]/g, '') || 'lauf') + '.json';
   link.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 });
@@ -308,14 +418,25 @@ get('import').addEventListener('change', async (event) => {
   const file = event.target.files[0];
   if (!file) return;
   try {
-    if (file.size > 2 * 1024 * 1024) throw new Error('Bericht zu groß.');
+    if (file.size > 4 * 1024 * 1024) throw new Error('Laufbericht zu groß.');
     const value = JSON.parse(await file.text());
     if (value?.protocol !== protocol || typeof value.task !== 'string'
         || !value.results || typeof value.results !== 'object') throw new Error('Kein LARA-Workbench-Bericht.');
-    resetLanes();
+    const item = cases.get(value.task);
+    if (item && (!item.revision || item.revision === value.revision)) {
+      selectScene(item);
+      get('shared').checked = value.same_prompt !== false;
+      if (value.instruction) get('shared-prompt').value = value.instruction;
+      for (const [side, lane] of Object.entries(lanes)) {
+        lane.prompt.value = value.results[side]?.instruction || lane.prompt.value;
+      }
+    }
     report = value;
-    for (const side of Object.keys(lanes)) showResult(side, report.results[side], true);
-    notify('Bericht geöffnet · ' + report.task);
+    for (const [side, lane] of Object.entries(lanes)) {
+      resetLane(lane);
+      if (report.results[side]) showResult(lane, report.results[side], true);
+    }
+    notify('Geöffneter Lauf · ' + report.task + (report.status === 'interrupted' ? ' · unterbrochen' : ''));
   } catch (error) {
     notify(error.message, true);
   } finally {
@@ -324,22 +445,5 @@ get('import').addEventListener('change', async (event) => {
   }
 });
 
-async function replays() {
-  const response = await checked(await fetch('proof/manifest.json'));
-  const manifest = await response.json();
-  const items = manifest.results.filter((item) => /^[\w-]+\.mp4$/.test(item.video ?? ''));
-  if (!connection) setCases(items.map((item) => ({ ...item, scene: item.initial_state })));
-  const select = get('replays');
-  select.replaceChildren(...items.map((item) => option(replayTitles[item.id] || item.id, item.video)));
-  select.value = items.find((item) => item.id === redOnBlue)?.video ?? items[0]?.video;
-  function pick() {
-    if (!select.value) return;
-    const player = get('proof-player');
-    player.src = 'proof/' + select.value;
-    player.play().catch(() => {});
-  }
-  get('play').addEventListener('click', pick);
-  select.addEventListener('change', pick);
-}
-
-replays().catch(() => notify('Die Replay-Bibliothek konnte nicht geladen werden.', true));
+controls();
+replays().catch(() => notify('Die Referenzszenen konnten nicht geladen werden.', true));

@@ -46,7 +46,7 @@ jobs:
           import imageio.v2 as imageio
           with imageio.get_reader('runs/ci-replay/bse-drop_onto_cube-000.mp4') as video:
               frame = video.get_data(0)
-              assert frame.shape == (480, 640, 3) and frame.std() > 1
+              assert frame.shape == (720, 960, 3) and frame.std() > 1
           PY
   cuda-source-build:
     runs-on: ubuntu-latest

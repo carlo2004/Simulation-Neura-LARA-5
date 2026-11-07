@@ -5,10 +5,21 @@ from contextlib import ExitStack
 import importlib.util
 import io
 import json
+import math
 from pathlib import Path
 import sys
 import time
 from types import ModuleType
+
+
+def trace_value(value):
+    if value is None or type(value) in (bool, int):
+        return value
+    if type(value) is str:
+        return value[:100]
+    if type(value) is float and math.isfinite(value):
+        return value
+    return f'<{type(value).__name__}>'
 
 
 def main():
@@ -40,6 +51,7 @@ def main():
     initial_state = None
     frame_count = 0
     stage = 'text_check' if not response['code'] else 'setup'
+
     def emit(event, **data):
         if args.live:
             print(json.dumps(dict(event=event, **data), ensure_ascii=True, allow_nan=False), flush=True)
@@ -56,37 +68,48 @@ def main():
             frame = None
             if args.live:
                 from PIL import Image
-                renderer = cleanup.enter_context(mujoco.Renderer(sim.model, height=360, width=480))
+                renderer = cleanup.enter_context(mujoco.Renderer(sim.model, height=720, width=960))
                 renderer.scene.flags[mujoco.mjtRndFlag.mjRND_REFLECTION] = 0
-                renderer.scene.flags[mujoco.mjtRndFlag.mjRND_SHADOW] = 0
                 next_frame = 0.
 
                 def frame(current, force=False):
                     nonlocal next_frame
-                    now = time.monotonic()
-                    if not force and now < next_frame:
+                    if not force and time.monotonic() < next_frame:
                         return
-                    next_frame = now + .16
                     buffer = io.BytesIO()
-                    Image.fromarray(current.render_frame(renderer)).save(buffer, 'JPEG', quality=75)
+                    Image.fromarray(current.render_frame(renderer)).save(buffer, 'JPEG', quality=88)
                     emit('frame', jpeg=base64.b64encode(buffer.getvalue()).decode('ascii'),
                          time_s=round(float(current.data.time), 3))
+                    next_frame = time.monotonic() + .125
 
                 frame(sim, force=True)
                 sim.record_callback = frame
             first_frame = sim.frames
             if args.video:
                 import imageio.v2 as imageio
-                sim.renderer = mujoco.Renderer(sim.model, height=480, width=640)
-                sim.writer = imageio.get_writer(partial, fps=FPS, codec='libx264', quality=6,
+                sim.renderer = mujoco.Renderer(sim.model, height=720, width=960)
+                sim.writer = imageio.get_writer(partial, fps=FPS, codec='libx264', quality=8,
                                                 ffmpeg_params=['-movflags', '+faststart'])
                 sim.writer.append_data(sim.render_frame(sim.renderer))
             stage = 'execution'
             try:
                 if args.generated:
                     from stacklab.workbench_policy import WorkbenchPolicy
-                    runner = WorkbenchPolicy(observed, on_action=lambda phase, action: emit(
-                        'action', phase=phase, method=action['method'], time_s=action['time_s']))
+
+                    def trace(phase, action):
+                        nonlocal stage
+                        stage = 'execution'
+                        values = action['args']
+                        emit('action', phase=phase, step=len(runner.actions), method=action['method'],
+                             args=[trace_value(value) for value in values[:4]],
+                             extra_args=max(0, len(values) - 4),
+                             kwargs=list(action['kwargs'])[:4],
+                             time_s=round(float(sim.data.time), 3),
+                             status=action.get('status'), error=action.get('error', '')[:500],
+                             result=[trace_value(value) for value in action.get('result', [])])
+
+                    stage = 'policy'
+                    runner = WorkbenchPolicy(observed, on_action=trace)
                     runner.run(code)
                 else:
                     run_reference(code, observed)

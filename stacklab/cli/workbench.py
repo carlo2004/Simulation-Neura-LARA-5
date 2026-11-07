@@ -1,6 +1,7 @@
 """Serve the browser workbench and run paired Prompt2Robo tasks on the LARA 5."""
 import argparse
 from contextlib import closing
+from datetime import datetime, timezone
 import hashlib
 import hmac
 import http.client
@@ -16,10 +17,12 @@ from threading import BoundedSemaphore, Timer
 from urllib.parse import urlsplit
 from uuid import uuid4
 
+from stacklab import __version__
 from stacklab.cli.prompt2robo import (CHECKER, LOCK, PROMPT_FORMAT, load_system_prompt, prompt_for,
                                      read_samples, replay_environment, response_for, source_files)
+from stacklab.config import write_json
 from stacklab.llm.metrics import GenerationMetrics
-from stacklab.paths import ROOT
+from stacklab.paths import ROOT, RUNS_ROOT
 
 WEB = ROOT / 'web/public'
 PROOFS = ROOT / 'examples/prompt2robo-replays/manifest.json'
@@ -59,7 +62,27 @@ def load_models(path):
         env_name = model.get('api_key_env', '')
         if not isinstance(env_name, str) or env_name and not re.fullmatch(r'[A-Z_][A-Z0-9_]*', env_name):
             raise ValueError(f'Invalid api_key_env in {key}')
+        for field in ('weights', 'adapter'):
+            if field not in model:
+                continue
+            artifact = model[field]
+            if (not isinstance(artifact, dict) or set(artifact) != {'file', 'sha256', 'bytes'}
+                    or not isinstance(artifact['file'], str)
+                    or not re.fullmatch(r'[^/\\\x00-\x1f]{1,255}\.gguf', artifact['file'], re.I)
+                    or not isinstance(artifact['sha256'], str)
+                    or not re.fullmatch(r'[a-f0-9]{64}', artifact['sha256'])
+                    or type(artifact['bytes']) is not int or artifact['bytes'] <= 0):
+                raise ValueError(f'Invalid {field} identity in {key}')
     return models
+
+
+def model_identity(key, model):
+    return dict(id=key, label=model['label'], api_model=model['model'],
+                weights=model.get('weights'), adapter=model.get('adapter'))
+
+
+def utc_now():
+    return datetime.now(timezone.utc).isoformat(timespec='milliseconds')
 
 
 def completion(model, messages):
@@ -119,7 +142,7 @@ def decode_answer(raw):
     return dict(code=code, message=message)
 
 
-def simulate(checker, sample, reply, output, emit, *, generated, unscored):
+def simulate(checker, sample, reply, output, emit, *, generated, unscored, run_id):
     worker = Path(__file__).with_name('_prompt2robo_worker.py')
     command = [sys.executable, '-I', str(worker), str(checker), str(output), sample['id'], '--live']
     if generated:
@@ -152,9 +175,9 @@ def simulate(checker, sample, reply, output, emit, *, generated, unscored):
                     process.kill()
     receipt = output / (sample['id'] + '.json')
     if not receipt.is_file():
-        print(log.name + ' ' + (output/'worker.log').read_text(encoding='utf-8', errors='replace')[-1500:],
-              file=sys.stderr, flush=True)
-        raise RuntimeError('The LARA 5 worker stopped without a result. Check the runner log.')
+        worker_log = (output/'worker.log').read_text(encoding='utf-8', errors='replace')
+        print(f'Workbench {run_id} / {sample["id"]}\n{worker_log[-1500:]}', file=sys.stderr, flush=True)
+        raise RuntimeError(f'LARA 5 worker exited with status {process.returncode}. See runner log for {run_id}.')
     return json.loads(receipt.read_text(encoding='utf-8'))
 
 
@@ -169,15 +192,24 @@ class Workbench(ThreadingHTTPServer):
         root = source_files(self.lock, [*names, CHECKER], source)
         self.checker = root / CHECKER
         self.system = load_system_prompt(self.lock, root)
+        try:
+            self.git_revision = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT,
+                                                        stderr=subprocess.DEVNULL, text=True, timeout=2).strip()
+        except (OSError, subprocess.SubprocessError):
+            self.git_revision = None
         proof_rows = json.loads(PROOFS.read_text(encoding='utf-8'))['results']
         proof = {row['id']: row['passed'] for row in proof_rows}
         available = {row['id']: row for row in read_samples(root, names)}
         chosen = [*proof, *(row['id'] for row in available.values() if row['split'] == 'eval_v4'), *extra_cases]
         self.cases = {key: available[key] for key in dict.fromkeys(chosen)}
-        self.catalog = dict(protocol=SCHEMA, lane_prompts=True, prompt_format=PROMPT_FORMAT,
+        self.samples = self.cases | {key: row for key, row in available.items()
+                                     if row['split'] == 'train' and row['verified'] is True}
+        self.catalog = dict(protocol=SCHEMA, lane_prompts=True, prompt_format=PROMPT_FORMAT, training_cases=True,
                             dataset=self.lock['repository'], revision=self.lock['revision'],
-                            models=[dict(id=key, label=value['label']) for key, value in models.items()],
+                            models=[model_identity(key, value) for key, value in models.items()],
                             cases=[dict(id=key, split=row['split'], reference_passed=proof.get(key),
+                                        category=row['category'], subcategory=row['subcategory'],
+                                        expected_behavior=row['expected_behavior'],
                                         request=row['user_prompt'].partition('\n')[2],
                                         scene=row['scene']) for key, row in self.cases.items()])
         super().__init__(('127.0.0.1', port), Handler)
@@ -189,6 +221,8 @@ class Handler(SimpleHTTPRequestHandler):
 
     def translate_path(self, path):
         local = Path(super().translate_path(path))
+        if local == WEB / LOCK.name:
+            return str(LOCK)
         parts = local.relative_to(WEB).parts
         if len(parts) == 2 and parts[0] == 'proof' and re.fullmatch(r'[\w-]+\.(mp4|json)', parts[1]):
             return str(PROOFS.parent / parts[1])
@@ -254,7 +288,7 @@ class Handler(SimpleHTTPRequestHandler):
         body = json.loads(self.rfile.read(size))
         if not isinstance(body, dict):
             raise ValueError('Expected a JSON object')
-        sample = self.server.cases.get(body.get('task', ''))
+        sample = self.server.samples.get(body.get('task', ''))
         if sample is None:
             raise ValueError('Choose a case from the catalog')
         mode = body.get('mode', 'compare')
@@ -335,48 +369,75 @@ class Handler(SimpleHTTPRequestHandler):
         prompt_hashes = {side: hashlib.sha256(json.dumps(messages).encode()).hexdigest()
                          for side, messages in messages_by_side.items()}
         report = dict(protocol=SCHEMA, prompt_format=PROMPT_FORMAT, id=uuid4().hex,
+                      started_at=utc_now(), runner_version=__version__, runner_revision=self.server.git_revision,
+                      status='running', system_prompt=self.server.system,
                       dataset=self.server.lock['repository'], revision=self.server.lock['revision'],
-                      mode=mode, task=sample['id'],
+                      mode=mode, task=sample['id'], split=sample['split'], subcategory=sample['subcategory'],
+                      expected_behavior=sample['expected_behavior'],
                       instruction=lanes[0][2] if same_prompt else None, scene=sample['scene'],
                       prompt_sha256=prompt_hashes[lanes[0][0]] if same_prompt else None,
-                      same_prompt=same_prompt, seed=SEED, max_tokens=MAX_TOKENS,
+                      same_prompt=same_prompt, seed=SEED, max_tokens=MAX_TOKENS, temperature=0,
                       scored=all(text == original for text in instructions.values()), results={})
-        write('start', report=report)
-        for lane, key, instruction in lanes:
-            def emit(event, **data):
-                write(event, lane=lane, **data)
-
-            unscored = instruction != original
-            model = self.server.models[key] if key else None
-            result = dict(model=key, label=model['label'] if model else 'Referenz' if mode == 'reference' else 'Eigener Code',
-                          instruction=instruction, prompt_sha256=prompt_hashes[lane], scored=not unscored,
-                          metrics={}, code='', message='', raw='', check=None)
+        try:
+            write('start', report=report)
+            for lane, key, instruction in lanes:
+                model = self.server.models[key] if key else None
+                label = model['label'] if model else ('Referenz' if mode == 'reference' else 'Eigener Code')
+                result = dict(model=key, label=label, model_identity=model_identity(key, model) if model else None,
+                              instruction=instruction, user_prompt=messages_by_side[lane][-1]['content'],
+                              prompt_sha256=prompt_hashes[lane], scored=instruction == original,
+                              started_at=utc_now(), metrics={}, code='', message='', raw='', check=None, actions=[])
+                report['results'][lane] = result
+                self.run_lane(mode, samples_by_side[lane], code, model, messages_by_side[lane], result,
+                              report['id'], lambda event, **data: write(event, lane=lane, **data))
+                write('result', lane=lane, result=result)
+            report['status'] = 'complete'
+        finally:
+            if report['status'] == 'running':
+                report['status'] = 'interrupted'
+            report['finished_at'] = utc_now()
             try:
-                with TemporaryDirectory(prefix='stacklab-workbench-') as temporary:
-                    output = Path(temporary)
-                    if model:
-                        emit('phase', phase='generating')
-                        raw, metrics, actual, finish = completion(model, messages_by_side[lane])
-                        result.update(raw=raw, metrics=metrics, actual_model=actual)
-                        if finish == 'length':
-                            raise ValueError('Model reached the token limit')
-                        reply = decode_answer(raw)
-                    elif mode == 'reference':
-                        reply = response_for(sample)
-                    else:
-                        reply = dict(code=code, message='')
-                    result.update(code=reply['code'], message=reply['message'])
-                    emit('program', code=reply['code'], message=reply['message'], metrics=result['metrics'])
-                    emit('phase', phase='executing')
-                    result['check'] = simulate(self.server.checker, samples_by_side[lane], reply, output, emit,
-                                               generated=mode != 'reference', unscored=unscored)
-            except ClientDisconnected:
-                raise
-            except (ValueError, RuntimeError, OSError, KeyError, IndexError, TypeError, http.client.HTTPException) as error:
-                result['error'] = str(error)
-            report['results'][lane] = result
-            emit('result', result=result)
+                write_json(RUNS_ROOT/'workbench'/(report['id'] + '.json'), report)
+            except OSError as error:
+                print(f'Workbench {report["id"]}: {error}', file=sys.stderr, flush=True)
         write('complete', report=report)
+
+    def run_lane(self, mode, sample, code, model, messages, result, run_id, write):
+        def emit(event, **data):
+            if event == 'action':
+                result['actions'].append(data)
+            write(event, **data)
+
+        stage = 'response'
+        try:
+            if model:
+                stage = 'generation'
+                emit('phase', phase='generating')
+                raw, metrics, actual, finish = completion(model, messages)
+                result.update(raw=raw, metrics=metrics, actual_model=actual, finish_reason=finish)
+                if finish == 'length':
+                    raise ValueError(f'Model reached the {MAX_TOKENS}-token limit')
+                stage = 'response'
+                reply = decode_answer(raw)
+            elif mode == 'reference':
+                reply = response_for(sample)
+            else:
+                reply = dict(code=code, message='')
+            result.update(code=reply['code'], message=reply['message'])
+            emit('program', code=reply['code'], message=reply['message'], metrics=result['metrics'])
+            stage = 'simulation'
+            emit('phase', phase='executing')
+            with TemporaryDirectory(prefix='stacklab-workbench-') as temporary:
+                result['check'] = simulate(self.server.checker, sample, reply, Path(temporary), emit,
+                                           generated=mode != 'reference', unscored=not result['scored'],
+                                           run_id=run_id)
+        except ClientDisconnected:
+            result['error_stage'] = stage
+            raise
+        except (ValueError, RuntimeError, OSError, KeyError, IndexError, TypeError, http.client.HTTPException) as error:
+            result.update(error=str(error), error_stage=stage, error_type=type(error).__name__)
+        finally:
+            result['finished_at'] = utc_now()
 
 
 def main(argv=None):

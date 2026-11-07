@@ -3,74 +3,161 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="LARA 5: Modellvergleich und Live-Simulation">
-  <title>LARA 5 · Modellvergleich</title>
+  <title>LARA 5 Workbench</title>
   <link rel="stylesheet" href="styles.css">
-  <script src="app.js" type="module"></script>
+  <script type="module" src="app.js"></script>
 </head>
 <body>
   <main>
     <header class="page-header">
-      <h1>LARA 5 · Modellvergleich</h1>
+      <div class="row masthead">
+        <h1>LARA 5 Workbench</h1>
+        <nav class="row" aria-label="Ansichten">
+          <button id="show-compare" type="button" aria-pressed="true" aria-controls="compare">Modellvergleich</button>
+          <button id="show-training" type="button" aria-pressed="false" aria-controls="training">Trainingsdaten</button>
+        </nav>
+      </div>
       <details id="connection">
         <summary id="connection-status">Runner verbinden</summary>
         <form id="connect-form">
-          <label>Runner-URL <input id="runner" inputmode="url" placeholder="Leer bei lokalem Runner" autocomplete="off"></label>
+          <label>Runner-URL <input id="runner" type="url" placeholder="https://…" autocomplete="off"></label>
           <label>Sitzungsschlüssel <input id="key" type="password" autocomplete="off" required></label>
-          <button type="submit" id="connect">Verbinden</button>
-          <a href="https://github.com/carlo2004/Simulation-Neura-LARA-5/blob/main/docs/workbench.md#runner-in-google-colab">Colab-Setup</a>
+          <button id="connect" class="primary" type="submit">Verbinden</button>
         </form>
       </details>
     </header>
+    <p id="connection-error" class="error" role="alert" hidden></p>
 
-    <div class="toolbar">
-      <label>Startszene <select id="task"></select></label>
-      <button id="copy-prompt" type="button">Prompt A → B</button>
-      <button class="primary" id="run" type="button" disabled>Beide starten</button>
-      <button id="stop" type="button" hidden>Abbrechen</button>
-    </div>
-    <p id="notice" role="status" aria-live="polite">Runner verbinden, um Modelle live zu testen.</p>
-    <div class="lanes" id="lanes"></div>
+    <section id="compare" aria-label="Modellvergleich">
+      <div class="scene-panel">
+        <div class="scene-selection">
+          <h2>Startszene</h2>
+          <div class="row filters">
+            <label class="sr-only" for="scene-filter">Szenen filtern</label>
+            <select id="scene-filter">
+              <option value="">Alle Szenen</option>
+              <option value="video">Mit Referenzvideo</option>
+              <option value="eval_v4">Evaluation</option>
+              <option value="train">Training</option>
+            </select>
+            <label class="sr-only" for="scene-search">Szene suchen</label>
+            <input id="scene-search" type="search" placeholder="Szene suchen">
+          </div>
+          <label class="sr-only" for="task">Startszene auswählen</label>
+          <select id="task"></select>
+          <p id="scene-id" class="muted identifier"></p>
+          <p id="scene-request"></p>
+          <details id="recording" hidden>
+            <summary>Referenzvideo</summary>
+            <video id="proof-player" controls playsinline preload="none" aria-label="Referenzlauf auf dem LARA 5"></video>
+            <a href="proof/manifest.json" target="_blank" rel="noopener">Prüfbericht der Referenzen</a>
+          </details>
+        </div>
+        <div id="scene-preview" class="scene-preview"></div>
+      </div>
 
-    <details class="secondary">
-      <summary>Startkoordinaten und Python</summary>
-      <ul id="objects"></ul>
-      <label>Python-Programm <textarea id="code-input" spellcheck="false" rows="4" maxlength="64000"></textarea></label>
-      <div class="row">
+      <section class="prompt-panel" aria-label="Testauftrag">
+        <div class="row prompt-bar">
+          <label><input id="shared" type="checkbox" checked> Gleicher Prompt für beide Modelle</label>
+          <button id="reset-prompt" type="button" hidden>Datensatzprompt wiederherstellen</button>
+        </div>
+        <label id="shared-field" class="field">Prompt
+          <textarea id="shared-prompt" rows="2" maxlength="4000"></textarea>
+        </label>
+        <div class="row run-toolbar">
+          <button id="run" class="primary" type="button" disabled>Beide testen</button>
+          <button id="reference" type="button" disabled>Referenzprogramm ausführen</button>
+          <button id="stop" type="button" hidden>Live-Ansicht beenden</button>
+          <span id="scoring" class="muted"></span>
+        </div>
+        <p id="notice" role="status" hidden></p>
+      </section>
+
+      <div class="lanes" id="lanes"></div>
+
+      <div class="row report-bar">
+        <button id="export" type="button" disabled>Laufbericht speichern</button>
+        <label class="file-button">Laufbericht öffnen <input id="import" type="file" accept="application/json,.json"></label>
+        <span id="report-id" class="muted identifier"></span>
+      </div>
+      <details class="secondary">
+        <summary>Eigenes Python-Programm ausführen</summary>
+        <label class="field">Python-Code <textarea id="code-input" rows="6" maxlength="64000" spellcheck="false"></textarea></label>
         <button id="run-code" type="button" disabled>Code ausführen</button>
-        <button id="reference" type="button" disabled>Referenz ausführen</button>
+      </details>
+    </section>
+
+    <section id="training" aria-labelledby="training-title" hidden>
+      <div class="section-heading">
+        <h2 id="training-title">Trainingsdaten</h2>
+        <a id="dataset-link" href="https://huggingface.co/datasets/Carlo0001/Prompt2Robo" target="_blank" rel="noopener">Prompt2Robo auf Hugging Face</a>
       </div>
-    </details>
-    <details class="secondary">
-      <summary>Aufnahmen und Berichte</summary>
-      <div class="row">
-        <label>Aufnahme <select id="replays"></select></label>
-        <button id="play" type="button">Abspielen</button>
-        <button id="export" type="button" disabled>Letzten Lauf speichern</button>
-        <label class="file-button">Bericht öffnen <input id="import" type="file" accept="application/json,.json"></label>
-        <a href="proof/manifest.json">Prüfbericht</a>
+      <p id="dataset-version" class="muted"></p>
+      <p id="training-status" role="status"></p>
+      <button id="training-retry" type="button" hidden>Erneut laden</button>
+      <div id="training-content" class="training-layout" hidden>
+        <div class="training-index">
+          <div class="filters">
+            <label class="sr-only" for="training-search">Trainingsdaten durchsuchen</label>
+            <input id="training-search" type="search" placeholder="Auftrag, Farbe oder ID suchen">
+            <label class="sr-only" for="training-category">Aufgabenkategorie</label>
+            <select id="training-category"><option value="">Alle Aufgaben</option></select>
+          </div>
+          <p id="training-count" class="muted" aria-live="polite"></p>
+          <ul id="training-list" class="training-list" aria-label="Trainingsbeispiele"></ul>
+          <div class="row paging">
+            <button id="training-prev" type="button">Zurück</button>
+            <span id="training-page"></span>
+            <button id="training-next" type="button">Weiter</button>
+          </div>
+        </div>
+        <article id="training-sample" class="training-sample" hidden>
+          <h3 id="sample-id" class="identifier"></h3>
+          <p id="sample-category" class="muted"></p>
+          <div class="sample-grid">
+            <div id="sample-scene" class="scene-preview"></div>
+            <div>
+              <h4>Nutzereingabe</h4>
+              <pre id="sample-prompt"></pre>
+              <button id="use-sample" type="button">Szene für Vergleich verwenden</button>
+              <a id="sample-source" target="_blank" rel="noopener">Quelldatei</a>
+            </div>
+          </div>
+          <h4 id="sample-answer-label">Referenzantwort</h4>
+          <pre id="sample-answer"></pre>
+        </article>
       </div>
-      <video id="proof-player" controls playsinline preload="none" poster="lara-start.webp" aria-label="LARA-5-Aufnahme"></video>
-    </details>
+    </section>
   </main>
 
   <template id="lane-template">
     <article class="lane">
-      <header><h2 class="lane-title"></h2><span class="lane-state">Bereit</span></header>
-      <label>Modell <select class="model" disabled></select></label>
-      <label>Prompt <textarea class="prompt" rows="3" maxlength="4000"></textarea></label>
+      <header><h2 class="lane-title"></h2><span class="lane-state" role="status"></span></header>
+      <label class="field model-choice">Modell <select class="model" disabled></select></label>
+      <p class="model-note muted"></p>
+      <details class="model-details" hidden><summary>Modellkennung</summary><dl class="model-identity kv"></dl></details>
+      <label class="field lane-prompt" hidden>Prompt <textarea class="prompt" rows="2" maxlength="4000"></textarea></label>
       <button class="start" type="button" disabled></button>
       <div class="viewport">
-        <img class="frame" src="lara-start.webp" alt="LARA 5 in MuJoCo">
-        <span class="frame-label">Referenzbild</span>
-        <span class="clock">—</span>
+        <img class="frame" src="lara-start.webp" width="960" height="720" alt="LARA 5 in MuJoCo">
+        <span class="frame-label">Beispielbild</span>
+        <span class="clock" hidden></span>
       </div>
       <dl class="metrics">
-        <div><dt>Ziel</dt><dd class="score">—</dd></div>
+        <div><dt>Zielprüfung</dt><dd class="score">—</dd></div>
         <div><dt>Tokens/s</dt><dd class="rate">—</dd></div>
         <div><dt>Generierung</dt><dd class="duration">—</dd></div>
       </dl>
-      <details class="output"><summary>Programm und Ergebnis</summary><p class="feedback"></p><pre class="program"></pre></details>
+      <p class="feedback" hidden></p>
+      <p class="run-model muted" hidden></p>
+      <details class="output" hidden>
+        <summary>Programm und Protokoll</summary>
+        <dl class="run-facts kv"></dl>
+        <pre class="program" hidden></pre>
+        <details class="action-log" hidden><summary class="action-title">Roboterbefehle</summary><ol class="actions"></ol></details>
+        <details class="raw-log" hidden><summary>Rohantwort</summary><pre class="raw"></pre></details>
+        <details class="state-log" hidden><summary>Start- und Endzustand</summary><pre class="states"></pre></details>
+      </details>
     </article>
   </template>
 </body>

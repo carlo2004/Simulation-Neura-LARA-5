@@ -9,6 +9,7 @@ const manifest = JSON.parse(readFileSync(join(proof, 'manifest.json'), 'utf8'));
 
 rmSync(out, { recursive: true, force: true });
 cpSync(join(web, 'public'), out, { recursive: true });
+copyFileSync(join(web, '../config/prompt2robo.lock.json'), join(out, 'prompt2robo.lock.json'));
 mkdirSync(join(out, 'proof'));
 for (const name of ['manifest.json', 'eval_v4-manifest.json',
   ...manifest.results.flatMap((row) => row.video ? [row.video] : [])]) {

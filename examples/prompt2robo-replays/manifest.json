@@ -210,7 +210,12 @@
       "frames": 658,
       "fps": 24,
       "video_duration_s": 27.417,
-      "video_sha256": "af88caaa86ff536f6be0ca75a20b27bd19860e11cd7b8a274d5e071c543bb641"
+      "video_sha256": "27aa2aee7deace2b03e021b433a15801cab2c6fae5c36c28759185c223ba662f",
+      "video_resolution": [
+        960,
+        720
+      ],
+      "video_frames": 658
     },
     {
       "id": "abs-stack_cube_on_cube-117",
@@ -286,7 +291,12 @@
       "frames": 444,
       "fps": 24,
       "video_duration_s": 18.5,
-      "video_sha256": "943ad56f6721194c6aab3b6a5df3426894cd7f771fbf2fb25f5ee209c213a818"
+      "video_sha256": "3bf0edc7fbbef8ac5326d3b4537bfe42db5ae64a2f5771455336794b51cef077",
+      "video_resolution": [
+        960,
+        720
+      ],
+      "video_frames": 444
     },
     {
       "id": "bse-drop_height_position-000",
@@ -362,7 +372,12 @@
       "frames": 349,
       "fps": 24,
       "video_duration_s": 14.542,
-      "video_sha256": "4d08270c271528f60b5758b4b6430ac6576d5463bbf174de0afa949ff6c7209f"
+      "video_sha256": "af7fb63f4b28fc2479800d771e0d6364dfd092c0950ba854432c0e6ca5e2376d",
+      "video_resolution": [
+        960,
+        720
+      ],
+      "video_frames": 349
     },
     {
       "id": "bse-drop_onto_cube-000",
@@ -438,7 +453,12 @@
       "frames": 312,
       "fps": 24,
       "video_duration_s": 13.0,
-      "video_sha256": "bc9a93bb7b4c538e98a82e80f5d4f09aba2a86a7d89372b9fb2310610e42f592"
+      "video_sha256": "2acf5cd94bc1e1517a596476f97e8e8ff1bde71fd16f2f1dda7011284118fda9",
+      "video_resolution": [
+        960,
+        720
+      ],
+      "video_frames": 312
     },
     {
       "id": "sexp-v2-rotation_explicit_turn-001",
@@ -546,7 +566,12 @@
       "frames": 86,
       "fps": 24,
       "video_duration_s": 3.583,
-      "video_sha256": "7978d019666c896a9096a85f2204bbcda12b74ed587cfe2635769b95f87b3192"
+      "video_sha256": "b4edd7331efcac1f6c1f3163736a0f034a9536536643aee23a060009242ed57c",
+      "video_resolution": [
+        960,
+        720
+      ],
+      "video_frames": 86
     },
     {
       "id": "abs-v4-referencing_top_beside_tower-001",
