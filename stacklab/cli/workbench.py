@@ -23,7 +23,7 @@ from stacklab.llm.remote import RemoteModel, endpoint
 from stacklab.llm.responses import parse_reply
 from stacklab.paths import ROOT
 
-DIST = ROOT / 'web/dist'
+WEB = ROOT / 'web/public'
 PROOFS = ROOT / 'examples/prompt2robo-replays/manifest.json'
 SCHEMA = 'stacklab-workbench-v1'
 MAX_BODY = 96 * 1024
@@ -54,7 +54,7 @@ def load_models(path):
 
 
 def completion(model, messages, directory, emit):
-    """Both lanes receive the same messages and one generation budget."""
+    """Generate one policy using the workbench's fixed generation budget."""
     if model['protocol'] == 'stacklab':
         client = RemoteModel(model['url'], recording='slim')
         raw, result = client.complete(messages, directory, max_tokens=MAX_TOKENS, seed=SEED,
@@ -154,7 +154,14 @@ class Workbench(ThreadingHTTPServer):
 
 class Handler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, directory=str(DIST), **kwargs)
+        super().__init__(*args, directory=str(WEB), **kwargs)
+
+    def translate_path(self, path):
+        local = Path(super().translate_path(path))
+        parts = local.relative_to(WEB).parts
+        if len(parts) == 2 and parts[0] == 'proof' and re.fullmatch(r'[\w-]+\.(mp4|json)', parts[1]):
+            return str(PROOFS.parent / parts[1])
+        return str(local)
 
     def setup(self):
         self.timeout = 30
@@ -222,22 +229,29 @@ class Handler(SimpleHTTPRequestHandler):
         mode = body.get('mode', 'compare')
         custom = body.get('prompt', '')
         code = body.get('code', '')
-        if (mode not in ('compare', 'reference', 'code') or not isinstance(custom, str)
+        if (mode not in ('compare', 'single', 'reference', 'code') or not isinstance(custom, str)
                 or len(custom) > 4000 or not isinstance(code, str) or len(code) > 64000):
             raise ValueError('Invalid workbench request')
         if mode == 'code' and not code.strip():
             raise ValueError('Enter a Python function')
-        lanes = [('left', None)]
+        original = sample['user_prompt'].partition('\n')[2].strip()
+        lanes = [('left', None, original if mode == 'reference' else custom.strip() or original)]
         if mode == 'compare':
             left, right = body.get('left'), body.get('right')
             if left == right or left not in self.server.models or right not in self.server.models:
                 raise ValueError('Choose two distinct configured model entries')
-            lanes = [('left', left), ('right', right)]
-        unscored = bool(custom.strip()) and mode != 'reference'
-        if unscored:
-            header = sample['user_prompt'].partition('\n')[0]
-            sample = dict(sample, user_prompt=header + '\n' + custom.strip())
-        return mode, sample, unscored, code, lanes
+            prompts = body.get('prompts', {})
+            if (not isinstance(prompts, dict) or set(prompts) - {'left', 'right'}
+                    or any(not isinstance(value, str) or len(value) > 4000 for value in prompts.values())):
+                raise ValueError('Prompts must be text with at most 4,000 characters per side')
+            lanes = [(side, key, prompts.get(side, custom).strip() or original)
+                     for side, key in (('left', left), ('right', right))]
+        elif mode == 'single':
+            side, key = body.get('side'), body.get('model')
+            if side not in ('left', 'right') or key not in self.server.models:
+                raise ValueError('Choose a side and a configured model')
+            lanes = [(side, key, custom.strip() or original)]
+        return mode, sample, code, lanes
 
     def do_POST(self):
         if self.path != '/api/run':
@@ -246,7 +260,7 @@ class Handler(SimpleHTTPRequestHandler):
         if not self.authorized():
             return
         try:
-            mode, sample, unscored, code, lanes = self.read_job()
+            mode, sample, code, lanes = self.read_job()
         except (ValueError, TypeError) as error:
             self.json_response(400, {'error': str(error)})
             return
@@ -254,13 +268,13 @@ class Handler(SimpleHTTPRequestHandler):
             self.json_response(429, {'error': 'Runner busy. Start again when a comparison has finished.'})
             return
         try:
-            self.stream_job(mode, sample, unscored, code, lanes)
+            self.stream_job(mode, sample, code, lanes)
         except (ClientDisconnected, BrokenPipeError, ConnectionResetError):
             pass
         finally:
             self.server.capacity.release()
 
-    def stream_job(self, mode, sample, unscored, code, lanes):
+    def stream_job(self, mode, sample, code, lanes):
         self.send_response(200)
         self.send_header('Content-Type', 'application/x-ndjson; charset=utf-8')
         self.send_header('Cache-Control', 'no-store')
@@ -275,26 +289,39 @@ class Handler(SimpleHTTPRequestHandler):
             except (BrokenPipeError, ConnectionResetError, TimeoutError) as error:
                 raise ClientDisconnected from error
 
-        messages = prompt_for(sample, self.server.system)
+        header, _, original = sample['user_prompt'].partition('\n')
+        original = original.strip()
+        instructions = {side: instruction for side, _, instruction in lanes}
+        same_prompt = len(set(instructions.values())) == 1
+        samples_by_side = {side: dict(sample, user_prompt=header + '\n' + instruction)
+                           for side, instruction in instructions.items()}
+        messages_by_side = {
+            side: prompt_for(lane_sample, self.server.system) for side, lane_sample in samples_by_side.items()
+        }
+        prompt_hashes = {side: hashlib.sha256(json.dumps(messages).encode()).hexdigest()
+                         for side, messages in messages_by_side.items()}
         report = dict(protocol=SCHEMA, id=uuid4().hex, dataset=self.server.lock['repository'],
                       revision=self.server.lock['revision'], mode=mode, task=sample['id'],
-                      instruction=sample['user_prompt'].partition('\n')[2], scene=sample['scene'],
-                      prompt_sha256=hashlib.sha256(json.dumps(messages).encode()).hexdigest(),
-                      seed=SEED, max_tokens=MAX_TOKENS, scored=not unscored, results={})
+                      instruction=lanes[0][2] if same_prompt else None, scene=sample['scene'],
+                      prompt_sha256=prompt_hashes[lanes[0][0]] if same_prompt else None,
+                      same_prompt=same_prompt, seed=SEED, max_tokens=MAX_TOKENS,
+                      scored=all(text == original for text in instructions.values()), results={})
         write('start', report=report)
-        for lane, key in lanes:
+        for lane, key, instruction in lanes:
             def emit(event, **data):
                 write(event, lane=lane, **data)
 
+            unscored = instruction != original
             model = self.server.models[key] if key else None
             result = dict(model=key, label=model['label'] if model else 'Referenz' if mode == 'reference' else 'Eigener Code',
+                          instruction=instruction, prompt_sha256=prompt_hashes[lane], scored=not unscored,
                           metrics={}, code='', message='', raw='', check=None)
             try:
                 with TemporaryDirectory(prefix='stacklab-workbench-') as temporary:
                     output = Path(temporary)
                     if model:
                         emit('phase', phase='generating')
-                        raw, metrics, actual, finish = completion(model, messages, output/'generation', emit)
+                        raw, metrics, actual, finish = completion(model, messages_by_side[lane], output/'generation', emit)
                         result.update(raw=raw, metrics=metrics, actual_model=actual)
                         if finish == 'length':
                             raise ValueError('Model reached the token limit')
@@ -308,7 +335,7 @@ class Handler(SimpleHTTPRequestHandler):
                     result.update(code=reply['code'], message=reply['message'])
                     emit('program', code=reply['code'], message=reply['message'], metrics=result['metrics'])
                     emit('phase', phase='executing')
-                    result['check'] = simulate(self.server.checker, sample, reply, output, emit,
+                    result['check'] = simulate(self.server.checker, samples_by_side[lane], reply, output, emit,
                                                generated=mode != 'reference', unscored=unscored)
             except ClientDisconnected:
                 raise
@@ -332,8 +359,8 @@ def main(argv=None):
         token = os.environ.get('STACKLAB_WORKBENCH_TOKEN', '')
         if not re.fullmatch(r'[a-zA-Z0-9_\-]{16,128}', token):
             raise ValueError('Set STACKLAB_WORKBENCH_TOKEN to a URL-safe key of at least 16 characters')
-        if not (DIST/'index.html').is_file():
-            raise ValueError('Run node web/build.mjs first')
+        if not (WEB/'index.html').is_file():
+            raise ValueError('Run the workbench from a checkout that includes web/public')
         from stacklab.sim.assets import model_ready
         if not model_ready():
             raise ValueError('Run python bootstrap.py to prepare the LARA 5 assets')

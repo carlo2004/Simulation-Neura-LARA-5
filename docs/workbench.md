@@ -1,65 +1,63 @@
-# Browser-Workbench für Prompt2Robo
+# LARA 5 im Browser
 
-Im Browser wählen alle dieselbe Aufgabe und vergleichen zwei Modelle nebeneinander. Der Runner führt jede Antwort in einer frischen Szene mit dem LARA 5 aus. Beide Modelle bekommen dieselben Zero-shot-Nachrichten, Seed 42 und ein Budget von 2.048 Ausgabetokens. Innerhalb eines Vergleichs startet A vor B. Die UI zeigt das erzeugte Python, Bilder aus MuJoCo, gemessene Laufzeiten und die Zielprüfung.
+Links und rechts stehen je ein Modell und ein Prompt. **A starten** und **B starten** führen eine Seite aus. **Beide starten** führt die Programme nacheinander aus, jeweils aus derselben gewählten Startszene. **Prompt A → B** kopiert den Text für einen Vergleich mit identischer Anweisung. Die Live-Bilder kommen aus derselben MuJoCo-Simulation wie die lokale LARA-Ansicht.
 
-## Was auf Vercel läuft
+Eine unveränderte Datensatzaufgabe erhält eine Zielprüfung. Bei geänderten Prompts zeigt der Runner die Ausführung und den Endzustand. Unter **Aufnahmen und Berichte** gibt es die Referenzvideos und JSON-Export. Ein Bericht enthält den ausgeführten Prompt, die Zielprüfung und die Messwerte pro Seite.
 
-Ein Vercel-Hobby-Projekt kann die statische Oberfläche, sechs Referenzaufnahmen und die zugehörigen öffentlichen Prüfberichte ausliefern. Das passt für ein nichtkommerzielles Seminarprojekt. Der Build ist rund 1,4 MB groß. Der Python-Runner und beide Modellserver laufen auf einem Teamrechner oder einer VM. Die GPU kann auch per bestehendem SSH-Portforward angebunden werden. [Vercel Hobby](https://vercel.com/docs/plans/hobby) · [Live-Modellserver](remote-live.md)
+## Runner in Google Colab
 
-In Vercel unter **Add New → Project** das bestehende GitHub-Repo `carlo2004/Simulation-Neura-LARA-5` importieren. Das Root Directory bleibt der Repo-Stamm. `vercel.json` setzt den Build `node web/build.mjs` und das Ausgabeverzeichnis `web/dist`. Die statische Seite braucht keine Umgebungsvariablen. Nach dem Deploy die Produktions-URL im Browser öffnen. [Vercel Git-Deployments](https://vercel.com/docs/git)
+Der Runner und die Modelle laufen auf der Colab-GPU-VM. Die Website auf Vercel dient als Oberfläche. Für die Verbindung zum Runner verwenden wir den offiziellen SSH-Zugang von Colab. Er benötigt eine dafür bereitgestellte Laufzeit. Bei Colab Pro mit positivem Guthaben gelten für SSH und interaktive Weboberflächen die Ausnahmen der Colab-FAQ. [Colab-FAQ](https://research.google.com/colaboratory/faq.html) · [SSH einmal einrichten](remote-live.md#2-benannte-colab-sitzung-anlegen)
 
-Mit dem Vercel-Link sind die Aufnahmen und das Öffnen gespeicherter Vergleichsberichte unabhängig vom Runner verfügbar.
-
-## Runner starten
-
-Auf einem Rechner mit dem Repo, Python 3.12 oder 3.13 und Node.js einmal die LARA-Geometrie einrichten und die Oberfläche bauen.
+**1. Auf deinem Rechner:** Die benannte Colab-Sitzung mit A100 anlegen, falls sie noch nicht läuft. Den SSH-Host `lara-colab` wie in der Einrichtung auf diese Sitzung zeigen lassen. Mit der Verbindung wird der Browserport weitergeleitet.
 
 ~~~bash
+colab --auth=oauth2 new -s lara-workbench --gpu A100
+ssh -t -o ExitOnForwardFailure=yes -L 127.0.0.1:8787:127.0.0.1:8787 lara-colab
+~~~
+
+Wenn der SSH-Zugang mit 404 antwortet, zuerst eine per CLI angelegte Laufzeit prüfen. `colab --auth=oauth2 url -s lara-workbench --open` kann dieselbe benannte Sitzung im Notebook öffnen. [Offizielle Colab-CLI](https://github.com/googlecolab/google-colab-cli)
+
+**2. Im Colab-Terminal:** Beim ersten Mal das Repo klonen. Im vorhandenen Checkout genügt `git pull --ff-only`.
+
+~~~bash
+cd /content
+git clone https://github.com/carlo2004/Simulation-Neura-LARA-5.git
+cd Simulation-Neura-LARA-5
 python bootstrap.py
-node web/build.mjs
-~~~
-
-Dann einen Schlüssel für die Sitzung im Terminal setzen und den Runner starten. Unter Windows entspricht der Interpreter `.\.venv\Scripts\python.exe`. In PowerShell wird die Variable mit `$env:STACKLAB_WORKBENCH_TOKEN = & .\.venv\Scripts\python.exe -c "import secrets; print(secrets.token_urlsafe(24))"` gesetzt.
-
-~~~bash
+apt-get update -qq && apt-get install -y -qq libosmesa6
 export STACKLAB_WORKBENCH_TOKEN="$(.venv/bin/python -c 'import secrets; print(secrets.token_urlsafe(24))')"
-.venv/bin/python -m stacklab workbench
 ~~~
 
-`http://127.0.0.1:8787` öffnen, **Runner verbinden** wählen und den Schlüssel eingeben. Bei dieser URL kann das Feld Runner-URL leer bleiben. Jetzt lassen sich Referenzprogramme und eigener Python-Code live ausführen. Der erste Start lädt den geprüften Prompt2Robo-Snapshot. Eine vorhandene Kopie kann mit `--source` verwendet werden.
-
-## Beide Modelle einbinden
-
-Basismodell und Fine-Tuning auf derselben GPU oder auf getrennten Hosts laden. Beide Endpunkte müssen vom Runner aus über Loopback erreichbar sein. Für getrennte Hosts die jeweiligen Ports per SSH weiterleiten. Zwei Varianten können auch auf demselben OpenAI-kompatiblen Server liegen, wenn ihre Modell-IDs getrennt auswählbar sind.
-
-Beispiel für zwei GGUF-Dateien mit `llama-server` aus llama.cpp, in zwei Terminals.
+Den Sitzungsschlüssel im eigenen Terminal bereithalten und in der Browsermaske eingeben. In dieser Shell steht er unter `$STACKLAB_WORKBENCH_TOKEN`. Die Modellgewichte als GGUF in der Colab-Laufzeit bereitstellen und die Pfade einsetzen.
 
 ~~~bash
-llama-server --host 127.0.0.1 --port 8081 --alias base -m /pfad/base.gguf
-llama-server --host 127.0.0.1 --port 8082 --alias tuned -m /pfad/tuned.gguf
+.venv/bin/python tools/start_colab_workbench.py \
+  --base /content/base.gguf \
+  --tuned /content/fine-tuning.gguf
 ~~~
 
-Für einen kompatiblen GGUF-LoRA-Adapter kann der zweite Server das Basismodell mit `--lora /pfad/adapter.gguf` laden. Transformers- oder vLLM-Checkpoints können über einen passenden OpenAI-kompatiblen Modellserver angeschlossen werden. [llama.cpp Server](https://github.com/ggml-org/llama.cpp/tree/master/tools/server)
+Bei einem kompatiblen GGUF-LoRA `--lora /content/adapter.gguf` anstelle von `--tuned` verwenden. Der Starthelfer prüft die LARA-Ansicht, lädt bei Bedarf die geprüfte CUDA-Version von llama.cpp und wartet auf beide Modelle. Für ältere CUDA-Images kann dafür ein Quellbuild mit CMake, C++-Compiler und `nvcc` nötig sein. Ein vorhandenes CUDA-Binary kann mit `--llama-server` angegeben werden. Ohne Modellpfade startet der Runner für einen ersten Test der Referenzprogramme.
+
+Falls beim Quellbuild CMake fehlt, installiere es mit `.venv/bin/python -m pip install cmake`. Die Einrichtung benötigt Python ab 3.12.
+
+**3. Im Browser:** [Lokale Workbench öffnen](http://127.0.0.1:8787). **Runner verbinden** wählen, das URL-Feld leer lassen und den Sitzungsschlüssel eingeben. Zwei Modelle und eine Szene auswählen.
+
+### Team-Session
+
+Der Rechner mit dem offenen SSH-Tunnel kann Port 8787 über eine private HTTPS-Adresse im Teamnetz freigeben. Mit Tailscale Serve läuft `tailscale serve --bg 8787` auf diesem Rechner. Die Teammitglieder öffnen die ausgegebene Team-URL und geben den Sitzungsschlüssel ein. Falls der Proxy den Host-Header umschreibt, die Team-URL beim Colab-Start mit `--origin https://RECHNER.TEAM.ts.net` erlauben. Mit `--concurrent 2` können zwei Personen gleichzeitig unabhängige Läufe starten. [Tailscale Serve](https://tailscale.com/docs/features/tailscale-serve)
+
+Auf der [Vercel-Workbench](https://simulation-neura-lara-5.vercel.app/) kann das Team dieselbe HTTPS-Runner-URL unter **Runner verbinden** eintragen. Dafür beim Colab-Start zusätzlich `--origin https://simulation-neura-lara-5.vercel.app` setzen. Die Browser-Ansicht bleibt über Vercel erreichbar, wenn Colab pausiert. Live-Läufe sind während der aktiven Colab-Sitzung und des offenen SSH-Tunnels verfügbar.
+
+## Vorhandene Modellserver
+
+Der Runner kann auch zwei bereits gestartete OpenAI-kompatible Server oder `stacklab serve` verwenden. Beide Endpunkte müssen vom Runner aus per Loopback erreichbar sein. In `runs/workbench-models.json` die Einträge aus [der Beispielkonfiguration](../config/workbench-models.example.json) anpassen und starten.
 
 ~~~bash
-mkdir -p runs
-cp config/workbench-models.example.json runs/workbench-models.json
 .venv/bin/python -m stacklab workbench --models runs/workbench-models.json
 ~~~
 
-Im lokalen JSON stehen Anzeigename, Protokoll, URL und Modell-ID. Für den vorhandenen `stacklab serve`-Endpunkt genügen `"protocol": "stacklab"`, `"label"` und `"url"`. Für einen API-Schlüssel am Modellserver kann ein OpenAI-Eintrag den Namen einer Umgebungsvariablen in `api_key_env` enthalten. Browser und Reports erhalten keine Modellserver-Schlüssel. Beide Varianten erscheinen nach dem Verbinden in den Auswahllisten.
+Für `stacklab serve` verwendet der Eintrag `"protocol": "stacklab"` sowie `label` und `url`. Bei OpenAI-kompatiblen Endpunkten kann `api_key_env` auf einen Schlüssel in der Umgebung des Runners verweisen. Die UI zeigt native Decode-Tokens/s, soweit verfügbar, sonst den Durchsatz über die ganze Anfrage. Die Messbasis steht im Tooltip und im Export.
 
-## Team-Session
+## Vercel
 
-Für den Live-Zugriff kann der Host den Runner über eine private HTTPS-Adresse bereitstellen, zum Beispiel per Tailscale Serve mit `tailscale serve --bg 8787`. Die Teammitglieder öffnen diese Adresse in ihrem Teamnetz und verwenden den Sitzungsschlüssel. Auf demselben Host läuft die Oberfläche direkt mit. [Tailscale Serve](https://tailscale.com/docs/features/tailscale-serve)
-
-Wer die Vercel-Seite mit dem Runner verbinden möchte, startet ihn zusätzlich mit `--origin https://EURE-PRODUKTIONS-URL.vercel.app`. In der Oberfläche die HTTPS-Adresse des Runners und den Sitzungsschlüssel eingeben. Der Runner lauscht lokal und akzeptiert für die API nur den Schlüssel und erlaubte Browser-Origins. Den Schlüssel separat an das Team geben.
-
-Standardmäßig verarbeitet der Runner einen Vergleich gleichzeitig. Mit `--concurrent 2` können zwei Browser gleichzeitig unabhängige Läufe ausführen. Bei belegten Slots meldet die Oberfläche den Engpass. Für eine vergleichbare Durchsatzmessung dieselbe Hardware, dasselbe Backend und einen Lauf zur Zeit verwenden.
-
-## Vergleich auswerten
-
-- Bei einer Datensatzaufgabe prüft der ursprüngliche Zielchecker die auf dem LARA 5 gemessenen Zustände. Ein freier Prompt liefert Zustandsdaten und Programm ohne Zielwertung.
-- Die Webausführung unterstützt das Prompt2Robo-API mit begrenzten Python-Ausdrücken, Schleifen, Hilfsfunktionen und ausgewählten numerischen Operationen. Ungültiger oder nicht unterstützter Code bleibt als Fehler im Ergebnis sichtbar.
-- Die UI zeigt native Decode-Tokens/s, wenn der Server diese liefert. Andernfalls zeigt sie bei bekanntem Tokenzähler den Durchsatz über die ganze Anfrage. Der Tooltip und das JSON kennzeichnen die Messbasis.
-- **JSON speichern** hält beide Ergebnisse, Anfangsszene, Modell-IDs, Prompt-Prüfsumme, Code, Zielprüfung, Zeiten und je ein Endbild fest. Über **Bericht öffnen** lässt sich die Gegenüberstellung später auch auf der statischen Seite ansehen.
+`vercel.json` baut die statischen Dateien mit `node web/build.mjs`. `web/dist` enthält die Oberfläche und die öffentlichen Referenzaufnahmen. Das bestehende Vercel-Projekt zieht aus `main`. Die Python-Simulation und die Modellgewichte bleiben auf dem Runner.

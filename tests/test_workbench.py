@@ -1,12 +1,13 @@
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from types import SimpleNamespace
+from io import BytesIO
 import json
 import unittest
 
 import numpy as np
 
-from stacklab.cli.workbench import load_models
+from stacklab.cli.workbench import Handler, load_models
 from stacklab.policy import PolicyError
 from stacklab.workbench_policy import WorkbenchPolicy
 
@@ -64,3 +65,23 @@ class WorkbenchTests(unittest.TestCase):
             path.write_text(json.dumps({'base': model}), encoding='utf-8')
             with self.assertRaisesRegex(ValueError, 'loopback'):
                 load_models(path)
+
+    def test_paired_and_individual_jobs_keep_prompts_on_their_side(self):
+        original = {'id': 'scene', 'user_prompt': 'Objects: 1 (red)\nStack the cubes.'}
+        handler = Handler.__new__(Handler)
+        handler.server = SimpleNamespace(cases={'scene': original}, models={'base': {}, 'tuned': {}})
+
+        def job(**values):
+            body = json.dumps(dict(task='scene', **values)).encode()
+            handler.headers = {'Content-Length': str(len(body))}
+            handler.rfile = BytesIO(body)
+            return handler.read_job()
+
+        _, sample, _, lanes = job(mode='compare', left='base', right='tuned',
+                                  prompts={'left': 'Stack the cubes.', 'right': 'Move up.'})
+        self.assertEqual(sample, original)
+        self.assertEqual(lanes, [('left', 'base', 'Stack the cubes.'), ('right', 'tuned', 'Move up.')])
+        self.assertEqual(job(mode='single', side='right', model='tuned', prompt='Rotate.')[3],
+                         [('right', 'tuned', 'Rotate.')])
+        with self.assertRaisesRegex(ValueError, 'Prompts must be text'):
+            job(mode='compare', left='base', right='tuned', prompts={'right': ['invalid']})

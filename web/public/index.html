@@ -3,117 +3,74 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Prompt2Robo. Zwei Modelle, dieselbe Szene auf dem NEURA LARA 5.">
-  <meta name="theme-color" content="#0a1016">
-  <title>Workbench · LARA Stack Lab</title>
+  <meta name="description" content="LARA 5: Modellvergleich und Live-Simulation">
+  <title>LARA 5 · Modellvergleich</title>
   <link rel="stylesheet" href="styles.css">
   <script src="app.js" type="module"></script>
 </head>
 <body>
-  <header class="bar">
-    <a class="wordmark" href="#top" aria-label="LARA Stack Lab">
-      <svg viewBox="0 0 32 32" width="31" height="31" aria-hidden="true">
-        <path d="M5 25h10m-5 0v-7l7-8 8 4v6m-4 0v4m8-4v4m-8-4h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        <circle cx="17" cy="10" r="3" fill="#111a22" stroke="currentColor" stroke-width="2"/>
-      </svg>
-      <span>LARA <strong>STACK LAB</strong></span>
-    </a>
-    <nav aria-label="Bereiche">
-      <a href="#vergleich">Vergleich</a>
-      <a href="#aufnahmen">Aufnahmen</a>
-    </nav>
-    <button id="connection-button" class="status" type="button" aria-controls="connection" aria-expanded="false">
-      <span class="dot"></span><span id="connection-status">Replay-Modus</span>
-    </button>
-  </header>
-  <main id="top">
-    <section class="intro">
-      <p class="eyebrow"><span>01</span> PROMPT2ROBO WORKBENCH</p>
-      <h1>Ein Auftrag. <em>Zwei Modelle.</em></h1>
-      <p class="lead">Vergleiche Basismodell und Fine-Tuning auf derselben Startszene. Sieh zu, wie der LARA 5 die erzeugten Programme ausführt.</p>
-    </section>
-
-    <details class="connection card" id="connection">
-      <summary>Runner verbinden</summary>
-      <form id="connect-form">
-        <label>Runner-URL <input id="runner" name="runner" inputmode="url" placeholder="https://team-runner.example" autocomplete="off"></label>
-        <label>Sitzungsschlüssel <input id="key" name="key" type="password" autocomplete="off" required></label>
-        <button class="primary" type="submit" id="connect">Verbinden</button>
-      </form>
-      <p class="muted" id="connection-help">Der Runner hält Modelle und Simulation bereit. Leer lassen, wenn die Oberfläche direkt vom Runner geöffnet wurde.</p>
-    </details>
-
-    <section id="vergleich" aria-labelledby="compare-title">
-      <div class="section-heading">
-        <h2 id="compare-title">Modellvergleich</h2>
-        <div class="tools">
-          <label class="button file-button">Bericht öffnen <input id="import" type="file" accept="application/json,.json"></label>
-          <button id="export" type="button" disabled>JSON speichern</button>
-        </div>
-      </div>
-      <div class="task card">
-        <div>
-          <label for="task">Aufgabe und Startszene</label>
-          <select id="task" aria-describedby="task-text"></select>
-          <p id="task-text"></p>
-          <details id="scene"><summary>Objekte und Koordinaten</summary><ul id="objects"></ul></details>
-        </div>
-        <div class="controls">
-          <p class="eyebrow">ZERO-SHOT <span>·</span> GLEICHE SZENE</p>
-          <button class="primary" id="run" type="button" disabled>Vergleich starten <span aria-hidden="true">↗</span></button>
-          <button id="stop" type="button" hidden>Abbrechen</button>
-          <button id="reference" type="button" disabled>Referenz live starten</button>
-        </div>
-      </div>
-      <p class="notice" id="notice" role="status" aria-live="polite">Verbinde den Runner für Live-Läufe. Unten sind die geprüften Aufnahmen direkt verfügbar.</p>
-      <div class="lanes" id="lanes"></div>
-      <details class="card explore">
-        <summary>Freier Prompt und Python-Konsole</summary>
-        <div class="explore-grid">
-          <label>Freier Prompt <span class="muted">· eigene Aufgabe, freie Auswertung</span>
-            <textarea id="prompt" rows="3" maxlength="4000" placeholder="Beispiel: Hebe den roten Würfel 10 cm an."></textarea>
-          </label>
-          <label>Python <span class="muted">· startet auf der gewählten Szene</span>
-            <textarea id="code-input" spellcheck="false" rows="6" maxlength="64000"></textarea>
-          </label>
-        </div>
-        <button id="run-code" type="button" disabled>Code ausführen</button>
+  <main>
+    <header class="page-header">
+      <h1>LARA 5 · Modellvergleich</h1>
+      <details id="connection">
+        <summary id="connection-status">Runner verbinden</summary>
+        <form id="connect-form">
+          <label>Runner-URL <input id="runner" inputmode="url" placeholder="Leer bei lokalem Runner" autocomplete="off"></label>
+          <label>Sitzungsschlüssel <input id="key" type="password" autocomplete="off" required></label>
+          <button type="submit" id="connect">Verbinden</button>
+          <a href="https://github.com/carlo2004/Simulation-Neura-LARA-5/blob/main/docs/workbench.md#runner-in-google-colab">Colab-Setup</a>
+        </form>
       </details>
-    </section>
+    </header>
 
-    <section id="aufnahmen" class="library" aria-labelledby="proof-title">
-      <div class="section-heading">
-        <div><p class="eyebrow"><span>02</span> REPLAY-BIBLIOTHEK</p><h2 id="proof-title">Auf dem LARA 5 geprüft</h2></div>
-        <a href="proof/manifest.json">Prüfbericht ↗</a>
+    <div class="toolbar">
+      <label>Startszene <select id="task"></select></label>
+      <button id="copy-prompt" type="button">Prompt A → B</button>
+      <button class="primary" id="run" type="button" disabled>Beide starten</button>
+      <button id="stop" type="button" hidden>Abbrechen</button>
+    </div>
+    <p id="notice" role="status" aria-live="polite">Runner verbinden, um Modelle live zu testen.</p>
+    <div class="lanes" id="lanes"></div>
+
+    <details class="secondary">
+      <summary>Startkoordinaten und Python</summary>
+      <ul id="objects"></ul>
+      <label>Python-Programm <textarea id="code-input" spellcheck="false" rows="4" maxlength="64000"></textarea></label>
+      <div class="row">
+        <button id="run-code" type="button" disabled>Code ausführen</button>
+        <button id="reference" type="button" disabled>Referenz ausführen</button>
       </div>
-      <div class="library-grid card">
-        <video id="proof-player" controls playsinline preload="metadata" poster="lara-start.webp" aria-label="Aufzeichnung auf dem LARA 5"></video>
-        <div class="library-menu">
-          <p class="eyebrow">REFERENZPROGRAMME · 2×</p>
-          <div id="replays" aria-label="Aufzeichnung wählen"></div>
-        </div>
+    </details>
+    <details class="secondary">
+      <summary>Aufnahmen und Berichte</summary>
+      <div class="row">
+        <label>Aufnahme <select id="replays"></select></label>
+        <button id="play" type="button">Abspielen</button>
+        <button id="export" type="button" disabled>Letzten Lauf speichern</button>
+        <label class="file-button">Bericht öffnen <input id="import" type="file" accept="application/json,.json"></label>
+        <a href="proof/manifest.json">Prüfbericht</a>
       </div>
-    </section>
-    <footer><span>NEURA LARA 5 · MuJoCo · Prompt2Robo</span><a href="https://github.com/carlo2004/Simulation-Neura-LARA-5/blob/main/docs/workbench.md">Einrichtung auf GitHub ↗</a></footer>
+      <video id="proof-player" controls playsinline preload="none" poster="lara-start.webp" aria-label="LARA-5-Aufnahme"></video>
+    </details>
   </main>
+
   <template id="lane-template">
-    <article class="lane card">
-      <header class="lane-header">
-        <span class="lane-index"></span>
-        <label><span class="lane-title"></span><select class="model" disabled></select></label>
-        <span class="lane-state">Bereit</span>
-      </header>
+    <article class="lane">
+      <header><h2 class="lane-title"></h2><span class="lane-state">Bereit</span></header>
+      <label>Modell <select class="model" disabled></select></label>
+      <label>Prompt <textarea class="prompt" rows="3" maxlength="4000"></textarea></label>
+      <button class="start" type="button" disabled></button>
       <div class="viewport">
-        <img class="frame" src="lara-start.webp" alt="LARA 5 und zwei Würfel in MuJoCo">
-        <span class="frame-label">REFERENZANSICHT</span>
-        <span class="clock">T = —</span>
+        <img class="frame" src="lara-start.webp" alt="LARA 5 in MuJoCo">
+        <span class="frame-label">Referenzbild</span>
+        <span class="clock">—</span>
       </div>
       <dl class="metrics">
-        <div><dt>Zielprüfung</dt><dd class="score">—</dd></div>
+        <div><dt>Ziel</dt><dd class="score">—</dd></div>
         <div><dt>Tokens/s</dt><dd class="rate">—</dd></div>
         <div><dt>Generierung</dt><dd class="duration">—</dd></div>
       </dl>
-      <details class="output"><summary>Programm und Feedback</summary><p class="feedback muted">Ergebnisse erscheinen hier.</p><pre class="program"></pre></details>
+      <details class="output"><summary>Programm und Ergebnis</summary><p class="feedback"></p><pre class="program"></pre></details>
     </article>
   </template>
 </body>
