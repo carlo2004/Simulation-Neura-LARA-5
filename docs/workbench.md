@@ -6,6 +6,8 @@ Eine unveränderte Datensatzaufgabe erhält eine Zielprüfung. Bei geänderten P
 
 ## Runner in Google Colab
 
+Für eine frische Laufzeit gibt es ein [Colab-Notebook mit Schritt-für-Schritt-Anleitung](colab-workbench.md). Es richtet die Umgebung ein, startet den Runner und beschreibt den Team-Zugang über ngrok auf deinem Rechner.
+
 Der Runner und die Modelle laufen auf der Colab-GPU-VM. Die Website auf Vercel dient als Oberfläche. Für die Verbindung zum Runner verwenden wir den offiziellen SSH-Zugang von Colab. Er benötigt eine dafür bereitgestellte Laufzeit. Bei Colab Pro mit positivem Guthaben gelten für SSH und interaktive Weboberflächen die Ausnahmen der Colab-FAQ. [Colab-FAQ](https://research.google.com/colaboratory/faq.html) · [SSH einmal einrichten](remote-live.md#2-benannte-colab-sitzung-anlegen)
 
 **1. Auf deinem Rechner:** Die benannte Colab-Sitzung mit A100 anlegen, falls sie noch nicht läuft. Den SSH-Host `lara-colab` wie in der Einrichtung auf diese Sitzung zeigen lassen. Mit der Verbindung wird der Browserport weitergeleitet.
