@@ -108,15 +108,20 @@ def lara_passes(reports, lock):
     return passed - failed
 
 
-def replay_one(root, sample, output, video, gui, timeout):
-    # The worker runs only reference programs from the checked snapshot.
+def replay_environment(offscreen=False):
     keys = ('PATH', 'SYSTEMROOT', 'WINDIR', 'TMP', 'TEMP', 'TMPDIR', 'DISPLAY',
             'XAUTHORITY', 'WAYLAND_DISPLAY', 'XDG_RUNTIME_DIR', 'LD_LIBRARY_PATH',
             'MUJOCO_GL', 'PYOPENGL_PLATFORM', 'EGL_DEVICE_ID', 'MUJOCO_EGL_DEVICE_ID', 'IMAGEIO_FFMPEG_EXE')
     env = {key: os.environ[key] for key in keys if key in os.environ}
-    if video and not gui and sys.platform.startswith('linux'):
+    if offscreen and sys.platform.startswith('linux'):
         env.setdefault('MUJOCO_GL', 'egl')
     env.update(OPENBLAS_NUM_THREADS='1', MKL_NUM_THREADS='1', OMP_NUM_THREADS='1')
+    return env
+
+
+def replay_one(root, sample, output, video, gui, timeout):
+    # The worker runs only reference programs from the checked snapshot.
+    env = replay_environment(video and not gui)
     command = [sys.executable, '-I', str(Path(__file__).with_name('_prompt2robo_worker.py')),
                str(root / CHECKER), str(output), sample['id']]
     if video:

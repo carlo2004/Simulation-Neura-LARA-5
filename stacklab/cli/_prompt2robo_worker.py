@@ -1,10 +1,13 @@
 """Run one pinned Prompt2Robo sample on the shared LARA 5 simulation."""
 import argparse
+import base64
 from contextlib import ExitStack
 import importlib.util
+import io
 import json
 from pathlib import Path
 import sys
+import time
 from types import ModuleType
 
 
@@ -15,6 +18,9 @@ def main():
     parser.add_argument('sample_id')
     parser.add_argument('--video', action='store_true')
     parser.add_argument('--gui', action='store_true')
+    parser.add_argument('--live', action='store_true', help='Stream sampled rendered frames over stdout')
+    parser.add_argument('--generated', action='store_true', help='Use the bounded model-policy evaluator')
+    parser.add_argument('--unscored', action='store_true', help='Execute a free prompt without a dataset goal')
     args = parser.parse_args()
     payload = json.load(sys.stdin)
     sample, response = payload['sample'], payload['response']
@@ -34,15 +40,40 @@ def main():
     initial_state = None
     frame_count = 0
     stage = 'text_check' if not response['code'] else 'setup'
+    def emit(event, **data):
+        if args.live:
+            print(json.dumps(dict(event=event, **data), ensure_ascii=True, allow_nan=False), flush=True)
+
     with ExitStack() as cleanup:
         def execute(scene, code):
             nonlocal observed, initial_state, stage, frame_count
-            sim = Simulation(ReplayScene(scene), visuals=args.video or args.gui)
+            sim = Simulation(ReplayScene(scene), visuals=args.video or args.gui or args.live)
             cleanup.callback(sim.close)
             observed = LaraReplay(sim, scene)
             initial_state = observed.state()
             if args.gui:
                 sim.open_viewer()
+            frame = None
+            if args.live:
+                from PIL import Image
+                renderer = cleanup.enter_context(mujoco.Renderer(sim.model, height=360, width=480))
+                renderer.scene.flags[mujoco.mjtRndFlag.mjRND_REFLECTION] = 0
+                renderer.scene.flags[mujoco.mjtRndFlag.mjRND_SHADOW] = 0
+                next_frame = 0.
+
+                def frame(current, force=False):
+                    nonlocal next_frame
+                    now = time.monotonic()
+                    if not force and now < next_frame:
+                        return
+                    next_frame = now + .16
+                    buffer = io.BytesIO()
+                    Image.fromarray(current.render_frame(renderer)).save(buffer, 'JPEG', quality=75)
+                    emit('frame', jpeg=base64.b64encode(buffer.getvalue()).decode('ascii'),
+                         time_s=round(float(current.data.time), 3))
+
+                frame(sim, force=True)
+                sim.record_callback = frame
             first_frame = sim.frames
             if args.video:
                 import imageio.v2 as imageio
@@ -52,11 +83,19 @@ def main():
                 sim.writer.append_data(sim.render_frame(sim.renderer))
             stage = 'execution'
             try:
-                run_reference(code, observed)
+                if args.generated:
+                    from stacklab.workbench_policy import WorkbenchPolicy
+                    runner = WorkbenchPolicy(observed, on_action=lambda phase, action: emit(
+                        'action', phase=phase, method=action['method'], time_s=action['time_s']))
+                    runner.run(code)
+                else:
+                    run_reference(code, observed)
                 sim.step(.75)
             except Exception as error:
                 return observed.state(), f'{type(error).__name__}: {error}', observed
             finally:
+                if frame is not None:
+                    frame(sim, force=True)
                 if sim.writer:
                     frame = sim.render_frame(sim.renderer)
                     for _ in range(FPS):
@@ -73,7 +112,18 @@ def main():
         spec = importlib.util.spec_from_file_location('prompt2robo_goals', args.checker)
         checker = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(checker)
-        passed, reasons = checker.check(sample)
+        if args.unscored:
+            reasons = []
+            if response['code']:
+                try:
+                    _, error, _ = execute(sample['scene'], response['code'])
+                except Exception as failure:
+                    error = str(failure)
+                if error:
+                    reasons.append(error)
+            passed = None
+        else:
+            passed, reasons = checker.check(sample)
 
     if frame_count:
         partial.replace(video_path)

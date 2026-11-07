@@ -1,0 +1,14 @@
+{
+  "base": {
+    "label": "Basismodell",
+    "protocol": "openai",
+    "url": "http://127.0.0.1:8081/v1",
+    "model": "base"
+  },
+  "tuned": {
+    "label": "Fine-Tuning",
+    "protocol": "openai",
+    "url": "http://127.0.0.1:8082/v1",
+    "model": "tuned"
+  }
+}
