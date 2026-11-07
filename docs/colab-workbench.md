@@ -12,6 +12,8 @@ Für die interaktive Nutzung ist eine Colab-Pro-Laufzeit mit positivem Rechenein
 4. Führe die Zellen 1 bis 4 aus. Warte auf **Runner bereit**. In der Vorschau unter Zelle 4 **Runner verbinden** wählen, URL leer lassen und den Sitzungsschlüssel eingeben.
 5. Wähle **Rot auf Blau** und klicke auf **Referenzprogramm ausführen**. Mit geladenen Modellen kannst du danach einzelne Modelle oder beide mit demselben Prompt testen.
 
+Nach einem Update öffne die aktuelle Notebook-Version oder übernimm deren `REVISION` in deine Drive-Kopie. Stoppe den bisherigen Runner über die letzte Zelle und führe die Einrichtung erneut aus. Unter **Armtempo** kannst du dann vor dem Start wählen. **MP4 exportieren** erscheint nach einem simulierten Lauf. [Tempo und Export](workbench.md#armtempo-und-mp4)
+
 Die Colab-Vorschau ist für deine eigene Notebook-Sitzung gedacht. Für einen Team-Link verwende den folgenden Ablauf mit einer per CLI angelegten Laufzeit.
 
 ## Team-Link mit ngrok

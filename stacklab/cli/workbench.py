@@ -10,17 +10,19 @@ import json
 import os
 from pathlib import Path
 import re
+import shutil
 import subprocess
 import sys
 from tempfile import TemporaryDirectory
 from threading import BoundedSemaphore, Timer
+from time import monotonic
 from urllib.parse import urlsplit
 from uuid import uuid4
 
 from stacklab import __version__
 from stacklab.cli.prompt2robo import (CHECKER, LOCK, PROMPT_FORMAT, load_system_prompt, prompt_for,
                                      read_samples, replay_environment, response_for, source_files)
-from stacklab.config import write_json
+from stacklab.config import Config, write_json
 from stacklab.llm.metrics import GenerationMetrics
 from stacklab.paths import ROOT, RUNS_ROOT
 
@@ -30,6 +32,9 @@ SCHEMA = 'stacklab-workbench-v1'
 MAX_BODY = 96 * 1024
 MAX_TOKENS = 2048
 SEED = 42
+STANDARD_SPEED_MM_S = Config.speed_mm_s
+SPEEDS_MM_S = (STANDARD_SPEED_MM_S, 120, 160)
+UI_SPEED_MM_S = 120
 
 
 class ClientDisconnected(Exception):
@@ -142,19 +147,22 @@ def decode_answer(raw):
     return dict(code=code, message=message)
 
 
-def simulate(checker, sample, reply, output, emit, *, generated, unscored, run_id):
+def simulate(checker, sample, reply, output, emit, *, generated, unscored, run_id,
+             speed_mm_s=STANDARD_SPEED_MM_S, video=False):
     worker = Path(__file__).with_name('_prompt2robo_worker.py')
-    command = [sys.executable, '-I', str(worker), str(checker), str(output), sample['id'], '--live']
+    command = [sys.executable, '-I', str(worker), str(checker), str(output), sample['id']]
+    command.extend(['--video', 'preview'] if video else ['--live'])
     if generated:
         command.append('--generated')
     if unscored:
         command.append('--unscored')
-    payload = dict(sample={k: v for k, v in sample.items() if k != 'assistant_answer'}, response=reply)
+    payload = dict(sample={k: v for k, v in sample.items() if k != 'assistant_answer'},
+                   response=reply, speed_mm_s=speed_mm_s)
     with (output / 'worker.log').open('w', encoding='utf-8') as log:
         with subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=log,
                               cwd=output, env=replay_environment(offscreen=True),
                               text=True, encoding='utf-8') as process:
-            timeout = Timer(120, process.kill)
+            timeout = Timer(180 if video else 120, process.kill)
             timeout.daemon = True
             timeout.start()
             try:
@@ -166,7 +174,7 @@ def simulate(checker, sample, reply, output, emit, *, generated, unscored, run_i
                     except ValueError:
                         continue
                     event = record.pop('event', None)
-                    if event in ('frame', 'action'):
+                    if emit is not None and event in ('frame', 'action'):
                         emit(event, **record)
                 process.wait()
             finally:
@@ -205,6 +213,7 @@ class Workbench(ThreadingHTTPServer):
         self.samples = self.cases | {key: row for key, row in available.items()
                                      if row['split'] == 'train' and row['verified'] is True}
         self.catalog = dict(protocol=SCHEMA, lane_prompts=True, prompt_format=PROMPT_FORMAT, training_cases=True,
+                            speeds_mm_s=SPEEDS_MM_S, default_speed_mm_s=UI_SPEED_MM_S, video_export=True,
                             dataset=self.lock['repository'], revision=self.lock['revision'],
                             models=[model_identity(key, value) for key, value in models.items()],
                             cases=[dict(id=key, split=row['split'], reference_passed=proof.get(key),
@@ -281,13 +290,17 @@ class Handler(SimpleHTTPRequestHandler):
         else:
             super().do_GET()
 
-    def read_job(self):
+    def read_body(self):
         size = int(self.headers.get('Content-Length', '0'))
         if not 0 < size <= MAX_BODY:
             raise ValueError('Request body exceeds the workbench limit')
         body = json.loads(self.rfile.read(size))
         if not isinstance(body, dict):
             raise ValueError('Expected a JSON object')
+        return body
+
+    def read_job(self):
+        body = self.read_body()
         sample = self.server.samples.get(body.get('task', ''))
         if sample is None:
             raise ValueError('Choose a case from the catalog')
@@ -299,6 +312,9 @@ class Handler(SimpleHTTPRequestHandler):
             raise ValueError('Invalid workbench request')
         if mode == 'code' and not code.strip():
             raise ValueError('Enter a Python function')
+        speed = body.get('speed_mm_s', STANDARD_SPEED_MM_S)
+        if type(speed) is not int or speed not in SPEEDS_MM_S:
+            raise ValueError('Choose an arm speed from the runner catalog')
         original = sample['user_prompt'].partition('\n')[2].strip()
         lanes = [('left', None, original if mode == 'reference' else custom.strip() or original)]
         if mode == 'compare':
@@ -316,16 +332,36 @@ class Handler(SimpleHTTPRequestHandler):
             if side not in ('left', 'right') or key not in self.server.models:
                 raise ValueError('Choose a side and a configured model')
             lanes = [(side, key, custom.strip() or original)]
-        return mode, sample, code, lanes
+        return mode, sample, code, lanes, speed
+
+    def read_video_job(self):
+        body = self.read_body()
+        run_id, lane = body.get('id'), body.get('lane')
+        if not isinstance(run_id, str) or not re.fullmatch(r'[a-f0-9]{32}', run_id) or lane not in ('left', 'right'):
+            raise ValueError('Choose a saved run and a side')
+        path = RUNS_ROOT / 'workbench' / (run_id + '.json')
+        report = json.loads(path.read_text(encoding='utf-8'))
+        result = report['results'].get(lane, {})
+        check = result.get('check') or {}
+        sample = self.server.samples.get(report['task'])
+        if (report['status'] != 'complete' or report['runner_revision'] != self.server.git_revision
+                or report['revision'] != self.server.lock['revision'] or sample is None or not result.get('code')
+                or not check.get('initial_state')):
+            raise ValueError('Für diese Seite gibt es keinen exportierbaren Lauf auf diesem Runner.')
+        return report, lane, dict(sample, user_prompt=result['user_prompt']), result
 
     def do_POST(self):
-        if self.path != '/api/run':
+        if self.path not in ('/api/run', '/api/video'):
             self.send_error(404)
             return
         if not self.authorized():
             return
+        video = self.path == '/api/video'
         try:
-            mode, sample, code, lanes = self.read_job()
+            job = self.read_video_job() if video else self.read_job()
+        except FileNotFoundError:
+            self.json_response(404, {'error': 'Dieser Lauf ist auf dem Runner nicht gespeichert.'})
+            return
         except (ValueError, TypeError) as error:
             self.json_response(400, {'error': str(error)})
             return
@@ -333,13 +369,40 @@ class Handler(SimpleHTTPRequestHandler):
             self.json_response(429, {'error': 'Runner busy. Start again when a comparison has finished.'})
             return
         try:
-            self.stream_job(mode, sample, code, lanes)
+            if video:
+                self.export_video(*job)
+            else:
+                self.stream_job(*job)
         except (ClientDisconnected, BrokenPipeError, ConnectionResetError):
             pass
         finally:
             self.server.capacity.release()
 
-    def stream_job(self, mode, sample, code, lanes):
+    def export_video(self, report, lane, sample, result):
+        generated = report['mode'] != 'reference'
+        reply = {key: result[key] for key in ('code', 'message')} if generated else response_for(sample)
+        with TemporaryDirectory(prefix='stacklab-video-') as temporary:
+            directory = Path(temporary)
+            try:
+                receipt = simulate(self.server.checker, sample, reply, directory, None,
+                                   generated=generated, unscored=not result['scored'], run_id=report['id'],
+                                   speed_mm_s=report.get('speed_mm_s', STANDARD_SPEED_MM_S), video=True)
+                path = directory / (sample['id'] + '.mp4')
+                if not receipt['video'] or not path.is_file():
+                    raise ValueError('Für diesen Lauf konnte kein Video gerendert werden.')
+            except (ValueError, RuntimeError, OSError) as error:
+                self.json_response(422, {'error': str(error)})
+                return
+            self.send_response(200)
+            self.send_header('Content-Type', 'video/mp4')
+            self.send_header('Content-Disposition', f'attachment; filename="lara-{report["id"]}-{lane}.mp4"')
+            self.send_header('Content-Length', str(path.stat().st_size))
+            self.send_header('Cache-Control', 'no-store')
+            self.end_headers()
+            with path.open('rb') as stream:
+                shutil.copyfileobj(stream, self.wfile)
+
+    def stream_job(self, mode, sample, code, lanes, speed_mm_s=STANDARD_SPEED_MM_S):
         self.send_response(200)
         self.send_header('Content-Type', 'application/x-ndjson; charset=utf-8')
         self.send_header('Cache-Control', 'no-store')
@@ -377,6 +440,7 @@ class Handler(SimpleHTTPRequestHandler):
                       instruction=lanes[0][2] if same_prompt else None, scene=sample['scene'],
                       prompt_sha256=prompt_hashes[lanes[0][0]] if same_prompt else None,
                       same_prompt=same_prompt, seed=SEED, max_tokens=MAX_TOKENS, temperature=0,
+                      speed_mm_s=speed_mm_s,
                       scored=all(text == original for text in instructions.values()), results={})
         try:
             write('start', report=report)
@@ -389,7 +453,7 @@ class Handler(SimpleHTTPRequestHandler):
                               started_at=utc_now(), metrics={}, code='', message='', raw='', check=None, actions=[])
                 report['results'][lane] = result
                 self.run_lane(mode, samples_by_side[lane], code, model, messages_by_side[lane], result,
-                              report['id'], lambda event, **data: write(event, lane=lane, **data))
+                              report['id'], lambda event, **data: write(event, lane=lane, **data), speed_mm_s)
                 write('result', lane=lane, result=result)
             report['status'] = 'complete'
         finally:
@@ -402,13 +466,15 @@ class Handler(SimpleHTTPRequestHandler):
                 print(f'Workbench {report["id"]}: {error}', file=sys.stderr, flush=True)
         write('complete', report=report)
 
-    def run_lane(self, mode, sample, code, model, messages, result, run_id, write):
+    def run_lane(self, mode, sample, code, model, messages, result, run_id, write,
+                 speed_mm_s=STANDARD_SPEED_MM_S):
         def emit(event, **data):
             if event == 'action':
                 result['actions'].append(data)
             write(event, **data)
 
         stage = 'response'
+        simulation_started = None
         try:
             if model:
                 stage = 'generation'
@@ -427,16 +493,19 @@ class Handler(SimpleHTTPRequestHandler):
             emit('program', code=reply['code'], message=reply['message'], metrics=result['metrics'])
             stage = 'simulation'
             emit('phase', phase='executing')
+            simulation_started = monotonic()
             with TemporaryDirectory(prefix='stacklab-workbench-') as temporary:
                 result['check'] = simulate(self.server.checker, sample, reply, Path(temporary), emit,
                                            generated=mode != 'reference', unscored=not result['scored'],
-                                           run_id=run_id)
+                                           run_id=run_id, speed_mm_s=speed_mm_s)
         except ClientDisconnected:
             result['error_stage'] = stage
             raise
         except (ValueError, RuntimeError, OSError, KeyError, IndexError, TypeError, http.client.HTTPException) as error:
             result.update(error=str(error), error_stage=stage, error_type=type(error).__name__)
         finally:
+            if simulation_started is not None:
+                result['simulation_wall_seconds'] = round(monotonic() - simulation_started, 3)
             result['finished_at'] = utc_now()
 
 

@@ -67,6 +67,7 @@
         <div class="row run-toolbar">
           <button id="run" class="primary" type="button" disabled>Beide testen</button>
           <button id="reference" type="button" disabled>Referenzprogramm ausführen</button>
+          <label id="speed-setting" hidden>Armtempo <select id="speed"></select></label>
           <button id="stop" type="button" hidden>Live-Ansicht beenden</button>
           <span id="scoring" class="muted"></span>
         </div>
@@ -147,7 +148,9 @@
         <div><dt>Zielprüfung</dt><dd class="score">—</dd></div>
         <div><dt>Tokens/s</dt><dd class="rate">—</dd></div>
         <div><dt>Generierung</dt><dd class="duration">—</dd></div>
+        <div><dt>Simulation</dt><dd class="simulation" title="Reale Zeit am Runner inklusive Live-Rendering">—</dd></div>
       </dl>
+      <button class="export-video" type="button" hidden>MP4 exportieren</button>
       <p class="feedback" hidden></p>
       <p class="run-model muted" hidden></p>
       <details class="output" hidden>

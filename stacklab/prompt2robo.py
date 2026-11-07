@@ -41,8 +41,8 @@ def angle(value):
 class ReplayScene(Config):
     """A validated snapshot, including touching cubes and existing towers."""
 
-    def __init__(self, scene):
-        super().__init__(fps=FPS, cube_size_m=CUBE_SIZE_M)
+    def __init__(self, scene, *, speed_mm_s=Config.speed_mm_s, fps=FPS):
+        super().__init__(fps=fps, cube_size_m=CUBE_SIZE_M, speed_mm_s=speed_mm_s)
         objects = scene['objects']
         if not 1 <= len(objects) <= 12:
             raise ValueError('Expected a scene with 1–12 cubes')

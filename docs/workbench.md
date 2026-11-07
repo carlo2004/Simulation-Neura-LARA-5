@@ -4,6 +4,12 @@ Wähle eine Startszene und prüfe Würfel und Greifer in der Draufsicht. **Beide
 
 Der unveränderte Datensatzauftrag erhält eine Zielprüfung. Bei eigenen Aufträgen siehst du das Programm, die Bewegung und den Endzustand. **Referenzprogramm ausführen** führt die Antwort aus dem Datensatz aus. Für die sechs aufgezeichneten Szenen kannst du außerdem das Referenzvideo ohne Runner abspielen.
 
+## Armtempo und MP4
+
+**Armtempo** gilt für beide Modelle sowie für Referenz und eigenen Code. Die Workbench startet bei **1,5×**. Für Vergleiche mit älteren Läufen wähle **1×** (80 mm/s als Reglervorgabe). Die Einstellungen verändern die Zeit der kartesischen Bewegungen. Greiferzeiten, Physikzeitschritt und Zielprüfung laufen nach denselben Regeln. **Simulation** zeigt die reale Dauer am Runner getrennt von der Modellgenerierung. Das gewählte Tempo steht im Laufbericht.
+
+Die Live-Ansicht überträgt kleine JPEG-Einzelbilder aus MuJoCo. **MP4 exportieren** rendert bei Bedarf einen abgeschlossenen Lauf aus derselben Szene, demselben Programm und mit demselben Armtempo neu. Der Runner muss dafür noch verbunden sein. Die Zeitbasis des MP4 ist die Simulationszeit. Aufgezeichnete Referenzvideos werden beim Öffnen der jeweiligen Vorschau geladen.
+
 ## Trainingsdaten
 
 Die Workbench lädt die verifizierten Trainingszeilen aus der in [`prompt2robo.lock.json`](../config/prompt2robo.lock.json) festgelegten Revision. Sie zeigt die Nutzereingabe, die Referenzantwort und die Startszene. Ein aktueller Runner kann die gewählte Trainingsszene ausführen. Der Viewer zeigt `data_v4`. Der genaue Trainingsstand eines Checkpoints ergibt sich aus seiner Modellkarte.

@@ -91,7 +91,7 @@ video { display: block; width: 100%; margin-top: 7px; background: #171b21; }
 .model-note:empty, .lane-state:empty { display: none; }
 .model-details { margin-top: -2px; }
 .model-details summary { color: var(--muted); font-size: .8rem; }
-.start { justify-self: start; }
+.start, .export-video { justify-self: start; }
 .viewport { position: relative; aspect-ratio: 4/3; background: #171b21; overflow: hidden; }
 .frame { display: block; width: 100%; height: 100%; object-fit: contain; }
 .frame-label, .clock {
@@ -100,7 +100,7 @@ video { display: block; width: 100%; margin-top: 7px; background: #171b21; }
 }
 .frame-label { left: 6px; }
 .clock { right: 6px; }
-.metrics { margin: 0; display: grid; grid-template-columns: 1.25fr 1fr 1fr; gap: 6px; }
+.metrics { margin: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
 .metrics dt { font-size: .76rem; color: var(--muted); }
 .metrics dd { margin: 2px 0; font-variant-numeric: tabular-nums; font-size: .9rem; }
 .feedback { font-size: .86rem; white-space: pre-wrap; overflow-wrap: anywhere; }

@@ -67,7 +67,7 @@ class WorkbenchTests(unittest.TestCase):
                 patch('stacklab.cli.workbench.simulate', return_value={}) as simulate, \
                 patch('stacklab.cli.workbench.write_json') as save:
             handler.stream_job('compare', sample, '', [('left', 'base', 'Stack the cubes.'),
-                                                      ('right', 'tuned', 'Move up.')])
+                                                      ('right', 'tuned', 'Move up.')], 120)
 
         system = {'role': 'system', 'content': handler.server.system}
         self.assertEqual(generate.call_args_list[0].args[1],
@@ -78,9 +78,13 @@ class WorkbenchTests(unittest.TestCase):
         self.assertEqual(simulate.call_args_list[1].args[2], {'code': '', 'message': message})
         self.assertFalse(simulate.call_args_list[0].kwargs['unscored'])
         self.assertTrue(simulate.call_args_list[1].kwargs['unscored'])
+        self.assertEqual([call.kwargs['speed_mm_s'] for call in simulate.call_args_list], [120, 120])
+        self.assertTrue(all(not call.kwargs.get('video') for call in simulate.call_args_list))
         report = json.loads(handler.wfile.getvalue().splitlines()[-1])['report']
         self.assertEqual(report, save.call_args.args[1])
         self.assertEqual(report['runner_revision'], 'def')
+        self.assertEqual(report['speed_mm_s'], 120)
+        self.assertGreaterEqual(report['results']['left']['simulation_wall_seconds'], 0)
         self.assertEqual(report['results']['left']['model_identity']['api_model'], 'base')
         self.assertEqual(report['results']['right']['user_prompt'], 'Objects: 1 (red), 3 (blue)\nMove up.')
 
@@ -167,11 +171,48 @@ class WorkbenchTests(unittest.TestCase):
             handler.rfile = BytesIO(body)
             return handler.read_job()
 
-        _, sample, _, lanes = job(mode='compare', left='base', right='tuned',
-                                  prompts={'left': 'Stack the cubes.', 'right': 'Move up.'})
+        _, sample, _, lanes, speed = job(mode='compare', left='base', right='tuned', speed_mm_s=120,
+                                         prompts={'left': 'Stack the cubes.', 'right': 'Move up.'})
         self.assertEqual(sample, original)
         self.assertEqual(lanes, [('left', 'base', 'Stack the cubes.'), ('right', 'tuned', 'Move up.')])
-        self.assertEqual(job(mode='single', side='right', model='tuned', prompt='Rotate.')[3],
-                         [('right', 'tuned', 'Rotate.')])
+        self.assertEqual(job(mode='single', side='right', model='tuned', prompt='Rotate.')[3:],
+                         ([('right', 'tuned', 'Rotate.')], 80))
         with self.assertRaisesRegex(ValueError, 'Prompts must be text'):
             job(mode='compare', left='base', right='tuned', prompts={'right': ['invalid']})
+        with self.assertRaisesRegex(ValueError, 'arm speed'):
+            job(mode='reference', speed_mm_s='120')
+
+    def test_video_export_replays_saved_lane_without_model_inference(self):
+        handler = Handler.__new__(Handler)
+        sample = {'id': 'scene', 'user_prompt': 'Original'}
+        handler.server = SimpleNamespace(checker=Path('check.py'), git_revision='code',
+                                         lock={'revision': 'data'}, samples={'scene': sample})
+        run_id = 'a' * 32
+        code = 'def run(robot):\n    robot.open_gripper()'
+        result = dict(code=code, message='', scored=False, user_prompt='Custom', check={'initial_state': {'ok': True}})
+        report = dict(id=run_id, task='scene', mode='single', runner_revision='code', revision='data',
+                      status='complete', speed_mm_s=120, results={'right': result})
+        body = json.dumps({'id': run_id, 'lane': 'right'}).encode()
+        handler.headers = {'Content-Length': str(len(body))}
+        handler.rfile, handler.wfile = BytesIO(body), BytesIO()
+        for name in ('send_response', 'send_header', 'end_headers'):
+            setattr(handler, name, lambda *args: None)
+
+        def encode(checker, scene, reply, output, emit, **kwargs):
+            self.assertEqual(scene, dict(sample, user_prompt='Custom'))
+            self.assertEqual(reply, {'code': code, 'message': ''})
+            self.assertIsNone(emit)
+            self.assertEqual(kwargs, dict(generated=True, unscored=True, run_id=run_id, speed_mm_s=120, video=True))
+            (output/'scene.mp4').write_bytes(b'video')
+            return {'video': 'scene.mp4'}
+
+        with TemporaryDirectory() as tmp:
+            directory = Path(tmp)/'workbench'
+            directory.mkdir()
+            (directory/(run_id + '.json')).write_text(json.dumps(report), encoding='utf-8')
+            with patch('stacklab.cli.workbench.RUNS_ROOT', Path(tmp)), \
+                    patch('stacklab.cli.workbench.simulate', side_effect=encode), \
+                    patch('stacklab.cli.workbench.completion') as generate:
+                handler.export_video(*handler.read_video_job())
+                generate.assert_not_called()
+        self.assertEqual(handler.wfile.getvalue(), b'video')

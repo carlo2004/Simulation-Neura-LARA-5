@@ -46,7 +46,7 @@ export function resetLane(lane) {
   lane.frame.src = 'lara-start.webp';
   lane['frame-label'].textContent = 'Beispielbild';
   lane.clock.hidden = true;
-  lane.score.textContent = lane.rate.textContent = lane.duration.textContent = '—';
+  lane.score.textContent = lane.rate.textContent = lane.duration.textContent = lane.simulation.textContent = '—';
   lane.rate.removeAttribute('title');
   lane.score.className = 'score';
   lane.feedback.hidden = true;
@@ -82,6 +82,8 @@ export function showResult(lane, result, archived = false) {
   lane.feedback.textContent = feedback;
   lane.feedback.classList.toggle('error', error);
   showMetrics(lane, result.metrics);
+  lane.simulation.textContent = Number.isFinite(result.simulation_wall_seconds)
+    ? result.simulation_wall_seconds.toFixed(2) + ' s' : '—';
   lane.output.hidden = false;
   if (error) lane.output.open = true;
   const model = result.model_identity;
@@ -96,6 +98,7 @@ export function showResult(lane, result, archived = false) {
     ['Phase', stages[stage]],
     ['Fehlertyp', result.error_type],
     ['Generierungsende', result.finish_reason],
+    ['Armtempo', Number.isFinite(check?.speed_mm_s) ? check.speed_mm_s + ' mm/s' : null],
   ]);
   lane.program.hidden = !result.code;
   lane.program.textContent = result.code ?? '';

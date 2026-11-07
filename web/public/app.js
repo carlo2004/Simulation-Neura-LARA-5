@@ -21,14 +21,16 @@ let scene = null;
 let connection = null;
 let connecting = false;
 let active = null;
+let exporting = false;
 let report = null;
+let reportRunner = null;
 
 for (const [side, label] of Object.entries(laneNames)) {
   const node = get('lane-template').content.firstElementChild.cloneNode(true);
   const parts = Object.fromEntries(
     ['lane-title', 'lane-state', 'model', 'model-note', 'model-details', 'model-identity',
       'lane-prompt', 'prompt', 'start', 'frame', 'frame-label', 'clock', 'score', 'rate', 'duration',
-      'feedback', 'run-model', 'output', 'run-facts', 'program', 'action-log', 'action-title', 'actions',
+      'simulation', 'export-video', 'feedback', 'run-model', 'output', 'run-facts', 'program', 'action-log', 'action-title', 'actions',
       'raw-log', 'raw', 'state-log', 'states'].map((name) => [name, node.querySelector('.' + name)]));
   parts['lane-title'].textContent = label;
   parts.prompt.setAttribute('aria-label', 'Prompt für ' + label);
@@ -42,6 +44,7 @@ for (const [side, label] of Object.entries(laneNames)) {
   });
   parts.start.textContent = label + ' testen';
   parts.start.addEventListener('click', () => run('single', side));
+  parts['export-video'].addEventListener('click', () => exportVideo(side));
   get('lanes').append(node);
   lanes[side] = parts;
 }
@@ -89,8 +92,14 @@ function canRun() {
   return connection.cases.has(scene.id) || (scene.file && connection.trainingCases);
 }
 
+function canExportVideo(side) {
+  const result = report?.results?.[side];
+  return connection?.videoExport && reportRunner === connection && report?.status === 'complete'
+    && !lanes[side].output.hidden && result?.code && result.check?.initial_state;
+}
+
 function controls() {
-  const busy = Boolean(active);
+  const busy = Boolean(active || exporting);
   const ready = canRun() && get('task').value === scene.id && !busy && !connecting;
   const left = lanes.left.model.value;
   const right = lanes.right.model.value;
@@ -100,7 +109,9 @@ function controls() {
   get('run').disabled = !(ready && left && right && left !== right);
   get('reference').disabled = !ready;
   get('run-code').disabled = !ready;
-  get('stop').hidden = !busy;
+  get('stop').hidden = !active;
+  get('speed-setting').hidden = !connection?.speeds.length;
+  get('speed').disabled = busy || !connection?.speeds.length;
   get('export').disabled = !report || busy;
   get('report-id').textContent = report?.id ? 'Lauf ' + report.id : '';
   get('shared-field').hidden = !shared;
@@ -115,11 +126,13 @@ function controls() {
   for (const id of ['scene-search', 'scene-filter', 'code-input', 'import']) get(id).disabled = busy;
   get('connect').disabled = connecting || busy;
   viewer.setBusy(busy);
-  for (const lane of Object.values(lanes)) {
+  for (const [side, lane] of Object.entries(lanes)) {
     lane.start.disabled = !ready || !lane.model.value;
     lane.model.disabled = busy || !connection?.models.size;
     lane['lane-prompt'].hidden = shared;
     lane.prompt.disabled = busy || !scene;
+    lane['export-video'].hidden = !canExportVideo(side);
+    lane['export-video'].disabled = busy || connecting;
   }
 }
 
@@ -175,11 +188,10 @@ function selectScene(item, reset = true) {
   const player = get('proof-player');
   const source = videoFor(item);
   recording.hidden = !source;
-  if (source !== player.getAttribute('src')) {
+  if (player.hasAttribute('src') && source !== player.getAttribute('src')) {
     recording.open = false;
     player.pause();
     player.removeAttribute('src');
-    if (source) player.src = source;
     player.load();
   }
   if (reset) {
@@ -195,7 +207,10 @@ get('task').addEventListener('change', () => {
   if (item) selectScene(item);
 });
 get('recording').addEventListener('toggle', (event) => {
-  if (!event.currentTarget.open) get('proof-player').pause();
+  const player = get('proof-player');
+  const source = scene && videoFor(scene);
+  if (!event.currentTarget.open) player.pause();
+  else if (source && !player.hasAttribute('src')) player.src = source;
 });
 get('scene-search').addEventListener('input', listScenes);
 get('scene-filter').addEventListener('change', listScenes);
@@ -235,7 +250,7 @@ async function checked(response) {
 
 get('connect-form').addEventListener('submit', async (event) => {
   event.preventDefault();
-  if (active || connecting) return;
+  if (active || exporting || connecting) return;
   const errorLine = get('connection-error');
   errorLine.hidden = true;
   connecting = true;
@@ -257,8 +272,13 @@ get('connect-form').addEventListener('submit', async (event) => {
     if (data.lane_prompts !== true || (data.models.length && data.prompt_format !== promptFormat)) {
       throw new Error('Für das Prompt2Robo-Format bitte das Colab-Repo aktualisieren und den Runner neu starten.');
     }
+    const speeds = (Array.isArray(data.speeds_mm_s) ? data.speeds_mm_s : []).filter(Number.isInteger);
     connection = { url, key, dataset: data.dataset, revision: data.revision, trainingCases: data.training_cases,
+      speeds, videoExport: data.video_export === true,
       cases: new Set(data.cases.map((item) => item.id)), models: new Map(data.models.map((item) => [item.id, item])) };
+    get('speed').replaceChildren(...speeds.map((speed) =>
+      new Option(new Intl.NumberFormat('de').format(speed / speeds[0]) + '×', speed)));
+    get('speed').value = speeds.includes(data.default_speed_mm_s) ? data.default_speed_mm_s : (speeds[0] ?? '');
     get('key').value = '';
     get('connection').open = false;
     get('connection-status').textContent = 'Runner verbunden';
@@ -335,9 +355,10 @@ function streamEvent(event, frames) {
 }
 
 async function run(mode, side = 'left') {
-  if (!canRun() || get('task').value !== scene.id || active || connecting) return;
+  if (!canRun() || get('task').value !== scene.id || active || exporting || connecting) return;
   const controller = new AbortController();
   const payload = { task: scene.id, mode };
+  if (connection.speeds.length) payload.speed_mm_s = Number(get('speed').value);
   if (mode === 'compare') {
     payload.left = lanes.left.model.value;
     payload.right = lanes.right.model.value;
@@ -348,6 +369,7 @@ async function run(mode, side = 'left') {
     Object.assign(payload, { code: get('code-input').value, prompt: prompt(side) });
   }
   report = null;
+  reportRunner = null;
   active = controller;
   const testing = mode === 'compare' ? ['left', 'right'] : [side];
   for (const key of testing) {
@@ -384,6 +406,7 @@ async function run(mode, side = 'left') {
       }
     }
     if (!complete) throw new Error('Verbindung endete vor dem Ergebnis.');
+    reportRunner = connection;
     if (mode === 'compare' && !report.same_prompt) notify('Die Modelle erhielten unterschiedliche Prompts.');
   } catch (error) {
     if (report) {
@@ -409,14 +432,45 @@ get('run').addEventListener('click', () => run('compare'));
 get('reference').addEventListener('click', () => run('reference'));
 get('run-code').addEventListener('click', () => run('code'));
 get('stop').addEventListener('click', () => active?.abort());
-get('export').addEventListener('click', () => {
-  if (!report) return;
-  const url = URL.createObjectURL(new Blob([JSON.stringify(report, null, 2) + '\n'], { type: 'application/json' }));
+
+function download(blob, name) {
+  const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
-  link.download = 'lara-' + (String(report.id ?? '').replace(/[^a-zA-Z0-9-]/g, '') || 'lauf') + '.json';
+  link.download = name;
   link.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+async function exportVideo(side) {
+  if (!canExportVideo(side) || active || exporting || connecting) return;
+  const id = report.id;
+  exporting = true;
+  controls();
+  notify('MP4 wird gerendert …');
+  try {
+    const response = await checked(await fetch(connection.url + '/api/video', {
+      method: 'POST', redirect: 'error', signal: AbortSignal.timeout(190000),
+      headers: { Authorization: 'Bearer ' + connection.key, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, lane: side }),
+    }));
+    if (!response.headers.get('content-type')?.startsWith('video/mp4')) {
+      throw new Error('Der Runner hat keine MP4-Datei geliefert.');
+    }
+    download(await response.blob(), 'lara-' + id + '-' + side + '.mp4');
+    notify('MP4 exportiert.');
+  } catch (error) {
+    notify(error.message, true);
+  } finally {
+    exporting = false;
+    controls();
+  }
+}
+
+get('export').addEventListener('click', () => {
+  if (!report) return;
+  const name = 'lara-' + (String(report.id ?? '').replace(/[^a-zA-Z0-9-]/g, '') || 'lauf') + '.json';
+  download(new Blob([JSON.stringify(report, null, 2) + '\n'], { type: 'application/json' }), name);
 });
 get('import').addEventListener('change', async (event) => {
   const file = event.target.files[0];
@@ -436,6 +490,7 @@ get('import').addEventListener('change', async (event) => {
       }
     }
     report = value;
+    reportRunner = null;
     for (const [side, lane] of Object.entries(lanes)) {
       resetLane(lane);
       if (report.results[side]) showResult(lane, report.results[side], true);
