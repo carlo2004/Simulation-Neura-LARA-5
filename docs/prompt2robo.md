@@ -19,6 +19,8 @@ Der Bericht hält die gemessene Start- und Endszene, die Prüfergebnisse und die
 
 ## Schnittstelle für das Modell
 
+Der SFT-Export unten beschreibt das Stack-Lab-Format mit JSON-Szene und JSON-Antwort. Für den bereits veröffentlichten Qwen3-4B-Checkpoint verwendet die [Workbench](workbench.md#modellformat) das ursprüngliche Textformat von Hugging Face.
+
 Der Zero-shot-Input enthält einen Systemprompt mit den LARA-Grenzen und einen Nutzerturn mit `user_prompt` und `scene`. Die Szene enthält die numerisch sortierten Objekt-IDs, Farben, Mittelpunkte und den Greiferzustand. Die IDs behalten ihren Wert, auch wenn die Nummerierung Lücken hat. `prompt --id abs-pyramid_2_layer-000` gibt die beiden Nachrichten für die Inferenz aus.
 
 Der gemeinsame Antwortumschlag hat zwei Stringfelder. Bei einer Aktion enthält `code` die Funktion `run(robot)`. Bei einer Rückfrage oder Ablehnung bleibt `code` leer und `message` enthält die Antwort. Der Replay-Worker führt bei Aktionszeilen das Referenzprogramm aus. Textzeilen werden mit dem Refusal-Checker geprüft und lösen keine Simulation aus.

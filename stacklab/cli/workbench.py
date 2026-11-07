@@ -16,7 +16,7 @@ from threading import BoundedSemaphore, Timer
 from urllib.parse import urlsplit
 from uuid import uuid4
 
-from stacklab.cli.prompt2robo import (CHECKER, LOCK, PROMPT, prompt_for, read_samples,
+from stacklab.cli.prompt2robo import (CHECKER, LOCK, read_samples,
                                      replay_environment, response_for, source_files)
 from stacklab.llm.metrics import GenerationMetrics
 from stacklab.llm.remote import RemoteModel, endpoint
@@ -26,6 +26,8 @@ from stacklab.paths import ROOT
 WEB = ROOT / 'web/public'
 PROOFS = ROOT / 'examples/prompt2robo-replays/manifest.json'
 SCHEMA = 'stacklab-workbench-v1'
+HF_SYSTEM_PROMPT = 'system_prompt.md'
+PROMPT_FORMAT = 'prompt2robo-hf-text-v1'
 MAX_BODY = 96 * 1024
 MAX_TOKENS = 2048
 SEED = 42
@@ -57,13 +59,15 @@ def completion(model, messages, directory, emit):
     """Generate one policy using the workbench's fixed generation budget."""
     if model['protocol'] == 'stacklab':
         client = RemoteModel(model['url'], recording='slim')
+        thinking = False if client.config.get('supports_thinking_toggle', True) else None
         raw, result = client.complete(messages, directory, max_tokens=MAX_TOKENS, seed=SEED,
-                                      timeout=150, on_progress=lambda metrics: emit('metrics', metrics=metrics))
+                                      thinking=thinking, timeout=150,
+                                      on_progress=lambda metrics: emit('metrics', metrics=metrics))
         return raw, result.get('performance', {}), client.config['model_id'], result.get('finish_reason')
 
     host, port = endpoint(model['url'].rstrip('/').removesuffix('/v1'))
     body = dict(model=model['model'], messages=messages, stream=False, max_tokens=MAX_TOKENS,
-                temperature=0, seed=SEED)
+                temperature=0, seed=SEED, chat_template_kwargs={'enable_thinking': False})
     headers = {'Content-Type': 'application/json'}
     if model.get('api_key_env'):
         key = os.environ.get(model['api_key_env'])
@@ -87,6 +91,27 @@ def completion(model, messages, directory, emit):
         raise ValueError('Invalid model response')
     metrics.update(result)
     return raw, metrics.snapshot(finished=True), result.get('model', model['model']), choice.get('finish_reason')
+
+
+def decode_answer(raw):
+    """Separate a dataset-style program or text reply without validating its Python here."""
+    answer = raw.strip()
+    fenced = '\x60\x60\x60' in answer
+    if fenced:
+        block = re.fullmatch(r'\x60\x60\x60(?:python|py|json)?[ \t]*\r?\n(.*?)\x60\x60\x60', answer, re.I | re.S)
+        if not block or '\x60\x60\x60' in block[1]:
+            raise ValueError('Expected one fenced response')
+        answer = block[1].strip()
+    if answer.startswith('{'):
+        reply = parse_reply(answer)
+        code, message = reply['code'].strip(), reply['message'].strip()
+    elif fenced or re.search(r'(?m)^[ \t]*(?:async[ \t]+)?def\b', answer):
+        code, message = answer, ''
+    else:
+        code, message = '', answer
+    if not (code or message):
+        raise ValueError('Model response is empty')
+    return dict(code=code, message=message)
 
 
 def simulate(checker, sample, reply, output, emit, *, generated, unscored):
@@ -138,14 +163,16 @@ class Workbench(ThreadingHTTPServer):
         names = [name for name in self.lock['files'] if name.endswith('.jsonl')]
         root = source_files(self.lock, [*names, CHECKER], source)
         self.checker = root / CHECKER
-        self.system = PROMPT.read_text(encoding='utf-8')
+        prompt_source = root if (root / HF_SYSTEM_PROMPT).is_file() else None
+        prompt_root = source_files(self.lock, [HF_SYSTEM_PROMPT], prompt_source)
+        self.system = (prompt_root / HF_SYSTEM_PROMPT).read_text(encoding='utf-8').strip()
         proof_rows = json.loads(PROOFS.read_text(encoding='utf-8'))['results']
         proof = {row['id']: row['passed'] for row in proof_rows}
         available = {row['id']: row for row in read_samples(root, names)}
         chosen = [*proof, *(row['id'] for row in available.values() if row['split'] == 'eval_v4'), *extra_cases]
         self.cases = {key: available[key] for key in dict.fromkeys(chosen)}
-        self.catalog = dict(protocol=SCHEMA, lane_prompts=True, dataset=self.lock['repository'],
-                            revision=self.lock['revision'],
+        self.catalog = dict(protocol=SCHEMA, lane_prompts=True, prompt_format=PROMPT_FORMAT,
+                            dataset=self.lock['repository'], revision=self.lock['revision'],
                             models=[dict(id=key, label=value['label']) for key, value in models.items()],
                             cases=[dict(id=key, split=row['split'], reference_passed=proof.get(key),
                                         request=row['user_prompt'].partition('\n')[2],
@@ -294,15 +321,20 @@ class Handler(SimpleHTTPRequestHandler):
         original = original.strip()
         instructions = {side: instruction for side, _, instruction in lanes}
         same_prompt = len(set(instructions.values())) == 1
-        samples_by_side = {side: dict(sample, user_prompt=header + '\n' + instruction)
-                           for side, instruction in instructions.items()}
+        samples_by_side = {
+            side: sample if instruction == original else dict(sample, user_prompt=header + '\n' + instruction)
+            for side, instruction in instructions.items()
+        }
         messages_by_side = {
-            side: prompt_for(lane_sample, self.server.system) for side, lane_sample in samples_by_side.items()
+            side: [{'role': 'system', 'content': self.server.system},
+                   {'role': 'user', 'content': lane_sample['user_prompt']}]
+            for side, lane_sample in samples_by_side.items()
         }
         prompt_hashes = {side: hashlib.sha256(json.dumps(messages).encode()).hexdigest()
                          for side, messages in messages_by_side.items()}
-        report = dict(protocol=SCHEMA, id=uuid4().hex, dataset=self.server.lock['repository'],
-                      revision=self.server.lock['revision'], mode=mode, task=sample['id'],
+        report = dict(protocol=SCHEMA, prompt_format=PROMPT_FORMAT, id=uuid4().hex,
+                      dataset=self.server.lock['repository'], revision=self.server.lock['revision'],
+                      mode=mode, task=sample['id'],
                       instruction=lanes[0][2] if same_prompt else None, scene=sample['scene'],
                       prompt_sha256=prompt_hashes[lanes[0][0]] if same_prompt else None,
                       same_prompt=same_prompt, seed=SEED, max_tokens=MAX_TOKENS,
@@ -326,9 +358,7 @@ class Handler(SimpleHTTPRequestHandler):
                         result.update(raw=raw, metrics=metrics, actual_model=actual)
                         if finish == 'length':
                             raise ValueError('Model reached the token limit')
-                        reply = parse_reply(raw)
-                        if not reply['code'].strip() and not reply['message'].strip():
-                            raise ValueError('Model response is empty')
+                        reply = decode_answer(raw)
                     elif mode == 'reference':
                         reply = response_for(sample)
                     else:

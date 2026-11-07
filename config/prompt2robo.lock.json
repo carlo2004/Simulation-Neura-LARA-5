@@ -2,6 +2,7 @@
   "repository": "Carlo0001/Prompt2Robo",
   "revision": "32360b8d733e9afc46062c3f421598381eb07c91",
   "files": {
+    "system_prompt.md": "7ca338d29f36c6b7d265b7cc7a59b103661e9bd567a9c806e0e82cc6aefd6d6c",
     "tools/check.py": "b544302a96fcd5889b5453935b7f41d792c5cda26f55c95695da5fa189bdf9ec",
     "data_v4/01_basic_single_explicit.jsonl": "37c0c98123366dcbaf6d1b8893470fc1f49a2c61a2c2ec73b2e0394ed3520e38",
     "data_v4/02_single_explicit.jsonl": "0ee555652a93a2e19e23bbdff13dea80726b4d3e40fc797b3d572f51e484975a",

@@ -122,6 +122,8 @@ def main():
                 if error:
                     reasons.append(error)
             passed = None
+        elif not response['code'] and sample['expected_behavior'] == 'execute':
+            passed, reasons = False, ['Expected a robot program but received a text response']
         else:
             passed, reasons = checker.check(sample)
 

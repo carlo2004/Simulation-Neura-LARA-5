@@ -4,6 +4,12 @@ Links und rechts stehen je ein Modell und ein Prompt. **A starten** und **B star
 
 Eine unveränderte Datensatzaufgabe erhält eine Zielprüfung. Bei geänderten Prompts zeigt der Runner die Ausführung und den Endzustand. Unter **Aufnahmen und Berichte** gibt es die Referenzvideos und JSON-Export. Ein Bericht enthält den ausgeführten Prompt, die Zielprüfung und die Messwerte pro Seite.
 
+## Modellformat
+
+Beide Seiten verwenden den Original-Systemprompt aus dem festgelegten Prompt2Robo-Snapshot und einen Zero-shot-Nutzerturn im Format `Objects: 1 (red), 2 (blue)` gefolgt von der Aufgabe in der nächsten Zeile. Bei einem eigenen Prompt ändert sich nur die Aufgabe. Die Positionen liest das Programm über `robot.get_object_position(id)` in der LARA-Simulation. Der Bericht enthält das Promptformat und den Hash der Nachrichten.
+
+Für den Colab-Runner mit llama.cpp wird Qwen3 im Non-Thinking-Modus angefragt. Die Workbench führt eine Python-Funktion `def run(robot):` über ihren begrenzten Interpreter aus und zeigt eine reine Textantwort ohne Roboteraktion an. Bei Bewegungen gelten die tatsächlichen [TCP-Grenzen der LARA-Simulation](prompt2robo.md#wiedergabe-und-export). Für einen Vergleich des Trainingseffekts verwende Qwen3-4B als Basismodell mit derselben GGUF-Präzision auf beiden Seiten. [Modellkarte](https://huggingface.co/moritzzzz/Prompt2Robo-Qwen3-4B-v3-full-4b-full) · [HF-Systemprompt](https://huggingface.co/datasets/Carlo0001/Prompt2Robo/blob/32360b8d733e9afc46062c3f421598381eb07c91/system_prompt.md)
+
 ## Runner in Google Colab
 
 Für eine frische Laufzeit gibt es ein [Colab-Notebook mit Schritt-für-Schritt-Anleitung](colab-workbench.md). Es richtet die Umgebung ein, startet den Runner und beschreibt den Team-Zugang über ngrok auf deinem Rechner.

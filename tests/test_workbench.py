@@ -4,10 +4,11 @@ from types import SimpleNamespace
 from io import BytesIO
 import json
 import unittest
+from unittest.mock import patch
 
 import numpy as np
 
-from stacklab.cli.workbench import Handler, load_models
+from stacklab.cli.workbench import Handler, decode_answer, load_models
 from stacklab.policy import PolicyError
 from stacklab.workbench_policy import WorkbenchPolicy
 
@@ -25,6 +26,53 @@ class Robot:
 
 
 class WorkbenchTests(unittest.TestCase):
+    def test_hf_answer_reaches_the_policy_without_flattening_run(self):
+        code = "def run(robot):\n    x, y, z = robot.get_object_position(2)\n    robot.move_to(x, y, z + 0.1)"
+        legacy = json.dumps({'code': code, 'message': ''})
+        for raw in (code, "\x60\x60\x60python\n" + code + "\n\x60\x60\x60",
+                    legacy, "\x60\x60\x60json\n" + legacy + "\n\x60\x60\x60"):
+            with self.subTest(raw=raw):
+                reply = decode_answer(raw)
+                self.assertEqual(reply, {'code': code, 'message': ''})
+                robot = Robot()
+                WorkbenchPolicy(robot).run(reply['code'])
+                np.testing.assert_allclose(robot.moves, [[.4, .2, .12]])
+
+        refusal = 'I only see 1 (red) and 2 (blue). Which cube should I use?'
+        self.assertEqual(decode_answer(refusal), {'code': '', 'message': refusal})
+        with self.assertRaisesRegex(ValueError, 'empty'):
+            decode_answer('  ')
+
+    def test_comparison_sends_native_user_messages_for_both_sides(self):
+        sample = {'id': 'scene', 'user_prompt': 'Objects: 1 (red), 3 (blue)\nStack the cubes.\n',
+                  'scene': {'objects': {'1': {'position': [.4, .1, .02]}}},
+                  'destination': 'private goal', 'assistant_answer': 'private reference'}
+        handler = Handler.__new__(Handler)
+        handler.server = SimpleNamespace(
+            system='HF system prompt', lock={'repository': 'fixture', 'revision': 'abc'},
+            models={'base': {'label': 'Base'}, 'tuned': {'label': 'Fine-Tuning'}}, checker=Path('check.py'))
+        handler.wfile = BytesIO()
+        for name in ('send_response', 'send_header', 'end_headers'):
+            setattr(handler, name, lambda *args: None)
+
+        code = 'def run(robot):\n    robot.open_gripper()'
+        message = 'Which cube should I move?'
+        answers = [(code, {}, 'base', 'stop'), (message, {}, 'tuned', 'stop')]
+        with patch('stacklab.cli.workbench.completion', side_effect=answers) as generate, \
+                patch('stacklab.cli.workbench.simulate', return_value={}) as simulate:
+            handler.stream_job('compare', sample, '', [('left', 'base', 'Stack the cubes.'),
+                                                      ('right', 'tuned', 'Move up.')])
+
+        system = {'role': 'system', 'content': handler.server.system}
+        self.assertEqual(generate.call_args_list[0].args[1],
+                         [system, {'role': 'user', 'content': sample['user_prompt']}])
+        self.assertEqual(generate.call_args_list[1].args[1],
+                         [system, {'role': 'user', 'content': 'Objects: 1 (red), 3 (blue)\nMove up.'}])
+        self.assertEqual(simulate.call_args_list[0].args[2], {'code': code, 'message': ''})
+        self.assertEqual(simulate.call_args_list[1].args[2], {'code': '', 'message': message})
+        self.assertFalse(simulate.call_args_list[0].kwargs['unscored'])
+        self.assertTrue(simulate.call_args_list[1].kwargs['unscored'])
+
     def test_model_policy_uses_helpers_positions_and_bounded_loops(self):
         robot = Robot()
         policy = WorkbenchPolicy(robot)
