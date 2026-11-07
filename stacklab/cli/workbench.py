@@ -144,7 +144,8 @@ class Workbench(ThreadingHTTPServer):
         available = {row['id']: row for row in read_samples(root, names)}
         chosen = [*proof, *(row['id'] for row in available.values() if row['split'] == 'eval_v4'), *extra_cases]
         self.cases = {key: available[key] for key in dict.fromkeys(chosen)}
-        self.catalog = dict(protocol=SCHEMA, dataset=self.lock['repository'], revision=self.lock['revision'],
+        self.catalog = dict(protocol=SCHEMA, lane_prompts=True, dataset=self.lock['repository'],
+                            revision=self.lock['revision'],
                             models=[dict(id=key, label=value['label']) for key, value in models.items()],
                             cases=[dict(id=key, split=row['split'], reference_passed=proof.get(key),
                                         request=row['user_prompt'].partition('\n')[2],

@@ -130,6 +130,9 @@ get('connect-form').addEventListener('submit', async (event) => {
     if (data.protocol !== protocol || !Array.isArray(data.models) || !Array.isArray(data.cases)) {
       throw new Error('Unter dieser Adresse läuft kein kompatibler LARA Runner.');
     }
+    if (data.lane_prompts !== true) {
+      throw new Error('Der Runner braucht ein Update. Repo aktualisieren und Runner neu starten.');
+    }
     connection = { url, key };
     get('key').value = '';
     get('connection').open = false;
