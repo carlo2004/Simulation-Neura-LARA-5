@@ -9,46 +9,36 @@ import unittest
 from unittest.mock import patch
 
 from stacklab.llm import catalog, hardware, source_runtime
-from stacklab.llm.runtime import LocalModel
 
 
 class CudaTests(unittest.TestCase):
-    def cuda_config(self, name='granite8b'):
+    def cuda_config(self, name='qwen4b'):
         with patch.object(catalog, 'platform_key', return_value='linux-x86_64'):
             return catalog.lock(name, device='cuda')
 
     def test_gpu_recipe_preserves_weights_and_cpu_installation(self):
-        cpu, cuda = catalog.lock('granite8b'), self.cuda_config()
+        cpu, cuda = catalog.lock('qwen4b'), self.cuda_config()
         self.assertEqual(cpu['model_sha256'], cuda['model_sha256'])
-        self.assertEqual(cpu['profiles'], cuda['profiles'])
         self.assertNotEqual(cpu['runtime_version'], cuda['runtime_version'])
         self.assertIn('cuda-12.8', cuda['runtime_assets']['linux-x86_64']['filename'])
         self.assertTrue(cuda['runtime_dependencies']['linux-x86_64'])
         with self.assertRaises(ValueError):
-            catalog.lock('granite8b', device='unknown')
+            catalog.lock('qwen4b', device='unknown')
 
     def test_old_colab_glibc_selects_the_same_pinned_source_version(self):
         with patch.object(catalog, 'platform_key', return_value='linux-x86_64'), \
                 patch.object(catalog.platform, 'libc_ver', return_value=('glibc','2.35')), \
                 patch.dict(catalog.os.environ, STACKLAB_CUDA_RUNTIME='auto'):
-            config=catalog.lock('granite8b',device='cuda')
+            config=catalog.lock('qwen4b',device='cuda')
         self.assertEqual(config['cuda_runtime_kind'],'source')
-        self.assertIn('-DGGML_CUDA_FA_QUANTS=f16-f16',source_runtime.build_flags(config))
+        self.assertIn('-DGGML_CUDA_FA_QUANTS=f16-f16', source_runtime.build_flags(config))
+        self.assertIn('-DCMAKE_CUDA_ARCHITECTURES=80;89', source_runtime.build_flags(config))
         self.assertEqual(config['runtime_source']['revision'],'a71c00f0bb2d60a4a52837d80baa534b651ebd91')
-        self.assertEqual(config['model_sha256'],catalog.lock('granite8b')['model_sha256'])
+        self.assertEqual(config['model_sha256'],catalog.lock('qwen4b')['model_sha256'])
         with patch.object(catalog, 'platform_key', return_value='linux-x86_64'), \
                 patch.object(catalog.platform, 'libc_ver', return_value=('glibc','2.39')), \
                 patch.dict(catalog.os.environ, STACKLAB_CUDA_RUNTIME='source'):
-            self.assertEqual(catalog.lock('granite8b',device='cuda')['cuda_runtime_kind'],'source')
-
-    def test_dory_build_targets_a100_and_l4_without_changing_cpu_flags(self):
-        cuda, cpu = self.cuda_config('dory4b'), catalog.lock('dory4b')
-        self.assertEqual(cuda['runtime_source'], cpu['runtime_source'])
-        self.assertNotEqual(cuda['runtime_version'], cpu['runtime_version'])
-        self.assertIn('-DGGML_CUDA=ON', source_runtime.build_flags(cuda))
-        self.assertIn('-DCMAKE_CUDA_ARCHITECTURES=80;89', source_runtime.build_flags(cuda))
-        self.assertIn('-DGGML_CUDA_FA=OFF', source_runtime.build_flags(cuda))
-        self.assertIn('-DGGML_CUDA=OFF', source_runtime.build_flags(cpu))
+            self.assertEqual(catalog.lock('qwen4b',device='cuda')['cuda_runtime_kind'],'source')
 
     def test_inventory_parses_both_devices_and_the_reported_total_memory(self):
         output='0, NVIDIA L4, GPU-fixture-l4, 23034, 570.86.10\n1, NVIDIA A100-SXM4-40GB, GPU-fixture-a100, 40514, 570.86.10\n'
@@ -62,7 +52,7 @@ class CudaTests(unittest.TestCase):
                 patch.object(catalog, 'download') as download:
             self.assertEqual(hardware.gpu_inventory(), [])
             with self.assertRaisesRegex(ValueError, 'Select a GPU runtime'):
-                catalog.setup('granite8b', device='cuda')
+                catalog.setup('qwen4b', device='cuda')
             download.assert_not_called()
 
     def test_cpu_only_backend_is_rejected_even_if_nvidia_smi_succeeded(self):
@@ -81,7 +71,9 @@ class CudaTests(unittest.TestCase):
                          dict(offloaded_layers=33, total_layers=33))
 
     def test_cuda_archives_install_both_server_and_dependency_and_detect_tampering(self):
-        config = self.cuda_config()
+        with patch.object(catalog, 'platform_key', return_value='linux-x86_64'), \
+                patch.dict(catalog.os.environ, STACKLAB_CUDA_RUNTIME='binary'):
+            config = catalog.cuda_runtime()
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
             def bundle(name, member, content):
@@ -98,54 +90,13 @@ class CudaTests(unittest.TestCase):
                     patch.object(catalog, 'download', side_effect=[main, dependency]) as download:
                 executable=catalog.install_cuda_runtime(config)
                 self.assertEqual(download.call_count, 2)
-                self.assertEqual(catalog.find_executable('granite8b', device='cuda'), executable)
+                self.assertEqual(catalog.find_cuda_executable(config), executable)
                 with patch.object(catalog.platform, 'system', return_value='Linux'):
                     env=catalog.runtime_env(executable)
                 self.assertIn(str((root/'cache/runtime'/config['runtime_version']/'cuda/lib').resolve()), env['LD_LIBRARY_PATH'])
                 executable.write_bytes(b'changed binary')
                 with self.assertRaisesRegex(ValueError, 'missing or changed'):
-                    catalog.find_executable('granite8b', device='cuda')
-
-    def test_requested_device_controls_native_command_and_saved_offload_evidence(self):
-        class Process:
-            def poll(self): return None
-            def terminate(self): pass
-            def wait(self, timeout): return 0
-        with tempfile.TemporaryDirectory() as temp:
-            root=Path(temp)
-            for device in ('cpu', 'cuda'):
-                path=root/device
-                path.mkdir()
-                with patch.object(catalog, 'platform_key', return_value='linux-x86_64'):
-                    client=LocalModel('granite8b', device=device)
-                config=client.config
-                weights=root/'models'/config['model_filename']
-                weights.parent.mkdir(exist_ok=True)
-                weights.touch()
-                client.config=dict(config, model_bytes=0)
-                def launch(command, **kwargs):
-                    if '-lv' in command and command[command.index('-lv')+1] == '5':
-                        kwargs['stdout'].write('load_tensors: offloaded 41/41 layers to GPU\n')
-                        kwargs['stdout'].flush()
-                    return Process()
-                response=io.BytesIO(b'{}')
-                response.status=200
-                with patch('stacklab.llm.runtime.CACHE_ROOT', root), \
-                        patch('stacklab.llm.runtime.find_executable', return_value=root/'llama-server'), \
-                        patch('stacklab.llm.runtime.runtime_env', return_value={}), \
-                        patch('stacklab.llm.runtime.gpu_inventory', return_value=[dict(name='fixture GPU')]), \
-                        patch('stacklab.llm.runtime.check_cuda_backend', return_value='CUDA0: fixture GPU'), \
-                        patch('stacklab.llm.runtime.subprocess.Popen', side_effect=launch) as started, \
-                        patch.object(client.opener, 'open', return_value=response):
-                    client.start(path)
-                command=started.call_args.args[0]
-                self.assertEqual(command[command.index('--gpu-layers')+1], '999' if device=='cuda' else '0')
-                self.assertEqual((path/'device.json').exists(), device=='cuda')
-                if device == 'cuda':
-                    self.assertEqual(json.loads((path/'device.json').read_text())['offloaded_layers'], 41)
-                else:
-                    self.assertNotIn('-lv', command)
-                client.close()
+                    catalog.find_cuda_executable(config)
 
     def test_colab_cuda_wheels_are_found_in_active_and_base_python(self):
         with tempfile.TemporaryDirectory() as temp:
@@ -194,7 +145,7 @@ class CudaTests(unittest.TestCase):
 
     def test_notebook_code_cells_compile_and_contain_no_fake_measurements(self):
         from stacklab.paths import ROOT
-        notebook=json.loads((ROOT/'notebooks/colab_gpu.ipynb').read_text(encoding='utf-8'))
+        notebook=json.loads((ROOT/'notebooks/colab_workbench.ipynb').read_text(encoding='utf-8'))
         self.assertEqual(notebook['nbformat'], 4)
         for index, cell in enumerate(notebook['cells']):
             if cell['cell_type']=='code':

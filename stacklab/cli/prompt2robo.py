@@ -18,7 +18,8 @@ from stacklab.paths import CACHE_ROOT, ROOT
 LOCK = ROOT / 'config/prompt2robo.lock.json'
 SPLITS = ('train', 'eval', 'eval_v2', 'eval_v3', 'eval_v4')
 CHECKER = 'tools/check.py'
-PROMPT = ROOT / 'config/prompts/prompt2robo.md'
+SYSTEM_PROMPT = 'system_prompt.md'
+PROMPT_FORMAT = 'prompt2robo-hf-text-v1'
 REPLAY_MODE = 'lara5_dataset_replay'
 
 
@@ -39,6 +40,11 @@ def source_files(lock, paths, source=None):
         if hashlib.sha256(path.read_bytes()).hexdigest() != lock['files'][name]:
             raise ValueError(f'SHA-256 mismatch for {path}')
     return root
+
+
+def load_system_prompt(lock, source):
+    root = source_files(lock, [SYSTEM_PROMPT], source if (source / SYSTEM_PROMPT).is_file() else None)
+    return (root / SYSTEM_PROMPT).read_text(encoding='utf-8').strip()
 
 
 def read_samples(root, names):
@@ -71,17 +77,16 @@ def prompt_for(sample, system):
     _, separator, instruction = sample['user_prompt'].partition('\n')
     if not separator or not instruction.strip():
         raise ValueError(f"Missing instruction in {sample['id']}")
-    objects = dict(sorted(sample['scene']['objects'].items(), key=lambda item: int(item[0])))
-    scene = dict(sample['scene'], objects=objects)
     return [
         {'role': 'system', 'content': system},
-        {'role': 'user', 'content': json.dumps({'user_prompt': instruction, 'scene': scene}, ensure_ascii=False)},
+        {'role': 'user', 'content': sample['user_prompt']},
     ]
 
 
 def messages_for(sample, system):
+    answer = response_for(sample)
     return [*prompt_for(sample, system),
-            {'role': 'assistant', 'content': json.dumps(response_for(sample), ensure_ascii=False)}]
+            {'role': 'assistant', 'content': answer['code'] or answer['message']}]
 
 
 def select(samples, split, identifiers, limit):
@@ -178,7 +183,7 @@ def main(argv=None):
         samples = list(read_samples(root, data))
         if args.command == 'prompt':
             sample, = select(samples, args.split, [args.id], 1)
-            print(json.dumps(prompt_for(sample, PROMPT.read_text(encoding='utf-8')), ensure_ascii=False, indent=2))
+            print(json.dumps(prompt_for(sample, load_system_prompt(lock, root)), ensure_ascii=False, indent=2))
             return 0
         if args.command in ('list', 'replay'):
             if args.limit < 1:
@@ -205,7 +210,7 @@ def main(argv=None):
         output.mkdir(parents=True, exist_ok=False)
         manifest = {'dataset': lock['repository'], 'revision': lock['revision']}
         if args.command == 'export':
-            system = PROMPT.read_text(encoding='utf-8')
+            system = load_system_prompt(lock, root)
             counts = {}
             for split in SPLITS:
                 rows = [s for s in samples if s['split'] == split and s['verified'] is True
@@ -215,7 +220,8 @@ def main(argv=None):
                         stream.write(json.dumps({'id': row['id'], 'messages': messages_for(row, system)},
                                                 ensure_ascii=False) + '\n')
                 counts[split] = len(rows)
-            manifest.update(prompt_sha256=hashlib.sha256(system.encode()).hexdigest(), splits=counts,
+            manifest.update(prompt_format=PROMPT_FORMAT, prompt_sha256=hashlib.sha256(system.encode()).hexdigest(),
+                            splits=counts,
                             label_verification='lara5_replay' if passed is not None else 'source_dataset',
                             excluded_unverified=sum(s['verified'] is not True for s in samples))
             if passed is not None:

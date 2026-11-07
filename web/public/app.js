@@ -223,9 +223,6 @@ function streamEvent(event, frames) {
     case 'phase':
       lane['lane-state'].textContent = event.phase === 'generating' ? 'Generiert …' : 'Führt aus …';
       break;
-    case 'metrics':
-      showMetrics(lane, event.metrics);
-      break;
     case 'program':
       lane.program.textContent = event.code || '';
       lane.feedback.textContent = event.message || 'Programm empfangen.';

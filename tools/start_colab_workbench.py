@@ -14,7 +14,7 @@ import sys
 from tempfile import mkdtemp
 import time
 
-from stacklab.llm.catalog import install_cuda_runtime, lock, runtime_env
+from stacklab.llm.catalog import cuda_runtime, install_cuda_runtime, runtime_env
 from stacklab.llm.hardware import check_cuda_backend, gpu_inventory, gpu_offload
 from stacklab.paths import ROOT, RUNS_ROOT
 
@@ -37,7 +37,7 @@ def stop(process):
 
 
 def cuda_server():
-    config = lock('qwen9b', device='cuda')
+    config = cuda_runtime()
     if config.get('cuda_runtime_kind') == 'source' and not shutil.which('nvcc'):
         cuda_bin = Path('/usr/local/cuda/bin')
         if (cuda_bin/'nvcc').is_file():

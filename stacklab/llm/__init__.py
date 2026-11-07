@@ -1,1 +1,1 @@
-"""Local model catalog, inference and feedback-driven agent."""
+"""Pinned llama.cpp setup and Workbench token metrics."""

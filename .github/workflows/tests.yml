@@ -1,55 +1,10 @@
-name: Python compatibility
+name: LARA Workbench
 on:
   push:
   pull_request:
 permissions:
   contents: read
 jobs:
-  cuda-source-build:
-    runs-on: ubuntu-latest
-    timeout-minutes: 40
-    strategy:
-      fail-fast: false
-      matrix:
-        model: [granite8b, dory4b]
-    container: nvidia/cuda:12.8.1-devel-ubuntu24.04
-    env:
-      # Build-only driver stub on GPU-less CI; Colab uses its actual NVIDIA driver.
-      LD_LIBRARY_PATH: /usr/local/cuda/lib64/stubs:/usr/local/cuda/lib64:/usr/local/nvidia/lib:/usr/local/nvidia/lib64
-      LDFLAGS: -Wl,-rpath-link,/usr/local/cuda/lib64/stubs
-    steps:
-      - uses: actions/checkout@v7
-      - name: Install source-build tools
-        run: |
-          apt-get update -qq
-          apt-get install -y -qq git cmake python3 g++
-          ln -sf libcuda.so /usr/local/cuda/lib64/stubs/libcuda.so.1
-      - name: Compile pinned CUDA kernels for A100 and L4
-        env:
-          STACKLAB_CUDA_RUNTIME: source
-          STACKLAB_CI_MODEL: ${{ matrix.model }}
-        run: |
-          python3 - <<'PY'
-          import os
-          from stacklab.llm.catalog import CACHE_ROOT, lock
-          from stacklab.llm.source_runtime import build_runtime
-          config = lock(os.environ['STACKLAB_CI_MODEL'], device='cuda')
-          print(build_runtime(config, CACHE_ROOT/'runtime'/config['runtime_version']))
-          print('CUDA compilation checked; this runner has no GPU for inference.')
-          PY
-      - name: CUDA build diagnostics on failure
-        if: failure()
-        env:
-          STACKLAB_CUDA_RUNTIME: source
-          STACKLAB_CI_MODEL: ${{ matrix.model }}
-        run: |
-          python3 - <<'PY'
-          import os
-          from stacklab.llm.catalog import CACHE_ROOT, lock
-          config=lock(os.environ['STACKLAB_CI_MODEL'], device='cuda')
-          log=CACHE_ROOT/'runtime'/config['runtime_version']/'build.log'
-          print(log.read_text(encoding='utf-8', errors='replace')[-24000:] if log.is_file() else 'No CUDA build log')
-          PY
   tests:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 25
@@ -64,10 +19,8 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
           cache: pip
-      - name: Install, diagnose and test the local environment
+      - name: Install and test the simulation and Workbench
         run: python bootstrap.py --test
-      - name: Check model cards against tokenizer and model locks
-        run: python tools/model_cards.py --check
       - name: Contact-physics scenarios
         if: matrix.os == 'ubuntu-latest' && matrix.python == '3.13'
         env:
@@ -76,17 +29,10 @@ jobs:
           .venv/bin/python tools/validate.py
           .venv/bin/python tools/validate_objects.py
           .venv/bin/python tools/validate_controls.py
-      - name: Verify pinned CUDA binary and library archives without a GPU
+      - name: Build the Vercel site
         if: matrix.os == 'ubuntu-latest' && matrix.python == '3.13'
-        run: |
-          .venv/bin/python - <<'PY'
-          import subprocess
-          from stacklab.llm.catalog import lock, install_cuda_runtime, runtime_env
-          executable=install_cuda_runtime(lock('granite8b', device='cuda'))
-          subprocess.run([str(executable),'--version'], env=runtime_env(executable), check=True)
-          print('Pinned CUDA packages verified and executable launched; no GPU inference claimed.')
-          PY
-      - name: Render Colab video through CPU OSMesa
+        run: node web/build.mjs
+      - name: Render a Prompt2Robo replay with OSMesa
         if: matrix.os == 'ubuntu-latest' && matrix.python == '3.13'
         env:
           MUJOCO_GL: osmesa
@@ -95,35 +41,42 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq libosmesa6
+          .venv/bin/python -m stacklab prompt2robo replay --id bse-drop_onto_cube-000 --video --output runs/ci-replay
           .venv/bin/python - <<'PY'
-          from pathlib import Path
-          import subprocess, sys
           import imageio.v2 as imageio
-          output=Path('runs/ci-colab-render').resolve()
-          output.mkdir(parents=True,exist_ok=True)
-          code=output/'control.py'
-          code.write_text('robot.jog("x", 0.05)\n')
-          video=output/'simulation.mp4'
-          subprocess.run([sys.executable,'-m','stacklab.cli.worker','--config','scenes/default.json',
-                          '--code',str(code),'--result',str(output/'result.json'),
-                          '--move-delta','.05','0','0','--video',str(video)],check=True)
-          reader=imageio.get_reader(video)
-          frame=reader.get_data(0)
-          reader.close()
-          assert frame.shape == (720,960,3) and frame.std() > 1
-          print('Actual movement, video encoding and a nonempty OSMesa frame verified.')
+          with imageio.get_reader('runs/ci-replay/bse-drop_onto_cube-000.mp4') as video:
+              frame = video.get_data(0)
+              assert frame.shape == (480, 640, 3) and frame.std() > 1
           PY
-      - name: Build and launch the pinned Dory CPU runtime
-        if: matrix.os == 'windows-latest' && matrix.python == '3.13'
-        run: >-
-          python -c "import subprocess; from stacklab.llm.catalog import CACHE_ROOT, lock; from stacklab.llm.source_runtime import build_runtime; c=lock('dory4b'); p=build_runtime(c,CACHE_ROOT/'runtime'/c['runtime_version']); subprocess.run([str(p),'--version'],check=True)"
-      - name: Dory build diagnostics on failure
-        if: failure() && matrix.os == 'windows-latest' && matrix.python == '3.13'
-        shell: python
+  cuda-source-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    container: nvidia/cuda:12.8.1-devel-ubuntu24.04
+    env:
+      STACKLAB_CUDA_RUNTIME: source
+      LD_LIBRARY_PATH: /usr/local/cuda/lib64/stubs:/usr/local/cuda/lib64:/usr/local/nvidia/lib:/usr/local/nvidia/lib64
+      LDFLAGS: -Wl,-rpath-link,/usr/local/cuda/lib64/stubs
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install source-build tools
         run: |
-          from pathlib import Path
-          import sys
-          sys.path.insert(0, str(Path.cwd()))
-          from stacklab.llm.catalog import CACHE_ROOT, lock
-          p = CACHE_ROOT/'runtime'/lock('dory4b')['runtime_version']/'build.log'
-          print(p.read_text(encoding='utf-8', errors='replace')[-16000:] if p.is_file() else 'No source-build log')
+          apt-get update -qq
+          apt-get install -y -qq git cmake python3 g++
+          ln -sf libcuda.so /usr/local/cuda/lib64/stubs/libcuda.so.1
+      - name: Compile the pinned runtime for A100 and L4
+        run: |
+          python3 - <<'PY'
+          from stacklab.llm.catalog import CACHE_ROOT, cuda_runtime
+          from stacklab.llm.source_runtime import build_runtime
+          config = cuda_runtime()
+          print(build_runtime(config, CACHE_ROOT/'runtime'/config['runtime_version']))
+          PY
+      - name: Show source-build diagnostics
+        if: failure()
+        run: |
+          python3 - <<'PY'
+          from stacklab.llm.catalog import CACHE_ROOT, cuda_runtime
+          log = CACHE_ROOT/'runtime'/cuda_runtime()['runtime_version']/'build.log'
+          if log.is_file():
+              print(log.read_text(encoding='utf-8', errors='replace')[-24000:])
+          PY

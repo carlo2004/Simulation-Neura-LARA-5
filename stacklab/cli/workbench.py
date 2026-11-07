@@ -16,17 +16,14 @@ from threading import BoundedSemaphore, Timer
 from urllib.parse import urlsplit
 from uuid import uuid4
 
-from stacklab.cli.prompt2robo import (CHECKER, LOCK, read_samples,
-                                     replay_environment, response_for, source_files)
+from stacklab.cli.prompt2robo import (CHECKER, LOCK, PROMPT_FORMAT, load_system_prompt, prompt_for,
+                                     read_samples, replay_environment, response_for, source_files)
 from stacklab.llm.metrics import GenerationMetrics
-from stacklab.llm.remote import RemoteModel, endpoint
 from stacklab.paths import ROOT
 
 WEB = ROOT / 'web/public'
 PROOFS = ROOT / 'examples/prompt2robo-replays/manifest.json'
 SCHEMA = 'stacklab-workbench-v1'
-HF_SYSTEM_PROMPT = 'system_prompt.md'
-PROMPT_FORMAT = 'prompt2robo-hf-text-v1'
 MAX_BODY = 96 * 1024
 MAX_TOKENS = 2048
 SEED = 42
@@ -36,6 +33,17 @@ class ClientDisconnected(Exception):
     pass
 
 
+def model_endpoint(url):
+    parsed = urlsplit(url.rstrip('/').removesuffix('/v1'))
+    if (parsed.scheme != 'http' or parsed.hostname not in ('127.0.0.1', 'localhost', '::1')
+            or parsed.username or parsed.password or parsed.path not in ('', '/')
+            or parsed.query or parsed.fragment):
+        raise ValueError('Use a loopback HTTP model endpoint, e.g. http://127.0.0.1:8081/v1')
+    if parsed.port == 0:
+        raise ValueError('Invalid server port')
+    return parsed.hostname, parsed.port or 80
+
+
 def load_models(path):
     models = {} if path is None else json.loads(path.read_text(encoding='utf-8'))
     if not isinstance(models, dict) or len(models) > 20:
@@ -43,10 +51,10 @@ def load_models(path):
     for key, model in models.items():
         if (not re.fullmatch(r'[a-z][a-z0-9_-]{0,39}', key) or not isinstance(model, dict)
                 or not isinstance(model.get('label'), str) or not model['label'].strip()
-                or not isinstance(model.get('url'), str) or model.get('protocol') not in ('openai', 'stacklab')):
+                or not isinstance(model.get('url'), str) or model.get('protocol', 'openai') != 'openai'):
             raise ValueError(f'Invalid model entry {key!r}')
-        endpoint(model['url'].rstrip('/').removesuffix('/v1') if model['protocol'] == 'openai' else model['url'])
-        if model['protocol'] == 'openai' and (not isinstance(model.get('model'), str) or not model['model'].strip()):
+        model_endpoint(model['url'])
+        if not isinstance(model.get('model'), str) or not model['model'].strip():
             raise ValueError(f'{key} needs the model ID used by its OpenAI-compatible server')
         env_name = model.get('api_key_env', '')
         if not isinstance(env_name, str) or env_name and not re.fullmatch(r'[A-Z_][A-Z0-9_]*', env_name):
@@ -54,17 +62,9 @@ def load_models(path):
     return models
 
 
-def completion(model, messages, directory, emit):
+def completion(model, messages):
     """Generate one policy using the workbench's fixed generation budget."""
-    if model['protocol'] == 'stacklab':
-        client = RemoteModel(model['url'], recording='slim')
-        thinking = False if client.config.get('supports_thinking_toggle', True) else None
-        raw, result = client.complete(messages, directory, max_tokens=MAX_TOKENS, seed=SEED,
-                                      thinking=thinking, timeout=150,
-                                      on_progress=lambda metrics: emit('metrics', metrics=metrics))
-        return raw, result.get('performance', {}), client.config['model_id'], result.get('finish_reason')
-
-    host, port = endpoint(model['url'].rstrip('/').removesuffix('/v1'))
+    host, port = model_endpoint(model['url'])
     body = dict(model=model['model'], messages=messages, stream=False, max_tokens=MAX_TOKENS,
                 temperature=0, seed=SEED, chat_template_kwargs={'enable_thinking': False})
     headers = {'Content-Type': 'application/json'}
@@ -168,9 +168,7 @@ class Workbench(ThreadingHTTPServer):
         names = [name for name in self.lock['files'] if name.endswith('.jsonl')]
         root = source_files(self.lock, [*names, CHECKER], source)
         self.checker = root / CHECKER
-        prompt_source = root if (root / HF_SYSTEM_PROMPT).is_file() else None
-        prompt_root = source_files(self.lock, [HF_SYSTEM_PROMPT], prompt_source)
-        self.system = (prompt_root / HF_SYSTEM_PROMPT).read_text(encoding='utf-8').strip()
+        self.system = load_system_prompt(self.lock, root)
         proof_rows = json.loads(PROOFS.read_text(encoding='utf-8'))['results']
         proof = {row['id']: row['passed'] for row in proof_rows}
         available = {row['id']: row for row in read_samples(root, names)}
@@ -331,8 +329,7 @@ class Handler(SimpleHTTPRequestHandler):
             for side, instruction in instructions.items()
         }
         messages_by_side = {
-            side: [{'role': 'system', 'content': self.server.system},
-                   {'role': 'user', 'content': lane_sample['user_prompt']}]
+            side: prompt_for(lane_sample, self.server.system)
             for side, lane_sample in samples_by_side.items()
         }
         prompt_hashes = {side: hashlib.sha256(json.dumps(messages).encode()).hexdigest()
@@ -359,7 +356,7 @@ class Handler(SimpleHTTPRequestHandler):
                     output = Path(temporary)
                     if model:
                         emit('phase', phase='generating')
-                        raw, metrics, actual, finish = completion(model, messages_by_side[lane], output/'generation', emit)
+                        raw, metrics, actual, finish = completion(model, messages_by_side[lane])
                         result.update(raw=raw, metrics=metrics, actual_model=actual)
                         if finish == 'length':
                             raise ValueError('Model reached the token limit')

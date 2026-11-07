@@ -1,6 +1,0 @@
-{
-  "schema_version": 2,
-  "system_prompt_file": "robot_api.md",
-  "world_info_file": "world_info.json",
-  "order": ["world_info", "observation", "runtime_info", "user_prompt"]
-}

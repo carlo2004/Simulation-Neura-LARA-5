@@ -24,17 +24,12 @@ class Prompt2RoboTests(unittest.TestCase):
         messages = messages_for(self.sample, 'System')
         self.assertEqual(messages[:-1], prompt_for(self.sample, 'System'))
         self.assertEqual([m['role'] for m in messages[:-1]], ['system', 'user'])
-        user = json.loads(messages[1]['content'])
-        self.assertEqual(set(user), {'user_prompt', 'scene'})
-        self.assertEqual(list(user['scene']['objects']), ['2', '10'])
-        self.assertEqual(user['scene'], self.sample['scene'])
-        self.assertEqual(json.loads(messages[-1]['content']),
-                         {'code': self.sample['assistant_answer'], 'message': ''})
+        self.assertEqual(messages[1]['content'], self.sample['user_prompt'])
+        self.assertEqual(messages[-1]['content'], self.sample['assistant_answer'])
 
     def test_refusal_keeps_text_out_of_code(self):
         sample = dict(self.sample, expected_behavior='refuse', assistant_answer='Please specify the cube.')
-        self.assertEqual(json.loads(messages_for(sample, 'System')[-1]['content']),
-                         {'code': '', 'message': 'Please specify the cube.'})
+        self.assertEqual(messages_for(sample, 'System')[-1]['content'], 'Please specify the cube.')
 
     def test_selection_cannot_silently_cross_split(self):
         with self.assertRaisesRegex(ValueError, 'split train'):

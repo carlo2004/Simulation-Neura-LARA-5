@@ -1,4 +1,4 @@
-"""Pinned model catalog, verified downloads and local runtime installation."""
+"""Verified GGUF downloads and the shared llama.cpp runtime."""
 import hashlib
 import json
 import os
@@ -18,58 +18,41 @@ def lock(model=None, device='cpu'):
     if device not in ('cpu', 'cuda'):
         raise ValueError('device must be cpu or cuda')
     registry = json.loads(REGISTRY_PATH.read_text(encoding='utf-8'))
-    if 'models' in registry:
-        key = model or registry['default_model']
-        if key not in registry['models']:
-            query = str(key).casefold()
-            matches = [k for k, v in registry['models'].items()
-                       if query in {str(name).casefold() for name in
-                                    (k, v['model_id'], v['model_id'].rsplit('/', 1)[-1], *v.get('aliases', []))}]
-            if len(matches) > 1:
-                raise ValueError('Ambiguous model name; use a catalog alias or full model ID')
-            key = matches[0] if matches else None
-        if key is None or key not in registry['models']:
-            raise ValueError('Unknown model. Use python -m stacklab models for the available aliases.')
-        config = {k: v for k, v in registry.items() if k not in ('models', 'default_model')}
-        config.update(registry['models'][key], model_key=key)
-    else:
-        config = registry  # Read older single-model locks and archived configurations.
-    total, ceiling = config['total_parameters'], config.get('max_total_parameters')
-    if type(total) is not int or total <= 0:
-        raise ValueError('total_parameters must be a positive integer')
-    if ceiling is not None and (type(ceiling) is not int or ceiling <= 0 or total > ceiling):
-        raise ValueError('Model exceeds the configured total-parameter budget')
+    models = registry['models']
+    key = model or registry['default_model']
+    if key not in models:
+        query = key.casefold()
+        matches = [alias for alias, entry in models.items()
+                   if query in (alias.casefold(), entry['model_id'].casefold(),
+                                entry['model_id'].rsplit('/', 1)[-1].casefold())]
+        if len(matches) != 1:
+            raise ValueError('Choose a model from the GGUF catalog: '+', '.join(models))
+        key = matches[0]
+    config = {k: v for k, v in registry.items() if k not in ('models', 'default_model')}
+    config.update(models[key], model_key=key)
     if device == 'cuda':
-        spec = json.loads((ROOT/'config/cuda.runtime.lock.json').read_text(encoding='utf-8'))
-        mode = os.environ.get('STACKLAB_CUDA_RUNTIME', 'auto')
-        if mode not in ('auto', 'binary', 'source'):
-            raise ValueError('STACKLAB_CUDA_RUNTIME must be auto, binary or source')
-        libc, libc_version = platform.libc_ver()
-        old_glibc = (libc == 'glibc' and libc_version and
-                     tuple(map(int, libc_version.split('.'))) < tuple(map(int, spec['minimum_binary_glibc'].split('.'))))
-        if platform_key() not in spec['runtime_assets']:
-            raise ValueError('Pinned CUDA support currently targets Linux x86-64, including Colab L4/A100')
-        if config.get('runtime_source'):
-            config.update(runtime_version=config['runtime_version']+'-cuda', device='cuda',
-                          cuda_architectures=spec['source_cuda_architectures'], cuda_runtime_kind='source',
-                          cuda_flash_attention_quants=spec['source_flash_attention_quants'])
-        else:
-            if config['runtime_version'] != spec['base_runtime_version']:
-                raise ValueError('No pinned CUDA recipe for '+config['runtime_version'])
-            if mode == 'source' or mode == 'auto' and old_glibc:
-                config.update(runtime_version=config['runtime_version']+'-cuda-source', device='cuda',
-                              runtime_source=dict(repository=spec['source_repository'], revision=spec['source_revision']),
-                              cuda_architectures=spec['source_cuda_architectures'], cuda_runtime_kind='source',
-                              cuda_flash_attention_quants=spec['source_flash_attention_quants'])
-            else:
-                config.update(runtime_version=spec['runtime_version'], runtime_assets=spec['runtime_assets'],
-                              runtime_dependencies=spec['runtime_dependencies'], device='cuda', cuda_runtime_kind='binary')
+        config.update(cuda_runtime())
     return config
 
 
-def model_keys():
-    registry = json.loads(REGISTRY_PATH.read_text(encoding='utf-8'))
-    return list(registry.get('models', {'qwen4b': registry}))
+def cuda_runtime():
+    """Resolve the pinned Colab runtime independently of the supplied GGUF."""
+    spec = json.loads((ROOT/'config/cuda.runtime.lock.json').read_text(encoding='utf-8'))
+    mode = os.environ.get('STACKLAB_CUDA_RUNTIME', 'auto')
+    if mode not in ('auto', 'binary', 'source'):
+        raise ValueError('STACKLAB_CUDA_RUNTIME must be auto, binary or source')
+    if platform_key() not in spec['runtime_assets']:
+        raise ValueError('Pinned CUDA support targets Linux x86-64, including Colab L4/A100')
+    libc, libc_version = platform.libc_ver()
+    old_glibc = (libc == 'glibc' and libc_version and
+                 tuple(map(int, libc_version.split('.'))) < tuple(map(int, spec['minimum_binary_glibc'].split('.'))))
+    if mode == 'source' or mode == 'auto' and old_glibc:
+        return dict(runtime_version=spec['base_runtime_version']+'-cuda-source', device='cuda',
+                    runtime_source=dict(repository=spec['source_repository'], revision=spec['source_revision']),
+                    cuda_architectures=spec['source_cuda_architectures'], cuda_runtime_kind='source',
+                    cuda_flash_attention_quants=spec['source_flash_attention_quants'])
+    return dict(runtime_version=spec['runtime_version'], runtime_assets=spec['runtime_assets'],
+                runtime_dependencies=spec['runtime_dependencies'], device='cuda', cuda_runtime_kind='binary')
 
 
 def sha256(path):
@@ -105,7 +88,7 @@ def download(url, path, expected_sha, expected_bytes):
     if offset > expected_bytes:
         raise ValueError('Partial file exceeds the expected size: '+str(partial))
     require_download_space(path, expected_bytes-offset)
-    headers = {'User-Agent': 'StackLab-local-LLM/2.6.1'}
+    headers = {'User-Agent': 'StackLab-Workbench'}
     if offset:
         headers['Range'] = f'bytes={offset}-'
     print('Download: '+path.name, flush=True)
@@ -147,19 +130,8 @@ def setup(model=None, device='cpu'):
                  config['model_sha256'], config['model_bytes'])
         print('Model and CUDA runtime verified: '+str(executable), flush=True)
         return executable
-    if device != 'cpu':
-        raise ValueError('device must be cpu or cuda')
-    config = lock(model)
+    config = lock(model, device=device)
     key = platform_key()
-    if config.get('runtime_source'):
-        from stacklab.llm.source_runtime import build_runtime, cmake_executable, ready_runtime
-        if not ready_runtime(config, CACHE_ROOT/'runtime'/config['runtime_version']):
-            cmake_executable()  # Diagnose missing build tools before a multi-GB download.
-        weights = CACHE_ROOT/'models'/config['model_filename']
-        download(config['model_url'], weights, config['model_sha256'], config['model_bytes'])
-        executable = build_runtime(config, CACHE_ROOT/'runtime'/config['runtime_version'])
-        print('Local model and pinned source runtime verified: '+str(executable), flush=True)
-        return executable
     if key not in config['runtime_assets']:
         raise ValueError('No pinned CPU runtime for '+key)
     weights = CACHE_ROOT/'models'/config['model_filename']
@@ -187,7 +159,7 @@ def setup(model=None, device='cpu'):
 
 
 def install_cuda_runtime(config):
-    """Install pinned binaries/libraries, or the model-specific source build; no weights."""
+    """Install the pinned CUDA binaries and libraries or build the same revision."""
     if config.get('device') != 'cuda':
         raise ValueError('Expected an explicitly resolved CUDA configuration')
     directory = CACHE_ROOT/'runtime'/config['runtime_version']
@@ -201,7 +173,7 @@ def install_cuda_runtime(config):
     if marker.is_file():
         installed = json.loads(marker.read_text(encoding='utf-8'))
         if installed.get('archive_sha256') == expected:
-            return find_executable(config['model_key'], device='cuda')
+            return find_cuda_executable(config)
     directory.mkdir(parents=True, exist_ok=True)
     for asset in assets:
         archive = download(asset['url'], CACHE_ROOT/'downloads'/asset['filename'], asset['sha256'], asset['bytes'])
@@ -219,17 +191,14 @@ def install_cuda_runtime(config):
     return executable
 
 
-def find_executable(model=None, device='cpu'):
-    config = lock(model, device=device)
+def find_cuda_executable(config):
     directory = CACHE_ROOT/'runtime'/config['runtime_version']
     if config.get('runtime_source'):
         from stacklab.llm.source_runtime import ready_runtime
         executable = ready_runtime(config, directory)
         if executable:
             return executable
-        raise ValueError('Pinned source runtime missing or changed. Run python -m stacklab setup --model '+
-                         config['model_key']+(' --device cuda' if device == 'cuda' else ''))
-    if device == 'cuda':
+    else:
         marker = directory/'installed.json'
         if marker.is_file():
             installed = json.loads(marker.read_text(encoding='utf-8'))
@@ -240,12 +209,18 @@ def find_executable(model=None, device='cpu'):
                     and executable.is_relative_to(directory.resolve()) and executable.is_file()
                     and sha256(executable) == installed.get('executable_sha256')):
                 return executable
-        raise ValueError('Pinned CUDA runtime missing or changed. Run stacklab setup --device cuda --model '+config['model_key'])
+    raise ValueError('Pinned CUDA runtime missing or changed. Run the Colab Workbench starter again.')
+
+
+def find_executable(model=None, device='cpu'):
+    config = lock(model, device=device)
+    if device == 'cuda':
+        return find_cuda_executable(config)
+    directory = CACHE_ROOT/'runtime'/config['runtime_version']
     suffix = '.exe' if os.name == 'nt' else ''
-    for name in ('llama-server',):
-        matches = list(directory.rglob(name+suffix)) if directory.exists() else []
-        if matches:
-            return matches[0].resolve()
+    matches = list(directory.rglob('llama-server'+suffix))
+    if matches:
+        return matches[0].resolve()
     raise ValueError('Local runtime missing. Run python -m stacklab setup first.')
 
 

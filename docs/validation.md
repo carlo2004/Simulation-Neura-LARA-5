@@ -1,26 +1,19 @@
-# Prüfen und auswerten
+# Prüfen
 
-## Software und Physik
+Die Softwaretests laufen mit der Projektumgebung. Sie prüfen unter anderem LARA-Geometrie, Kontakte, manuelle Steuerung, Datensatzformat, begrenzte Programmausführung und die Auswahl der CUDA-Runtime.
 
-```bash
+~~~bash
 python bootstrap.py --test
-.venv/bin/python tools/validate.py
-.venv/bin/python tools/validate_objects.py
-.venv/bin/python tools/validate_controls.py
-```
+node web/build.mjs
+~~~
 
-Die Tests prüfen Modellkinematik, echte Kontakte und Stabilität, Objektbearbeitung, Terminalbefehle, manuelle Steuerung, Overlays, Codevalidierung, Downloads, Streaming und Abbrüche. Ein bekanntes Kontrollprogramm wird durch denselben Interpreter ausgeführt wie Modellcode: es muss stapeln; ein No-op muss die Stapelprüfung verfehlen.
+Für eine physische Kontrolle ohne Modell kannst du einen Referenzfall wiedergeben. Verwende einen neuen Ausgabeordner pro Lauf.
 
-GitHub Actions prüft Linux und Windows mit Python 3.12/3.13. Die Linux-Prüfung führt zusätzlich die Physik-Szenarien aus. Große Modellgewichte werden dabei nicht heruntergeladen. Ein grüner Testlauf prüft die Software, keine neue Modellqualität.
+~~~bash
+.venv/bin/python -m stacklab prompt2robo replay \
+  --id bse-drop_onto_cube-000 --video --output runs/check-rot-auf-blau
+~~~
 
-Optionales Rendering benötigt OpenGL, z. B. `MUJOCO_GL=egl` auf einem passenden Linux-System. Native Fenster müssen zusätzlich auf dem Vorführrechner angesehen werden; Headless-Tests prüfen keine Desktopbedienung.
+Der Bericht enthält Start- und Endzustand und die Gründe der Zielwertung. Für einen End-to-End-Test in der Workbench wähle **Rot auf Blau**, lasse den Datensatzauftrag stehen und starte die gewünschte Modellseite. Die unabhängige Zielprüfung bewertet den ausgeführten Code. [Replay und Export](prompt2robo.md) · [Modellvergleich](workbench.md)
 
-## Auswertung
-
-Beim Stapeln werden Zentrierung, Höhe, Kontakte, Geschwindigkeiten und Freigabe durch den Greifer geprüft. Die Evaluation verlangt 20 gültige Stabilitätsproben. Die detaillierten aktuellen Kriterien stehen in `evaluation.py` und `sim/robot.py`; [historische Messungen](../experiments/README.md) nennen die damaligen Bedingungen.
-
-Ein Agentenbericht mit `success: null` bedeutet: eine freie Anweisung wurde nicht semantisch durch ein vorgegebenes Ziel bewertet. `model_finished` ist eine Modellmeldung. Nur `verified_success` bezeichnet einen bestandenen vorgegebenen physikalischen Test.
-
-Neue Ergebnisse unter `runs/` werden nicht automatisch in Git aufgenommen. Relevante Versuche mit `stacklab share` auf HF teilen; Konfiguration, Softwarestand, Prompt, Modellrevision, Antwort und unabhängige Messung bleiben im Snapshot erhalten. Geplante Serien und Playground werden getrennt abgelegt. Für einen Paper-Vergleich dieselbe API, Seeds, Budgets, Sampling-Profile und Metriken einfrieren. Unterschiedliche Entwicklungsbedingungen nicht zu einer gemeinsamen Erfolgsquote mischen.
-
-Neue Agentenberichte enthalten Softwareversion, verfügbaren Git-Commit und Änderungsstatus, Python-/Systemangaben und die wirksamen Ausführungsbudgets. Fehlen Git oder Repositorymetadaten, bleiben die entsprechenden Felder `null`; die Simulation funktioniert weiter.
+Die Skripte `tools/validate.py`, `tools/validate_objects.py` und `tools/validate_controls.py` prüfen die lokale Physik und Bedienung ausführlicher. Unter Linux kann MuJoCo bei Bedarf über `MUJOCO_GL=osmesa` mit installiertem `libosmesa6` rendern. Das Colab-Notebook richtet diesen Pfad ein.

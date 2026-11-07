@@ -1,3 +1,0 @@
-{
-  "error": "ValueError: This CUDA source runtime needs the NVIDIA CUDA Toolkit (nvcc), CMake and a C++ compiler"
-}

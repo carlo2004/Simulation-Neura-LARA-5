@@ -13,7 +13,7 @@ Nach erfolgreicher Einrichtung den ausgegebenen Interpreter verwenden. Linux-Bei
 .venv/bin/python -m stacklab demo --video
 ```
 
-Windows: `.\.venv\Scripts\python.exe` statt `.venv/bin/python`. macOS-Fenster benötigen MuJoCos `mjpython`. Für Demo und Konsole z. B. `.venv/bin/mjpython -m stacklab console` verwenden. Chat und Benchmark erkennen den Wrapper automatisch in derselben Umgebung.
+Unter Windows verwende `.\.venv\Scripts\python.exe`. Für das native Fenster unter macOS nutze `.venv/bin/mjpython -m stacklab console` beziehungsweise `.venv/bin/mjpython -m stacklab demo --gui`.
 
 Jeder Befehl hat `--help`. `python -m stacklab --version` zeigt die Softwareversion.
 
@@ -35,9 +35,7 @@ check red blue
 
 Die vollständigen Abläufe stehen in [examples](../examples/). Mit `--config scenes/three_cubes.json` eine andere Szene wählen. Die JSON-Dateien enthalten Objektform, Masse, Größe und Startposition; [Einstellungen](settings.md) erklärt ihre Bedeutung. Achsen, Auswertungsboxen und die Einstellungstafel sind optional. Die Einstellungstafel lässt sich einklappen.
 
-Für die flüssigste Ansicht zunächst ohne `--axes` und `--stackviz` starten.
-Die [Performance-Einstellungen](settings.md#performance-und-empfohlener-start) enthalten
-Startbefehle für lokale Modelle und den Colab-Remote-Modus.
+Achsen und Stapelrahmen lassen sich bei Bedarf mit `axes on` und `stackviz red blue` einblenden. [Anzeige und Einstellungen](settings.md)
 
 Die Konsole enthält manuelle Steuerung und Mesh-Import. Für Physikversuche eignet sich die vorbereitete Ente aus `scenes/duck.json`; fremde Meshes werden als konvexe Kollisionshülle importiert. Hohlräume und Texturen sind dabei keine detaillierte Kollisionsgeometrie.
 
@@ -55,7 +53,7 @@ with closing(Simulation(Config(), gui=True)) as robot:
     robot.gripper(closed=False)
 ```
 
-Direkter eigener Python-Code hat die normale Simulations-API. Modellcode läuft durch die begrenzte API in `stacklab/policy.py`; [robot_api.md](../config/prompts/robot_api.md) beschreibt die verfügbaren Modellbefehle.
+Die Workbench führt Modellcode mit der begrenzten Prompt2Robo-API aus. [Modellformat und Bedienung](workbench.md)
 
 ## Dateien und Fehlersuche
 

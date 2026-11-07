@@ -1,19 +1,23 @@
 """Bounded evaluation of the Prompt2Robo Python subset for live model output."""
 import ast
+from dataclasses import dataclass
+import json
 import math
 import operator
-from dataclasses import dataclass
+import os
+from pathlib import Path
 
 import numpy as np
 
-from stacklab.policy import Interpreter, OPS, PolicyCancelled, PolicyError, number
+from stacklab.paths import ROOT
 from stacklab.prompt2robo import METHODS
 
 BUILTINS = {fn.__name__: fn for fn in (abs, min, max, len, round, sum, sorted, all, any, int, float, str, bool)}
 NUMERIC = {'np.array': np.asarray, 'np.mean': np.mean, 'np.ptp': np.ptp, 'np.sign': np.sign,
            'np.linalg.norm': np.linalg.norm,
            **{'math.' + name: getattr(math, name) for name in ('hypot', 'sqrt', 'sin', 'cos', 'radians', 'degrees')}}
-BINARY = {**OPS, ast.FloorDiv: operator.floordiv, ast.Mod: operator.mod, ast.Pow: operator.pow}
+BINARY = {ast.Add: operator.add, ast.Sub: operator.sub, ast.Mult: operator.mul,
+          ast.Div: operator.truediv, ast.FloorDiv: operator.floordiv, ast.Mod: operator.mod, ast.Pow: operator.pow}
 COMPARE = {ast.Eq: operator.eq, ast.NotEq: operator.ne, ast.Lt: operator.lt, ast.LtE: operator.le,
            ast.Gt: operator.gt, ast.GtE: operator.ge, ast.In: lambda a, b: a in b,
            ast.NotIn: lambda a, b: a not in b, ast.Is: operator.is_, ast.IsNot: operator.is_not}
@@ -23,6 +27,47 @@ NODES = (ast.Module, ast.FunctionDef, ast.arguments, ast.arg, ast.Lambda, ast.Re
          ast.Compare, ast.BoolOp, ast.And, ast.Or, ast.ListComp, ast.GeneratorExp, ast.comprehension,
          ast.Call, ast.Attribute, ast.Starred, ast.keyword, *BINARY, *COMPARE)
 RESERVED = {'robot', 'np', 'math', 'range', 'zip', 'enumerate', 'reversed', *BUILTINS}
+
+
+@dataclass(frozen=True)
+class ExecutionLimits:
+    """Resource budgets, independent of the task and its success criteria."""
+    code_characters: int = 64000
+    ast_nodes: int = 4096
+    api_calls: int = 256
+    sequence_items: int = 64
+
+    def __post_init__(self):
+        for name in ("code_characters", "ast_nodes", "api_calls", "sequence_items"):
+            value = getattr(self, name)
+            if type(value) is not int or value < 1:
+                raise ValueError(name+" must be a positive integer")
+
+    @classmethod
+    def load(cls, path=None):
+        path = Path(path or os.environ.get("STACKLAB_POLICY_LIMITS", ROOT/"config/policy.json"))
+        data = json.loads(path.read_text(encoding="utf-8"))
+        if not isinstance(data, dict):
+            raise ValueError("Policy limits must be a JSON object")
+        try:
+            return cls(**data)
+        except TypeError as error:
+            raise ValueError("Unknown policy-limit setting: "+str(error)) from None
+
+
+class PolicyError(ValueError):
+    pass
+
+
+class PolicyCancelled(PolicyError):
+    pass
+
+
+def number(value):
+    if type(value) not in (int, float) or not math.isfinite(value) or abs(value) > 1e6:
+        raise PolicyError('Expected a finite number with absolute value at most 1000000')
+    return value
+
 
 
 def qualified_name(node):
@@ -43,8 +88,16 @@ class Returned(Exception):
     pass
 
 
-class WorkbenchPolicy(Interpreter):
+class WorkbenchPolicy:
     """Evaluate syntax and bounded values without compiling or running Python bytecode."""
+
+    def __init__(self, robot, on_action=None, should_stop=None, limits=None):
+        self.limits = limits or ExecutionLimits.load()
+        self.robot = robot
+        self.variables = {}
+        self.actions = []
+        self.on_action = on_action
+        self.should_stop = should_stop
 
     def run(self, code):
         if len(code) > self.limits.code_characters:
@@ -211,7 +264,21 @@ class WorkbenchPolicy(Interpreter):
                 return self.data_value(result)
             finally:
                 self.variables = scope
-        return super().expression(node)
+        if isinstance(node, ast.Constant):
+            return node.value
+        if isinstance(node, ast.Name):
+            if node.id not in self.variables:
+                raise PolicyError('Undefined variable: '+node.id)
+            return self.variables[node.id]
+        if isinstance(node, ast.Subscript):
+            value, index = self.expression(node.value), self.expression(node.slice)
+            if not isinstance(value, list) or type(index) is not int or not -len(value) <= index < len(value):
+                raise PolicyError('Index a position list with an in-range integer')
+            return value[index]
+        if isinstance(node, ast.UnaryOp):
+            value = number(self.expression(node.operand))
+            return value if isinstance(node.op, ast.UAdd) else -value
+        raise PolicyError('Unsupported expression')
 
     def invoke(self, node):
         name = qualified_name(node.func)
@@ -257,6 +324,26 @@ class WorkbenchPolicy(Interpreter):
         if isinstance(fn, Function) and not kwargs:
             return self.function(fn, args)
         raise PolicyError('Unsupported call: ' + name)
+
+    def call(self, method, args, kwargs):
+        if self.should_stop and self.should_stop():
+            raise PolicyCancelled('Execution cancelled')
+        if len(self.actions) >= self.limits.api_calls:
+            raise PolicyError(f'API call budget reached: {self.limits.api_calls}')
+        action = dict(method=method, args=args, kwargs=kwargs, time_s=float(self.robot.data.time))
+        self.actions.append(action)
+        if self.on_action:
+            self.on_action('start', action)
+        try:
+            result = self.dispatch(method, args, kwargs, action)
+            action['status'] = 'ok'
+            return result
+        except Exception as error:
+            action.update(status='error', error=type(error).__name__+': '+str(error))
+            raise
+        finally:
+            if self.on_action:
+                self.on_action('end', action)
 
     def dispatch(self, method, args, kwargs, action):
         if kwargs:

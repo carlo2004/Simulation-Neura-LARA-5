@@ -31,7 +31,7 @@ def main(argv=None):
         if args.test:
             subprocess.run([str(python), "-m", "unittest", "discover", "-s", "tests", "-v"], cwd=ROOT, check=True)
         print("\nStart with this interpreter:")
-        print(str(python)+" -m stacklab console")
+        print(str(python)+" -m stacklab workbench --help")
         return 0
     except (ValueError, OSError, subprocess.CalledProcessError) as error:
         print("Setup failed: "+str(error), file=sys.stderr)

@@ -19,13 +19,11 @@ Der Bericht hält die gemessene Start- und Endszene, die Prüfergebnisse und die
 
 ## Schnittstelle für das Modell
 
-Der SFT-Export unten beschreibt das Stack-Lab-Format mit JSON-Szene und JSON-Antwort. Für den bereits veröffentlichten Qwen3-4B-Checkpoint verwendet die [Workbench](workbench.md#modellformat) das ursprüngliche Textformat von Hugging Face.
+Die [Workbench](workbench.md#modellformat), `prompt` und der SFT-Export verwenden den ursprünglichen HF-Systemprompt und den unveränderten Nutzerturn aus dem Datensatz. Dieser enthält die Zeile `Objects: …` mit IDs und Farben, gefolgt vom Auftrag. Das Programm liest die Koordinaten aus der Simulation. `prompt --id abs-pyramid_2_layer-000` gibt die beiden Nachrichten für die Inferenz aus.
 
-Der Zero-shot-Input enthält einen Systemprompt mit den LARA-Grenzen und einen Nutzerturn mit `user_prompt` und `scene`. Die Szene enthält die numerisch sortierten Objekt-IDs, Farben, Mittelpunkte und den Greiferzustand. Die IDs behalten ihren Wert, auch wenn die Nummerierung Lücken hat. `prompt --id abs-pyramid_2_layer-000` gibt die beiden Nachrichten für die Inferenz aus.
+`export` schreibt JSONL mit `id` und `messages`. Die dritte Nachricht enthält die unveränderte Zielantwort als Python-Funktion `def run(robot)` oder als Text. Szenenkoordinaten, Referenzzustand und Zielbedingungen bleiben beim Simulator und beim Checker. Der Replay-Worker führt Aktionszeilen auf dem LARA aus und prüft Textzeilen separat.
 
-Der gemeinsame Antwortumschlag hat zwei Stringfelder. Bei einer Aktion enthält `code` die Funktion `run(robot)`. Bei einer Rückfrage oder Ablehnung bleibt `code` leer und `message` enthält die Antwort. Der Replay-Worker führt bei Aktionszeilen das Referenzprogramm aus. Textzeilen werden mit dem Refusal-Checker geprüft und lösen keine Simulation aus.
-
-`export` schreibt JSONL mit `id` und `messages`. Jede Zeile enthält den Systemprompt, die Aufgabe mit Anfangsszene und genau eine Zielantwort. Die Zielfelder des Checkers bleiben in der Quelldatei. Für SFT wird `train.jsonl` verwendet. `eval.jsonl`, `eval_v2.jsonl`, `eval_v3.jsonl` und `eval_v4.jsonl` bleiben getrennt. Die Inferenz verwendet das gleiche Nachrichtenformat bis zur Nutzerrolle.
+Für SFT wird `train.jsonl` verwendet. `eval.jsonl`, `eval_v2.jsonl`, `eval_v3.jsonl` und `eval_v4.jsonl` bleiben getrennt. Das Exportmanifest hält Datenrevision, Promptformat und Prüfsumme des Systemprompts fest.
 
 Mit `--replay-report` übernimmt der Export nur bestandene Zeilen aus den angegebenen LARA-Berichten. Die Option lässt sich für mehrere Berichte und Splits wiederholen. Der oben gezeigte Einzeltest ergibt eine Trainingszeile. Ohne Berichte exportiert der Befehl die ursprünglich verifizierten Labels und kennzeichnet sie als `source_dataset`.
 

@@ -73,33 +73,3 @@ class GenerationMetrics:
                                                 if self.first_token is not None and self.request_started is not None else None),
                     partial=partial, output_includes_reasoning=True,
                     rate_source='runtime' if decode_rate is not None else 'request_wall_clock' if effective is not None else None)
-
-
-def summarize(generations):
-    """Aggregate matching token/time counters rather than averaging per-round rates."""
-    metrics = [g['performance'] for g in generations if g.get('performance')]
-    native = [m for m in metrics if m.get('native_decode_tokens') is not None and m.get('decode_seconds')]
-    seconds = sum(m['decode_seconds'] for m in native)
-    # Early development records (schema 1) included the first/prefill token here.
-    native_tokens = sum(max(0, m['native_decode_tokens']-1) if m.get('schema_version') == 1
-                        else m['native_decode_tokens'] for m in native)
-    counted = [m for m in metrics if m.get('output_tokens') is not None]
-    loads = [m['model_load_seconds'] for m in metrics if m.get('model_load_seconds') is not None]
-    requests = [m['request_seconds'] for m in metrics if m.get('request_seconds') is not None]
-    totals = [m['total_seconds'] for m in metrics if m.get('total_seconds') is not None]
-    first_sum = sum(m['time_to_first_token_seconds'] if m.get('time_to_first_token_seconds') is not None
-                    else m.get('first_token_seconds_sum', 0) for m in metrics)
-    first_count = sum(1 if m.get('time_to_first_token_seconds') is not None
-                      else m.get('first_token_measurements', 0) for m in metrics)
-    return dict(schema_version=2, measured_rounds=len(metrics), total_rounds=len(generations), counted_rounds=len(counted),
-                output_tokens=sum(m['output_tokens'] for m in counted) if counted else None,
-                native_decode_tokens=native_tokens if native else None,
-                decode_seconds=seconds if native else None,
-                decode_tokens_per_second=native_tokens/seconds if seconds else None,
-                model_load_seconds=sum(loads) if loads else None,
-                request_seconds=sum(requests) if requests else None,
-                total_seconds=sum(totals) if totals else None,
-                first_token_seconds_sum=first_sum, first_token_measurements=first_count,
-                first_token_seconds_mean=first_sum/first_count if first_count else None,
-                partial_rounds=sum(bool(m.get('partial')) for m in metrics),
-                partial=len(metrics) != len(generations) or any(m.get('partial') for m in metrics))

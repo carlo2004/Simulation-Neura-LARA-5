@@ -69,10 +69,10 @@ Teste zuerst [localhost:8787](http://127.0.0.1:8787). Wenn der SSH-Endpunkt in e
 **5. ngrok auf deinem Rechner starten.** Installiere den ngrok-Agent und konfiguriere dort deinen Authtoken über den Befehl aus dem Dashboard. Den Sitzungsschlüssel aus Schritt 4 brauchst du später in der Workbench. [ngrok einrichten](https://ngrok.com/docs/gateway/endpoints/agent-cli-quickstart)
 
 ~~~bash
-ngrok http http://127.0.0.1:8787 --inspect=false
+ngrok http 8787 --url "https://<DEINE-DEV-DOMAIN>" --inspect=false
 ~~~
 
-Teile die ausgegebene HTTPS-Adresse mit dem Team und übermittle den LARA-Sitzungsschlüssel getrennt. Am einfachsten öffnet ihr die ngrok-Adresse direkt. Unter **Runner verbinden** bleibt die URL dann leer. Alternativ könnt ihr auf der Vercel-Seite die ngrok-Adresse im Feld **Runner-URL** eintragen. Wenn die ngrok-Startseite dazwischenkommt, öffnet die ngrok-Adresse direkt.
+Teile die HTTPS-Adresse und den LARA-Sitzungsschlüssel getrennt. Öffnet die ngrok-Adresse einmal direkt und bestätigt bei Bedarf **Visit Site**. Danach tragt ihr auf Vercel die Adresse unter **Runner-URL** und den Schlüssel unter **Sitzungsschlüssel** ein. Alternativ funktioniert die Seite an der ngrok-Adresse mit leerem URL-Feld.
 
 **6. Beenden.** ngrok und den SSH-Tunnel schließen. Danach die Colab-Sitzung freigeben.
 
@@ -88,3 +88,15 @@ Teile die ausgegebene HTTPS-Adresse mit dem Team und übermittle den LARA-Sitzun
 - **GPU oder Speicher reicht nicht**. Beginne mit dem Referenzmodus und prüfe die Größe beider GGUF-Dateien. Der Runner startet beide Modelle auf derselben GPU.
 - **Runner wurde nicht bereit**. Das Startprotokoll steht unter `/content/lara-workbench/runner.log`. Ein erster CUDA-Quellbuild kann mehrere Minuten dauern.
 - **Port 8787 ist belegt**. Stoppe den früheren Runner in derselben Laufzeit, bevor du das Notebook erneut startest.
+
+## Manueller Start im Colab-Terminal
+
+In einem eingerichteten Checkout kannst du den Starter direkt mit deinen GGUF-Dateien aufrufen. Er liest den Sitzungsschlüssel aus `STACKLAB_WORKBENCH_TOKEN`. Für die Vercel-Seite gib die Origin mit.
+
+~~~bash
+.venv/bin/python tools/start_colab_workbench.py \
+  --base "$BASE_GGUF" --tuned "$TUNED_GGUF" \
+  --origin https://simulation-neura-lara-5.vercel.app
+~~~
+
+Setze `BASE_GGUF` und `TUNED_GGUF` auf die vorhandenen Dateien. Ein passender GGUF-LoRA wird mit `--lora` anstelle von `--tuned` angegeben. Der Starter richtet die CUDA-Runtime für die GPU ein. Bei Bedarf lädt `.venv/bin/python -m stacklab setup --model qwen4b --device cuda` zusätzlich die gepinnte Qwen3.5-4B-Q4_K_M-Datei für einen Test mit einem Basismodell. Für die wissenschaftliche Gegenüberstellung wähle den Ausgangscheckpoint des trainierten Modells.

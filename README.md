@@ -1,111 +1,34 @@
 # LARA Stack Lab
 
-Interaktive MuJoCo-Simulation eines NEURA LARA 5 mit Greifer, Kontaktphysik und lokaler LLM-Steuerung in Python. Das Seminarziel: prüfen, ob kleine Sprachmodelle aus Sprache brauchbare Roboterprogramme erzeugen, und später ein Finetuning mit denselben Aufgaben vergleichen.
+Workbench für den Zero-shot-Vergleich von Basismodell und Fine-Tuning auf dem simulierten NEURA LARA 5. Beide Modelle erhalten dieselbe Startszene und bei Bedarf denselben Auftrag. Die Workbench zeigt die erzeugten Programme, die Bewegung in MuJoCo, die Zielprüfung und Tokens pro Sekunde.
 
-## Schnell starten
+## Im Browser starten
 
-Der **Prompt2Robo-Modus** spielt die HF-Referenzprogramme auf derselben LARA-5-Simulation wie Demo und Live-Chat ab. Der SFT-Export kann auf erfolgreiche LARA-Replays beschränkt werden. [Einrichtung und Befehle](docs/prompt2robo.md) · [Replay-Videos](examples/prompt2robo-replays/)
+1. Starte den Runner mit dem [Colab-Notebook](https://colab.research.google.com/github/carlo2004/Simulation-Neura-LARA-5/blob/main/notebooks/colab_workbench.ipynb). Für den Modellvergleich gib die beiden GGUF-Pfade oder ein Basis-GGUF mit LoRA-Adapter an.
+2. Für die Team-Session leite den Runner über Colab-SSH und ngrok weiter. [Startanleitung](docs/colab-workbench.md)
+3. Öffne die [Vercel-Workbench](https://simulation-neura-lara-5.vercel.app/), verbinde den Runner und wähle eine Aufgabe. **Prompt A → B** kopiert den Auftrag. **Beide starten** vergleicht die beiden Modelle.
 
-Die **Browser-Workbench** stellt Basismodell und Fine-Tuning nebeneinander und führt ihre Programme auf derselben Startszene aus. Die Oberfläche lässt sich statisch auf Vercel hosten. Für Live-Läufe verbindet sich das Team mit einem LARA-Runner. [Workbench einrichten](docs/workbench.md)
+Mit dem Referenzmodus kannst du die Szene und das Stapeln auch ohne Modellgewichte ausprobieren.
 
-`python -m stacklab tasks list` zeigt die **Folgeaufgaben für einen bis fünf Würfel**. Die Pyramide lässt sich mit `python -m stacklab tasks run pyramid --code examples/pyramid.py --gui` ohne Modell ausprobieren. [Aufgabenkatalog und API](docs/tasks.md)
+## Lokal entwickeln
 
-**Testlauf 2 auf A100:** [32 Rot-auf-Blau-Versuche je Modell, insgesamt 192 Episoden](docs/stack-study-v2.md). Das [Colab-Notebook](https://colab.research.google.com/github/carlo2004/Simulation-Neura-LARA-5/blob/main/notebooks/colab_stack_study_v2.ipynb) prüft zuerst den HF-Schreibzugriff und sichert jeden Versuch automatisch nach Drive und HF. Hinterlege `HF_TOKEN` als Colab-Secret. Nach Laufzeitverlust werden die Checkpoints wiederhergestellt; die Auswertung und Modellauswahl nimmst du selbst vor.
+Git und Python 3.12 oder 3.13. Die erste Einrichtung lädt die festgelegte Robotergeometrie und installiert die Abhängigkeiten in eine lokale Umgebung.
 
-Voraussetzung: Git, Python **3.12 oder neuer**, Internet für die erste Einrichtung. CI prüft Python 3.12 und 3.13 auf Linux und Windows. Ein Desktop wird für das 3D-Fenster benötigt; Tests funktionieren ohne Fenster.
-
-```bash
+~~~bash
 git clone https://github.com/carlo2004/Simulation-Neura-LARA-5.git
 cd Simulation-Neura-LARA-5
 python bootstrap.py --test
-```
-
-Die Einrichtung legt eine lokale Python-Umgebung an, installiert das Projekt und erzeugt die geprüfte Robotergeometrie. Danach **diesen Interpreter** verwenden:
-
-| System | Python-Befehl |
-|---|---|
-| Linux / macOS | `.venv/bin/python` |
-| Windows PowerShell | `.\.venv\Scripts\python.exe` |
-
-Beispiele für Linux; unter Windows den Interpreter aus der Tabelle einsetzen:
-
-```bash
 .venv/bin/python -m stacklab demo --gui
 .venv/bin/python -m stacklab console
-.venv/bin/python -m stacklab models
-.venv/bin/python -m stacklab setup --model qwen9b
-.venv/bin/python -m stacklab chat --model qwen9b --no-thinking
-```
+~~~
 
-Im Chat z. B. `Bewege den Greifer 5 cm nach rechts.` eingeben. Code, Aktionen und echte Zustandsrückmeldungen werden angezeigt. `/stop` unterbricht die Aufgabe; `/help` zeigt weitere Befehle. Im manuellen Terminal helfen `help`, `objects` und die [Beispiele](examples/).
+Unter Windows verwende `.\.venv\Scripts\python.exe`. Für das native Fenster unter macOS verwende `.venv/bin/mjpython`. [Simulator bedienen](docs/start.md)
 
-Für eine flüssige lokale Ansicht starten Achsen, Koordinaten und Stapelrahmen ausgeschaltet.
-Im Chat lassen sie sich bei Bedarf mit `/axes on` und `/stackviz red blue` zuschalten.
-Die Live-Ansicht wird auf die konfigurierten FPS begrenzt, der Overlay-Neuaufbau auf 10 Hz.
-[Performance-Einstellungen und Windows-Startbefehle](docs/settings.md#performance-und-empfohlener-start).
+## Daten und Code
 
-**Nach einem Update aus einem alten Checkout einmal `python bootstrap.py --test` ausführen.** Die bisherigen einzelnen Startskripte wurden durch Paketbefehle ersetzt; siehe [Migration](docs/history/README.md).
+- [Prompt2Robo-Datensatz wiedergeben und für SFT exportieren](docs/prompt2robo.md)
+- [Workbench, Modellformat und Berichte](docs/workbench.md)
+- [Architektur und Verantwortlichkeiten](docs/architecture.md)
+- [Prüfungen](docs/validation.md) und [frühere Versuchsstände](docs/archive.md)
 
-## Was funktioniert und was noch offen ist
-
-Der Roboter kann über Terminal, Tastatur und Python gesteuert werden. Szenen, Objektpositionen, zusätzliche Würfel und importierte Meshes sind anpassbar. Achsen und Stapelprüfung sind optional einblendbar. Die Physik-Kontrollprogramme stapeln mit echten Kontakten und unabhängigen Stabilitätsprüfungen.
-
-Die Modellanbindung unterstützt Qwen3.5-4B/9B, Ministral 3 8B Reasoning, Nemotron 3.5 Bolt, Nemotron Labs Dory1.0-4B, IBM Granite 4.2 8B und LiquidAI LFM2.5-2.6B. Chat und Benchmark zeigen echte Tokens pro Sekunde, Prompttempo und Ladezeit an. Dory benötigt einen einmaligen separaten Quellbuild; die [Modellanleitung](docs/models.md) erklärt die Voraussetzungen. In den bisherigen echten Versuchen gelangen einfache Bewegungen; **zuverlässiges Stapeln durch die unveränderten Modelle ist noch nicht erreicht**. Negative Ergebnisse stehen im [Versuchsindex](experiments/README.md). Softwaretests mit vorgegebenen Antworten sind kein Nachweis für Modellqualität.
-
-Für Colab Pro mit **L4 oder A100** gibt es ein [startfertiges Notebook](https://colab.research.google.com/github/carlo2004/Simulation-Neura-LARA-5/blob/main/notebooks/colab_gpu.ipynb). `--device cuda` aktiviert die geprüfte CUDA-Runtime unter Linux; CPU bleibt Standard. Das Notebook prüft die GPU-Nutzung, zeigt eine optionale Video-Vorschau und sichert die Versuchsergebnisse nach jeder Episode. [Einrichtung und GPU-Vergleich](docs/colab.md).
-
-**Live zuschauen mit dem Modell auf Colab:** `stacklab serve` hält das Modell auf der GPU geladen; `stacklab chat --server-url http://127.0.0.1:8765 --stream` verbindet den lokalen Simulator über einen SSH-Portforward. Code, native Tokens/s und echte Rückmeldungen bleiben sichtbar. Ein Starthelfer richtet die GPU-Seite ein. [Live-Einrichtung mit Colab und später Compute Engine](docs/remote-live.md).
-
-Die Geometrie und Kinematik stammen aus einer RoboDK-Quelldatei. Dynamik, Greifer und Regelung enthalten eigene Annahmen; dies ist eine Forschungsumgebung für die Tischaufgabe, kein validierter digitaler Zwilling. [Herkunft und Lizenzen](assets/sources/NOTICE.md).
-
-## Orientierung
-
-| Ort | Inhalt |
-|---|---|
-| `stacklab/sim/` | Roboter, Physik, manuelle Steuerung, Overlays, Mesh-Import |
-| `stacklab/llm/` | Modellkatalog, lokale Inferenz, Feedback-Agent |
-| `stacklab/cli/` | Terminalbefehle und Prozesseinstieg |
-| `stacklab/config.py`, `policy.py`, `evaluation.py` | Szenendaten, ausführbare Roboter-API, unabhängige Bewertung |
-| `config/`, `scenes/` | Modellrevisionen, Prompts, Szenen |
-| `assets/` | Roboterdefinitionen, Quellen und erzeugte Geometrie |
-| `tests/`, `tools/` | Softwaretests und ausführbare Physikprüfungen |
-| `examples/` | Kleine Terminal- und Python-Beispiele |
-| `experiments/` | Versuchsindex und geprüfte Verweise auf die Rohdaten in HF |
-| `docs/` | Bedienung, Architektur, Versuchsablauf, Entscheidungsgeschichte |
-| `runs/` | Neue Ergebnisse; nicht versioniert |
-
-[Bedienung und Einrichtung](docs/start.md) · [Modelle und Live-Chat](docs/models.md) · [Einstellungen](docs/settings.md) · [Architektur erweitern](docs/architecture.md) · [Prüfen und wissenschaftlich auswerten](docs/validation.md) · [Ergebnisarchitektur und Vergleichsplan](docs/results.md)
-
-Für wiederholbare Entwicklungspiloten gibt es `stacklab experiment plan`, `run` und `report`: dieselben Startfälle über mehrere Modelle und Blockbudgets, getrennte Szenen-/Generierungsseeds und automatisch JSON, CSV und Markdown. [Vergleich Schritt für Schritt](docs/experiments.md).
-
-**Alle Modelle auf L4 und A100 vergleichen:** Der [automatische Remote-Pilot](docs/remote-benchmark.md)
-führt standardmäßig zehn Episoden pro Modell und GPU aus, mit lokaler Simulation,
-automatischem Modellwechsel auf Colab, kompakten Bewegungsdaten, Rohdaten und vorläufiger Rangliste.
-[Hugging Face](docs/huggingface.md) übernimmt neue Datenstände samt Prüfsummen und
-festgelegter Hub-Revision; Code und Konfigurationen bleiben in GitHub.
-Der [schlanke Standardmodus](docs/slim-benchmark.md) erzeugt Videos erst bei Bedarf
-und bietet eine lokale HTML-Sichtung mit Auftrag, Modellantwort, Code und Zeiten.
-
-Modellgewichte liegen standardmäßig im lokalen Cache. Mit `STACKLAB_CACHE_DIR` kann ein anderer Datenträger gewählt werden; `STACKLAB_RUN_DIR` steuert den Ergebnisordner. Das Projekt wird aus diesem Checkout mit editierbarer Installation betrieben.
-
-Der Zero-shot-Kontext trennt Systemregeln, World Info, aktuelle Beobachtungen,
-Budgets und Nutzerauftrag. Die Systemregeln enthalten keine Zahlenliterale.
-Die Reihenfolge der Kontextblöcke ist konfigurierbar. [Modellkontext](docs/context.md)
-
-Die Modellkarten nennen den verwendeten Tokenizer mit Herstellerrevision und
-Prüfsummen. [Alle Modellkarten](docs/models.md)
-
-## Einen Lauf mit dem Team teilen
-
-Nach eigener HF-Anmeldung genügt:
-
-```bash
-python -m stacklab share runs/mein-chat --title "Interessanter Greifer-Versuch"
-```
-
-Freie Versuche landen in `playground`, eingefrorene Vergleichsserien in
-`experiments`, jeweils unter dem eigenen HF-Namen und einer eindeutigen Run-ID.
-Der ausgegebene Link zeigt Auftrag, Code, Feedback und Tokenmessungen direkt auf
-HF. Beiträge ohne direktes Schreibrecht werden als HF-PR eingereicht.
-`python -m stacklab share list --pending` findet auch die offenen Teambeiträge.
-[Einrichtung und Teamablauf](docs/huggingface.md).
+Vercel liefert die statische Oberfläche. Der Runner führt Modell und Simulation aus. Lokale Ergebnisse landen unter `runs/`. Die Geometrie und Kinematik stammen aus dem RoboDK-Modell. Dynamik und Greifer enthalten Simulationsannahmen. [Modellquellen und Lizenzen](assets/sources/NOTICE.md)

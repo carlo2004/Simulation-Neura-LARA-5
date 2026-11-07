@@ -9,8 +9,7 @@ from unittest.mock import patch
 import numpy as np
 
 from stacklab.cli.workbench import Handler, decode_answer, load_models
-from stacklab.policy import PolicyError
-from stacklab.workbench_policy import WorkbenchPolicy
+from stacklab.workbench_policy import PolicyError, WorkbenchPolicy
 
 
 class Robot:

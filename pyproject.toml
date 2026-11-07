@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "lara-stack-lab"
 dynamic = ["version", "dependencies"]
-description = "Contact-physics LARA 5 simulation and local Python-policy experiments"
+description = "Prompt2Robo model comparison on the LARA 5 MuJoCo simulation"
 requires-python = ">=3.12"
 
 [project.scripts]
